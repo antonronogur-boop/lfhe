@@ -54,6 +54,14 @@ class Settings(BaseSettings):
     collector_timeout_seconds: float = Field(default=30.0, gt=0, le=300)
     collector_respect_robots_txt: bool = True
 
+    # Claim pipeline (Phase 2). Model configurations are registered, immutable,
+    # allow-listed rows (lfhe.model_configurations); only their ids are configured
+    # here. Provider credentials are NOT settings: the provider adapter reads them
+    # from the secret-managed environment at call time (docs/providers.md).
+    ai_provider: str = Field(default="anthropic", pattern=r"^(anthropic)$")
+    m02_model_configuration_id: str | None = None
+    m03_model_configuration_id: str | None = None
+
     @model_validator(mode="after")
     def _safety_rules(self) -> "Settings":
         url = self.database_url.get_secret_value()

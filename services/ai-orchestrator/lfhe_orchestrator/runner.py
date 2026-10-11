@@ -6,7 +6,10 @@
     Schema validation → finish_model_run (SUCCEEDED | SCHEMA_VALIDATION_FAILED
     | PROVIDER_ERROR).
 
-No automatic repair or re-prompting: a schema failure is recorded as such.
+The runner itself never repairs or re-prompts: a schema failure is recorded
+as such. The claim pipeline (claim_pipeline.py) may start ONE transparent
+repair attempt, which is a new, separately traceable model run with identical
+input/context objects.
 """
 from __future__ import annotations
 

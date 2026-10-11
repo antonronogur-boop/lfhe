@@ -159,6 +159,21 @@ def model_flags(check: dict | None) -> set[str]:
     return flags
 
 
+_INSTRUCTION_LIKE = re.compile("|".join([
+    r"\b(ignore|disregard|forget)\b.{0,40}\b(previous|prior|above|earlier|all)\b.{0,20}\b(instructions?|prompts?|rules)\b",
+    r"\bnew instructions?\b", r"\byou are now\b", r"(^|[\n.!?\]>]\s*)(system|assistant|developer|user)\s*:", r"</?\s*lfhe_task_envelope",
+    r"\b(admin|developer|jailbreak)\s+mode\b", r"\bas an (ai|llm|language model)\b", r"\bprompt injection\b",
+    r"ігноруй\w*\s+(усі|всі|попередні)", r"zignoruj\w*\s+(wszystkie|poprzednie)", r"hagyd figyelmen kívül",
+    r"игнорируй\w*\s+(все|предыдущие)",
+]), re.IGNORECASE | re.DOTALL)
+
+
+def instruction_like(text: str) -> bool:
+    """Source text that addresses an AI / tries to issue instructions (TB-2).
+    Such text is still only data; every claim from it goes to a human."""
+    return bool(_INSTRUCTION_LIKE.search(unicodedata.normalize("NFKC", text)))
+
+
 def review_flags(claim: dict, span_text: str, language: str | None, *, high_impact: bool) -> tuple[list[str], list[str]]:
     """All QA-S18 review flags for one grounded candidate, plus warnings."""
     det, warnings = deterministic_flags(span_text, language, claim.get("claim_text_normalised") or "")
