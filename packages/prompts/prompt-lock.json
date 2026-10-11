@@ -1,4 +1,7 @@
 {
-  "format": "lfhe-prompt-lock/1",
-  "bundles": {}
+  "bundles": {
+    "M02_CLAIM_EXTRACTOR/1.0.0": "7f2b5a4414ee28536f515c315d9b8e74c573df537ef1ce12cd21965c6e39dcd3",
+    "M03_CLASSIFIER/1.0.0": "d3d5a72a70467364d1a77a870691eac03e0046ad6df3cfc53d36c85f3ba7da00"
+  },
+  "format": "lfhe-prompt-lock/1"
 }

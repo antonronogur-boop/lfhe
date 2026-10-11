@@ -1,0 +1,8 @@
+{
+  "format": "lfhe-prompt-manifest/1",
+  "module_code": "M02_CLAIM_EXTRACTOR",
+  "semver": "1.0.0",
+  "module_version": "MPP-1.2.2+P2-ADDENDUM-1.0",
+  "test_fixture": false,
+  "description": "Precision factual-claim extraction with exact original-language evidence spans (Phase 2)."
+}

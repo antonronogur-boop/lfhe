@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "lfhe:M03_CLASSIFIER:1.0.0:output",
+  "title": "M03 Classifier output (global output envelope)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "module",
+    "status",
+    "result",
+    "warnings",
+    "human_review_required"
+  ],
+  "properties": {
+    "module": {
+      "const": "M03_CLASSIFIER"
+    },
+    "status": {
+      "enum": [
+        "SUCCESS",
+        "SUCCESS_WITH_WARNINGS",
+        "INSUFFICIENT_INFORMATION",
+        "AMBIGUOUS",
+        "FAILED",
+        "HUMAN_REVIEW_REQUIRED"
+      ]
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assignments",
+        "classification_confidence"
+      ],
+      "properties": {
+        "assignments": {
+          "type": "array",
+          "maxItems": 400,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "taxonomy_type",
+              "taxonomy_id",
+              "target_object_type",
+              "target_object_id",
+              "confidence"
+            ],
+            "properties": {
+              "taxonomy_type": {
+                "enum": [
+                  "TOPIC",
+                  "TAG",
+                  "PIR",
+                  "GEO"
+                ]
+              },
+              "taxonomy_id": {
+                "enum": [
+                  "TOPIC_AIR_POWER",
+                  "TOPIC_COMBAT_AVIATION",
+                  "TOPIC_AIR_DEFENCE",
+                  "TOPIC_IAMD",
+                  "TOPIC_UAS",
+                  "TOPIC_UCAV",
+                  "TOPIC_C_UAS",
+                  "TOPIC_ISR",
+                  "TOPIC_AEWC",
+                  "TOPIC_EW",
+                  "TOPIC_AIR_C2",
+                  "TOPIC_SENSOR",
+                  "TOPIC_SENSOR_FUSION",
+                  "TOPIC_PRECISION_STRIKE",
+                  "TOPIC_LONG_RANGE_STRIKE",
+                  "TOPIC_AIR_LAUNCHED_WEAPONS",
+                  "TOPIC_AIR_MOBILITY",
+                  "TOPIC_AERIAL_REFUELLING",
+                  "TOPIC_READINESS",
+                  "TOPIC_DEPLOYMENT",
+                  "TOPIC_EXERCISE",
+                  "TOPIC_TRAINING",
+                  "TOPIC_LOGISTICS",
+                  "TOPIC_MAINTENANCE",
+                  "TOPIC_INFRASTRUCTURE",
+                  "TOPIC_MANPOWER",
+                  "TOPIC_STOCKPILES",
+                  "TOPIC_PROCUREMENT",
+                  "TOPIC_DEFENCE_INDUSTRY",
+                  "TOPIC_PRODUCTION",
+                  "TOPIC_SUSTAINMENT",
+                  "TOPIC_AI",
+                  "TOPIC_AUTONOMY",
+                  "TOPIC_DOCTRINE",
+                  "TOPIC_ORGANISATION",
+                  "TOPIC_INTERNATIONAL_COOPERATION",
+                  "TOPIC_LESSONS_IDENTIFIED",
+                  "TAG_AI_ENABLED",
+                  "TAG_AUTONOMY",
+                  "TAG_MASS",
+                  "TAG_ATTRITABLE_SYSTEMS",
+                  "TAG_HUMAN_MACHINE_TEAMING",
+                  "TAG_SENSOR_TO_DECISION",
+                  "TAG_EW_RESILIENCE",
+                  "TAG_NAVIGATION_RESILIENCE",
+                  "TAG_INDUSTRIAL_SCALE",
+                  "TAG_INTEROPERABILITY",
+                  "TAG_COST_EXCHANGE",
+                  "TAG_COMBAT_ADAPTATION",
+                  "TAG_SWARMING",
+                  "PIR_01",
+                  "PIR_02",
+                  "PIR_03",
+                  "PIR_04",
+                  "PIR_05",
+                  "PIR_06",
+                  "PIR_07",
+                  "PIR_08",
+                  "GEO_PRIORITY_1",
+                  "GEO_PRIORITY_2",
+                  "GEO_PRIORITY_3",
+                  "GEO_GLOBAL_WATCH"
+                ]
+              },
+              "target_object_type": {
+                "const": "CLAIM"
+              },
+              "target_object_id": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+              },
+              "confidence": {
+                "enum": [
+                  "HIGH",
+                  "MODERATE",
+                  "LOW"
+                ]
+              }
+            }
+          }
+        },
+        "classification_confidence": {
+          "enum": [
+            "HIGH",
+            "MODERATE",
+            "LOW",
+            null
+          ]
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "string",
+        "maxLength": 500
+      }
+    },
+    "human_review_required": {
+      "type": "boolean"
+    }
+  }
+}
