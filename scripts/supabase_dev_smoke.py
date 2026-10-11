@@ -96,7 +96,7 @@ def main() -> int:
     check("RLS: viewer sees no audit rows (no AUDIT_READ)", r.status_code == 200 and r.json() == [],
           f"HTTP {r.status_code}")
     r = rest.rpc("my_permissions", {}, viewer)
-    check("RPC: viewer permissions", r.status_code == 200 and set(r.json()) == {"SOURCE_READ", "ARTICLE_READ"},
+    check("RPC: viewer permissions", r.status_code == 200 and set(r.json()) == {"SOURCE_READ", "ARTICLE_READ", "CLAIM_READ"},
           r.text)
 
     # 4. HUMAN_ONLY SECURITY DEFINER behaviour

@@ -178,7 +178,7 @@ def test_F9_authentication_and_server_side_authorisation(pg, make_user):
             c.execute("SELECT lfhe.create_source(%s::jsonb)", (json.dumps(source_payload()),))
     with pg.as_user(viewer) as c:
         assert {r["p"] for r in c.execute("SELECT lfhe.my_permissions() AS p").fetchall()} == \
-            {"SOURCE_READ", "ARTICLE_READ"}
+            {"SOURCE_READ", "ARTICLE_READ", "CLAIM_READ"}  # CLAIM_READ: Phase 2 (P2-02)
         assert c.execute("SELECT count(*) AS n FROM lfhe.audit_log").fetchone()["n"] == 0, "no AUDIT_READ → no rows"
         with pytest.raises(psycopg.errors.InsufficientPrivilege):
             c.execute("SELECT lfhe.set_source_active(%s, true, 'viewer attempt')", (uuid.uuid4(),))

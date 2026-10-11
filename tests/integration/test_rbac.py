@@ -78,7 +78,7 @@ def test_has_permission_and_my_permissions(pg, make_user):
         assert c.execute("SELECT lfhe.has_permission('SOURCE_READ') AS p").fetchone()["p"] is True
         assert c.execute("SELECT lfhe.has_permission('SOURCE_CREATE') AS p").fetchone()["p"] is False
         perms = [r["p"] for r in c.execute("SELECT lfhe.my_permissions() AS p")]
-        assert perms == ["ARTICLE_READ", "SOURCE_READ"]
+        assert perms == ["ARTICLE_READ", "CLAIM_READ", "SOURCE_READ"]  # CLAIM_READ added in Phase 2 (P2-02)
 
 
 def test_last_admin_cannot_be_revoked(pg, make_user):
