@@ -23,4 +23,10 @@ All material project changes are recorded here.
   clean text (`lfhe-clean-text` 1.0.0), write-once object store, span primitives.
 - P1-10 Prompt-version source of truth and model-run traceability (guardrail 3),
   canonical JSON, prompt registry tooling, FakeProvider runner.
+- CG1-01 Retryable / non-retryable item failure classification; no job retry for permanent failures.
+- CG1-02 Snapshot identity = canonical source state; duplicates write no raw object; reconciliation report.
+- CG1-03 Recursive credential-key validator (DB authoritative; Python + TS mirrors).
+- CG1-04 Redirect hops checked against the source domain; explicit final-origin provenance.
+- CG1-05 Model runs record envelope, input-set and context-set hashes (DB-verified set hashes).
+- CG1-06 Python 3.13 hash-checked lock, pinned gitleaks in CI, DEV Supabase smoke script/runbook.
 - P1-11 F1–F10 acceptance suite, backup/restore round-trip test, documentation.

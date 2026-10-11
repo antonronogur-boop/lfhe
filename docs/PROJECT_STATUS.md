@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Current phase | Phase 1 — Foundation |
-| Current gate | Control Gate 1 report submitted (2026-10-11); **awaiting Product Owner decision** |
+| Current gate | Control Gate 1 NOT YET APPROVED; CG1 corrective pass (CG1-01…06) submitted 2026-10-11; **awaiting Product Owner decision** |
 | Next authorised action | **None.** Phase 2 must not start without explicit Product Owner approval |
 
 ## Phase 1 progress
@@ -21,6 +21,23 @@
 | P1-09 Article and original-language snapshot storage | done |
 | P1-10 Model-run and prompt-version foundation | done |
 | P1-11 Security / integration / acceptance tests | done |
+
+## CG1 corrective pass
+
+| Item | Status |
+| --- | --- |
+| CG1-01 Non-retryable item failures | resolved (docs/collection-semantics.md) |
+| CG1-02 Snapshot identity / orphan objects | resolved (docs/snapshot-identity.md) |
+| CG1-03 Recursive credential-key rejection | resolved (migration 1000) |
+| CG1-04 Cross-domain redirects | resolved (docs/collection-semantics.md) |
+| CG1-05 Model-run envelope / input / context hashes | resolved (docs/model-run-traceability.md) |
+| CG1-06 Toolchain / CI / DEV Supabase | partially resolved — lock + Python 3.13 + gitleaks done; GitHub CI, DEV Supabase smoke, pg_cron NOT RUN |
+
+PO decisions on D-01…D-06 (2026-10-11): D-01 approved with condition (transactional
+migration + append-only checksummed history + fix-forward + tested backup/restore;
+transactional rollback is **not** a schema downgrade); D-02, D-03, D-05 approved;
+D-04 approved as Phase 1 deferral (replay-grade availability required before REPLAY
+testing); D-06 approved conditionally (CG1-06 verification open).
 
 ## Decision register
 
@@ -45,14 +62,16 @@
 
 | ID | Limitation | Impact / plan |
 | --- | --- | --- |
-| L-01 | Web UI (source administration) type-checked, unit-tested and built, but **not** exercised end-to-end against a live Supabase project | Server-side enforcement is tested at DB level; E2E against a DEV Supabase project before first deployment |
+| L-01 | Web UI type-checked, unit-tested and built, but **not** exercised end-to-end against a live Supabase project | `scripts/supabase_dev_smoke.py` + `docs/runbooks/dev-supabase-smoke.md` ready; NOT RUN |
 | L-02 | S3 object-storage backend implemented but not exercised (LOCAL backend tested) | Test against the chosen bucket before PROD |
-| L-03 | pg_cron schedule migration is conditional and was not run (no pg_cron in the local cluster) | Verify on the Supabase DEV project |
-| L-04 | CI workflow defined but not executed on GitHub from this environment; gitleaks not run locally (repository scanner + tests run) | First push runs CI |
+| L-03 | pg_cron schedule migration is conditional and was not run (no pg_cron in the local cluster) | Covered by the DEV smoke script; NOT RUN |
+| L-04 | GitHub CI not executed (no repository reachable from the session); gitleaks 8.24.3 run locally on full history: no leaks | Create private repo `lfhe`, push, run CI |
 | L-05 | Per-host politeness interval is per worker process | Single collector worker in Phase 1; shared limiter if scaled |
 | L-06 | Audit writes are serialised by one advisory lock (by design, guardrail 1) | Acceptable at Phase 1 volume; revisit with measurements |
-| L-07 | Raw object written before the DB row: a DB failure can leave an unreferenced, content-addressed object | Harmless (write-once, hash-named); garbage collection later |
-| L-08 | No down-migrations | Reversibility = transactional apply per file + fix-forward + backup/restore (round-trip tested) |
+| L-07 | Duplicates write nothing (CG1-02); an orphan object is still possible after a crash between object write and DB insert, or a race with differing raw bytes | Reported by `scripts/object_store_reconcile.py` (report-only) |
+| L-08 | No down-migrations (D-01 approved with condition) | Transactional apply + checksummed append-only history + fix-forward + tested backup/restore; transactional rollback is not a schema downgrade |
 | L-09 | Model-run foundation uses FakeProvider only; no real provider adapter, no per-module model selection | Phase 2 |
 | L-10 | Language detection (py3langid) is a fallback only; html `lang` / feed language take precedence | Recorded per snapshot in `language_method` |
 
+| L-11 | A later *scheduled* collection re-requests an item that was access-denied in an earlier job (once per schedule interval; never via job retry) | Optional per-URL suppression list later |
+| L-12 | Snapshots created before migration 0900 have no `source_state` (test databases only) | Next collection creates a new version with state |
