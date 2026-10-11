@@ -49,3 +49,17 @@ userinfo, and URL query/fragment parameters with credential-like names. The
 check runs in a BEFORE trigger (errors list paths/parameter names only) with
 CHECK constraints as backstop, so a rejected secret never reaches a row, the
 audit log or an error message.
+
+### CG1-08A additions
+- Before inspection every string is put into its *inspection form* (tab/LF/CR
+  removed, leading/trailing U+0001–U+0020 trimmed, `\` read as `/`) — the way URL
+  parsers read it — so whitespace-wrapped or backslash variants cannot evade the rule.
+- Userinfo is checked for `scheme://`, for http/https/ws/wss/ftp/file with any
+  number of slashes, and for `//authority`; parameter names are checked in every
+  string containing `?` or `#`, including relative references.
+- Known source URL fields (`feed_url`, `sitemap_url`, `endpoint`, `urls[]`) must be
+  present, JSON strings and canonical absolute http(s) URLs
+  (`lfhe.source_config_problems`, trigger `sources_validate_config`, error code
+  `SOURCE_CONFIG_INVALID`), checked before any row or audit entry exists.
+- PostgreSQL, Python and TypeScript share the parity fixture
+  `tests/fixtures/url_canonicalisation_cases.json`.

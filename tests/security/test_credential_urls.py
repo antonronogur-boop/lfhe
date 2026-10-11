@@ -88,12 +88,15 @@ def test_update_rpc_and_owner_writes_are_rejected(pg, make_user):
             c.execute("UPDATE lfhe.sources SET collection_config = %s WHERE id = %s",
                       (Jsonb({"feed_url": f"https://example.org/f?token={SECRET}"}), sid))
         c.execute("ALTER TABLE lfhe.sources DISABLE TRIGGER sources_reject_credential_keys")
-        try:  # backstop CHECK still holds without the trigger
-            with pytest.raises(psycopg.errors.CheckViolation, match="sources_config_urls_have_no_credentials"):
+        c.execute("ALTER TABLE lfhe.sources DISABLE TRIGGER sources_validate_config")
+        try:  # backstop CHECKs still hold without the guard triggers
+            with pytest.raises(psycopg.errors.CheckViolation,
+                               match="sources_config_urls_(have_no_credentials|valid)"):
                 c.execute("UPDATE lfhe.sources SET collection_config = %s WHERE id = %s",
                           (Jsonb({"feed_url": "https://example.org/f?token=x"}), sid))
         finally:
             c.execute("ALTER TABLE lfhe.sources ENABLE TRIGGER sources_reject_credential_keys")
+            c.execute("ALTER TABLE lfhe.sources ENABLE TRIGGER sources_validate_config")
     no_secret_anywhere(pg)
 
 
@@ -119,4 +122,5 @@ def test_database_and_python_url_rules_agree(pg):
     with pg.admin() as c:
         db = [c.execute("SELECT lfhe.url_credential_problems(%s) AS p", (u,)).fetchone()["p"] for u in urls]
     assert db == [url_credential_problems(u) for u in urls]
-    assert [bool(p) for p in db] == [True, True, True, False, False, True, True, True, False, False]
+    # CG1-08A: parameter names are inspected in every string with '?'/'#', not only absolute URLs
+    assert [bool(p) for p in db] == [True, True, True, False, False, True, True, True, True, False]

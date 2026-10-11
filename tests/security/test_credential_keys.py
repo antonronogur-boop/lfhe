@@ -77,12 +77,14 @@ def test_update_and_direct_table_writes_are_also_rejected(pg, make_user):
             c.execute("UPDATE lfhe.sources SET collection_config = %s WHERE id = %s",
                       (Jsonb({"nested": {"secret": SECRET}}), sid))
         c.execute("ALTER TABLE lfhe.sources DISABLE TRIGGER sources_reject_credential_keys")
-        try:  # backstop CHECK constraint holds even without the trigger
+        c.execute("ALTER TABLE lfhe.sources DISABLE TRIGGER sources_validate_config")
+        try:  # backstop CHECK constraint holds even without the guard triggers
             with pytest.raises(psycopg.errors.CheckViolation, match="sources_config_has_no_credentials"):
                 c.execute("UPDATE lfhe.sources SET collection_config = %s WHERE id = %s",
-                          (Jsonb({"nested": {"secret": "x"}}), sid))
+                          (Jsonb({**benign, "nested": {"secret": "x"}}), sid))
         finally:
             c.execute("ALTER TABLE lfhe.sources ENABLE TRIGGER sources_reject_credential_keys")
+            c.execute("ALTER TABLE lfhe.sources ENABLE TRIGGER sources_validate_config")
 
 
 def test_model_settings_and_job_payloads_are_checked_recursively(pg):

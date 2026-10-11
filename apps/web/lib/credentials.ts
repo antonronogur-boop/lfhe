@@ -37,19 +37,35 @@ export function credentialKeyPaths(value: unknown, path = "$"): string[] {
   return out;
 }
 
-/** CG1-08 mirror of lfhe.url_credential_problems (names only, never values). */
+/** CG1-08A mirror of lfhe.url_inspection_form. */
+export function urlInspectionForm(value: string): string {
+  return value
+    .replace(/[\t\n\r]/g, "")
+    .replace(/^[\x01-\x20]+|[\x01-\x20]+$/g, "")
+    .replace(/\\/g, "/");
+}
+
+/** CG1-08/08A mirror of lfhe.url_credential_problems (names only, never values). */
 export function urlCredentialProblems(url: string): string[] {
-  if (!/^[A-Za-z][A-Za-z0-9+.-]*:\/\//.test(url)) return [];
+  const v = urlInspectionForm(url);
+  let authority: string | undefined;
+  const slashes = /^[A-Za-z][A-Za-z0-9+.-]*:\/\/([^/?#]*)/.exec(v);
+  if (slashes) authority = slashes[1];
+  else if (/^(https?|wss?|ftp|file):/i.test(v)) authority = /^[A-Za-z]+:\/*([^/?#]*)/.exec(v)?.[1];
+  else if (v.startsWith("//")) authority = /^\/\/([^/?#]*)/.exec(v)?.[1];
   const out: string[] = [];
-  const authority = /^[A-Za-z][A-Za-z0-9+.-]*:\/\/([^/?#]*)/.exec(url)?.[1] ?? "";
-  if (authority.includes("@") || authority.toLowerCase().includes("%40")) out.push("USERINFO");
-  const query = /\?([^#]*)/.exec(url)?.[1] ?? "";
-  const fragment = /#(.*)$/.exec(url)?.[1] ?? "";
-  for (const part of `${query}&${fragment}`.split("&")) {
-    if (!part) continue;
-    let name = part.split("=")[0].replace(/\+/g, " ");
-    try { name = decodeURIComponent(name); } catch { /* inspect raw name */ }
-    if (name && isCredentialKey(name)) out.push(`CREDENTIAL_PARAMETER:${name.toLowerCase()}`);
+  if (authority !== undefined && (authority.includes("@") || authority.toLowerCase().includes("%40"))) {
+    out.push("USERINFO");
+  }
+  if (v.includes("?") || v.includes("#")) {
+    const query = /\?([^#]*)/.exec(v)?.[1] ?? "";
+    const fragment = /#(.*)$/s.exec(v)?.[1] ?? "";
+    for (const part of `${query}&${fragment}`.split("&")) {
+      if (!part) continue;
+      let name = part.split("=")[0].replace(/\+/g, " ");
+      try { name = decodeURIComponent(name); } catch { /* inspect raw name */ }
+      if (name && isCredentialKey(name)) out.push(`CREDENTIAL_PARAMETER:${name.toLowerCase()}`);
+    }
   }
   return out;
 }

@@ -32,7 +32,7 @@
 | CG1-04 Cross-domain redirects | resolved (docs/collection-semantics.md) |
 | CG1-05 Model-run envelope / input / context hashes | resolved (docs/model-run-traceability.md) |
 | CG1-07 robots.txt fail-closed + non-poisoned cache | resolved (docs/collection-semantics.md, robots section) |
-| CG1-08 Credentials in URL values | resolved (migration 1300; DB authoritative, Python/TS mirrors) |
+| CG1-08 Credentials in URL values | resolved (migration 1300) + CG1-08A canonicalisation and source URL field validation (migration 1400) |
 | CG1-06 Toolchain / CI / DEV Supabase | resolved — lock + Python 3.13 + gitleaks + GitHub CI PASS (run 38143832019) + DEV Supabase: 14/14 migrations, smoke 17/17 PASS incl. CG1-08 and pg_cron (2026-10-11 17:21) |
 
 PO decisions on D-01…D-06 (2026-10-11): D-01 approved with condition (transactional

@@ -128,6 +128,14 @@ def main() -> int:
           r.status_code >= 400 and "CREDENTIAL_URL_REJECTED" in r.text and synthetic not in r.text and leaked == 0,
           f"HTTP {r.status_code}")
 
+    cred_ws = {"p": {**payload["p"], "name": name + "-cg108a",
+                     "collection_config": {"feed_url": f"  /feed?api_key={synthetic}"}}}
+    r = rest.rpc("create_source", cred_ws, admin)
+    leaked = db.execute("SELECT count(*) AS n FROM lfhe.audit_log WHERE new_state::text LIKE %s",
+                        (f"%{synthetic}%",)).fetchone()["n"]
+    check("CG1-08A: whitespace/relative credential URL rejected via RPC, not echoed, not audited",
+          r.status_code >= 400 and synthetic not in r.text and leaked == 0, f"HTTP {r.status_code}")
+
     # 5. source administration end-to-end
     r = rest.rpc("create_source", payload, admin)
     ok = check("source admin: admin creates source", r.status_code == 200, f"HTTP {r.status_code} {r.text}")

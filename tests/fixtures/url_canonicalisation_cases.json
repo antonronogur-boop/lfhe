@@ -1,0 +1,112 @@
+{
+  "_comment": "CG1-08A parity fixture: PostgreSQL, Python and TypeScript must produce these exact results. Placeholder values only.",
+  "cases": [
+    {
+      "input": " https://example.org/feed?api_key=fake",
+      "inspection_form": "https://example.org/feed?api_key=fake",
+      "problems": [
+        "CREDENTIAL_PARAMETER:api_key"
+      ]
+    },
+    {
+      "input": "https://example.org/feed?token=fake ",
+      "inspection_form": "https://example.org/feed?token=fake",
+      "problems": [
+        "CREDENTIAL_PARAMETER:token"
+      ]
+    },
+    {
+      "input": "\thttps://user:fake@example.org/feed\n",
+      "inspection_form": "https://user:fake@example.org/feed",
+      "problems": [
+        "USERINFO"
+      ]
+    },
+    {
+      "input": "/feed?api_key=fake",
+      "inspection_form": "/feed?api_key=fake",
+      "problems": [
+        "CREDENTIAL_PARAMETER:api_key"
+      ]
+    },
+    {
+      "input": "sitemap.xml?token=fake",
+      "inspection_form": "sitemap.xml?token=fake",
+      "problems": [
+        "CREDENTIAL_PARAMETER:token"
+      ]
+    },
+    {
+      "input": "https:reader:fake@example.org/x",
+      "inspection_form": "https:reader:fake@example.org/x",
+      "problems": [
+        "USERINFO"
+      ]
+    },
+    {
+      "input": "https:\\\\u:fake@example.org\\x",
+      "inspection_form": "https://u:fake@example.org/x",
+      "problems": [
+        "USERINFO"
+      ]
+    },
+    {
+      "input": "//u:fake@example.org/",
+      "inspection_form": "//u:fake@example.org/",
+      "problems": [
+        "USERINFO"
+      ]
+    },
+    {
+      "input": "https://example.org/f?api_\t_key=fake",
+      "inspection_form": "https://example.org/f?api__key=fake",
+      "problems": [
+        "CREDENTIAL_PARAMETER:api__key"
+      ]
+    },
+    {
+      "input": "https://example.org/f?lang=en&page=2",
+      "inspection_form": "https://example.org/f?lang=en&page=2",
+      "problems": []
+    },
+    {
+      "input": "plain text",
+      "inspection_form": "plain text",
+      "problems": []
+    },
+    {
+      "input": "mailto:someone@example.org",
+      "inspection_form": "mailto:someone@example.org",
+      "problems": []
+    },
+    {
+      "input": "note: meet at 10",
+      "inspection_form": "note: meet at 10",
+      "problems": []
+    },
+    {
+      "input": "https://example.org/a#section-2",
+      "inspection_form": "https://example.org/a#section-2",
+      "problems": []
+    },
+    {
+      "input": "\u0001https://e.org/?key=1 ",
+      "inspection_form": "https://e.org/?key=1",
+      "problems": [
+        "CREDENTIAL_PARAMETER:key"
+      ]
+    },
+    {
+      "input": "HTTPS://Example.ORG/?Authorization=x",
+      "inspection_form": "HTTPS://Example.ORG/?Authorization=x",
+      "problems": [
+        "CREDENTIAL_PARAMETER:authorization"
+      ]
+    },
+    {
+      "input": "https://example.org/?q=a%26token%3Dx",
+      "inspection_form": "https://example.org/?q=a%26token%3Dx",
+      "problems": []
+    }
+  ]
+}

@@ -22,7 +22,7 @@ import defusedxml.ElementTree as SafeET
 import feedparser
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, ValidationError, model_validator
 
-from lfhe_shared.credentials import credential_key_paths, credential_url_paths
+from lfhe_shared.credentials import credential_key_paths, credential_url_paths, source_config_problems
 
 from .http import FetchResult, PoliteHttpClient
 
@@ -238,6 +238,9 @@ ADAPTERS: dict[str, type[Adapter]] = {
 def build_adapter(method: str, config: dict) -> Adapter:
     if method not in ADAPTERS:
         raise AdapterConfigError(f"no adapter for collection method {method!r} in Phase 1")
+    problems = source_config_problems(method, config)  # mirror of the database rule (CG1-08A)
+    if problems:
+        raise AdapterConfigError(f"{method} config invalid (found at {', '.join(problems)})")
     return ADAPTERS[method](config)
 
 

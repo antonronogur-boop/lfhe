@@ -97,3 +97,16 @@ describe("credential URL rule (mirror of lfhe.url_credential_problems)", () => {
     ).toThrow(/credentials/);
   });
 });
+
+describe("CG1-08A canonicalisation parity (shared fixture with PostgreSQL and Python)", () => {
+  it("TypeScript produces exactly the fixture results", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { resolve } = await import("node:path");
+    const { urlCredentialProblems, urlInspectionForm } = await import("../lib/credentials");
+    const fixture = JSON.parse(readFileSync(resolve(__dirname, "../../../tests/fixtures/url_canonicalisation_cases.json"), "utf8"));
+    for (const c of fixture.cases) {
+      expect(urlInspectionForm(c.input)).toBe(c.inspection_form);
+      expect(urlCredentialProblems(c.input)).toEqual(c.problems);
+    }
+  });
+});
