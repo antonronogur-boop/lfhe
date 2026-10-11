@@ -4,45 +4,55 @@ on:
   push:
     branches: [main, develop]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+env:
+  GITLEAKS_VERSION: "8.24.3"
+  GITLEAKS_SHA256: "9991e0b2903da4c8f6122b5c3186448b927a5da4deef1fe45271c3793f4ee29c"
+
 jobs:
   secret-scan:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: gitleaks
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: gitleaks (pinned binary, checksum verified) — full git history
+        run: |
+          curl -sSL -o gitleaks.tgz "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  gitleaks.tgz" | sha256sum -c -
+          tar xzf gitleaks.tgz gitleaks
+          ./gitleaks git --redact --no-banner --exit-code 1 .
       - name: repository secret scan
         run: python3 scripts/secret_scan.py
 
   python-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version-file: ".python-version"
       - name: install PostgreSQL 16 binaries
         run: |
           sudo apt-get update
           sudo apt-get install -y postgresql-16 postgresql-contrib-16
           echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"
-      - name: install
-        run: pip install -e ".[test]"
+      - name: install locked dependencies (hash-checked)
+        run: |
+          python -m pip install --upgrade pip
+          pip install --require-hashes -r requirements/py313-test.lock
+          pip install --no-deps -e .
       - name: prompt artifacts unchanged since locking
-        run: python3 scripts/prompt_registry.py check-lock
+        run: python scripts/prompt_registry.py check-lock
       - name: tests (throw-away PostgreSQL cluster)
-        run: pytest -W error::DeprecationWarning
+        run: python -m pytest -W error::DeprecationWarning
 
   web:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: apps/web
@@ -50,7 +60,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version-file: "apps/web/.nvmrc"
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
+      - name: build (placeholder public config only; no secrets)
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: "https://placeholder.supabase.invalid"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "placeholder-anon-key-not-a-secret"

@@ -30,13 +30,14 @@ Current phase: **Phase 1 — Foundation** (no analytical AI pipeline yet).
 
 ## Running the tests locally
 
-Requirements: Python ≥ 3.11, PostgreSQL 16 binaries (`initdb`, `pg_ctl`) on
+Requirements: CPython 3.13 (authoritative, `.python-version`), PostgreSQL 16 binaries (`initdb`, `pg_ctl`) on
 the machine. The test harness starts a throw-away PostgreSQL cluster, applies a
 minimal **local-only Supabase shim** (`tests/fixtures/supabase_shim.sql`) and
 then the real migrations.
 
 ```bash
-pip install -e ".[test]"
+pip install --require-hashes -r requirements/py313-test.lock
+pip install --no-deps -e .
 python3 scripts/prompt_registry.py check-lock
 pytest -W error::DeprecationWarning
 ```

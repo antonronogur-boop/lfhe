@@ -33,3 +33,11 @@ They are never written to this repository.
   signed-in user's session.
 - pg_cron: schedule `SELECT lfhe.enqueue_due_collections();` (e.g. every 5 min).
 - Point-in-time recovery / backups enabled; restore tested before PROD use.
+
+## Toolchain (CG1-06)
+- Authoritative Python runtime: **CPython 3.13** (`.python-version`); dependencies
+  from the hash-checked lock `requirements/py313-test.lock`.
+- Node: **22** (`apps/web/.nvmrc`) with `apps/web/package-lock.json` (`npm ci`).
+- CI: `.github/workflows/ci.yml` (pinned, checksum-verified gitleaks over full
+  history; repository secret scan; locked Python tests; web typecheck/test/build).
+- DEV Supabase smoke test: `docs/runbooks/dev-supabase-smoke.md`.
