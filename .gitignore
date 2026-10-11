@@ -26,3 +26,6 @@ next-env.d.ts
 var/
 *.dump
 .DS_Store
+
+# K-05 local configuration (PO-confirmed discovery pages)
+k05_sources.json
