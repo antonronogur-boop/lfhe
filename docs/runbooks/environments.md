@@ -22,7 +22,7 @@
 -- after migrations:
 SELECT lfhe.set_deployment_environment('TEST');   -- one-time; cannot be changed afterwards
 CREATE ROLE lfhe_worker_login LOGIN PASSWORD '<from secret manager>' IN ROLE lfhe_worker;
-SELECT lfhe.bootstrap_admin('<auth.users uuid of the first administrator>');
+SELECT lfhe.bootstrap_grant_role('<auth.users uuid of the first administrator>', 'ADMIN');
 ```
 Passwords and keys are generated in and stored by the platform secret manager.
 They are never written to this repository.
