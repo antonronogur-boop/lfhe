@@ -66,6 +66,14 @@ class LocalObjectStore:
             self.get(key)  # verifies the existing object
         return key
 
+    def iter_keys(self, prefix: str = "raw"):
+        base = self.root / prefix
+        if not base.exists():
+            return
+        for path in sorted(base.rglob("*")):
+            if path.is_file():
+                yield path.relative_to(self.root).as_posix()
+
     def get(self, key: str) -> bytes:
         data = self._path(key).read_bytes()
         if sha256_hex(data) != _expected_hash(key):
@@ -93,6 +101,12 @@ class S3ObjectStore:  # pragma: no cover - not exercised in Phase 1 tests
             self.get(key)
         return key
 
+    def iter_keys(self, prefix: str = "raw"):
+        paginator = self.client.get_paginator("list_objects_v2")
+        for page in paginator.paginate(Bucket=self.bucket, Prefix=prefix + "/"):
+            for obj in page.get("Contents", []):
+                yield obj["Key"]
+
     def get(self, key: str) -> bytes:
         data = self.client.get_object(Bucket=self.bucket, Key=key)["Body"].read()
         if sha256_hex(data) != _expected_hash(key):
@@ -109,3 +123,11 @@ def build_object_store(settings) -> ObjectStore:
         access_key_id=settings.storage_s3_access_key_id.get_secret_value(),
         secret_access_key=settings.storage_s3_secret_access_key.get_secret_value(),
     )
+
+
+def find_unreferenced_objects(store, conn, prefix: str = "raw") -> list[str]:
+    """Objects in the store that no article_snapshot references (report only;
+    nothing is deleted — removal is an explicit operator decision)."""
+    referenced = {r["raw_storage_key"] for r in conn.execute(
+        "SELECT DISTINCT raw_storage_key FROM lfhe.article_snapshots WHERE raw_storage_key IS NOT NULL").fetchall()}
+    return [k for k in store.iter_keys(prefix) if k not in referenced]

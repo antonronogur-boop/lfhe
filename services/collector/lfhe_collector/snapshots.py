@@ -7,9 +7,20 @@ Retention (source.retention_mode, decided by a human at source approval):
   FULL              raw bytes → write-once object store; CANONICAL_CLEAN_TEXT stored
   PERMITTED_EXCERPT no raw bytes kept; PERMITTED_EXCERPT text (≤ excerpt_max_chars)
   METADATA_ONLY     no raw bytes, no text; hashes + metadata only
-Raw SHA-256 is always recorded. Content identity (duplicate detection) is the
-clean-text hash when text could be extracted, otherwise the raw-bytes hash, so
-cosmetic markup changes do not create new versions but any text change does.
+Raw SHA-256 is always recorded.
+
+Identity (CG1-02, docs/snapshot-identity.md):
+  * content hash (content_identity_sha256) = clean-text SHA-256 when text was
+    extracted, otherwise raw SHA-256;
+  * snapshot identity (source_state_sha256) = canonical hash of the source
+    state built by ``source_state()``: content hash + final URL + media type +
+    title + language + every source-stated timestamp (with field/basis) +
+    discovery identifiers + retention mode. A change to any of these is a new
+    snapshot version, even when the clean text is identical; cosmetic markup
+    and volatile response metadata are not.
+Raw bytes are written to the object store only after a read-only pre-check
+shows the state is new, so routine duplicates create no unreferenced objects
+(rare concurrent races are covered by scripts/object_store_reconcile.py).
 
 Time model (normalisation of 2026-10-08; G-03):
   publication_datetime   only as stated by the source (page metadata preferred,
@@ -31,6 +42,7 @@ from datetime import timedelta
 
 from psycopg.types.json import Jsonb
 
+from lfhe_shared.canonical_json import canonical_sha256
 from lfhe_shared.hashing import sha256_hex, text_sha256
 from lfhe_shared.storage import ObjectStore
 
@@ -96,6 +108,33 @@ def timestamp_fields(item: DiscoveredItem, page_published, page_field, retrieved
              "public_availability_confidence": confidence, "date_status": "OK"}, flags)
 
 
+SNAPSHOT_STATE_FORMAT = "lfhe-snapshot-state/1"
+
+
+def source_state(*, final_url: str, media_type: str, content_sha256: str, content_basis: str,
+                 title: str | None, language: str | None, language_method: str,
+                 stated_publication: list[dict], source_updated: str | None, source_updated_field: str | None,
+                 discovery: dict, retention_mode: str) -> dict:
+    """The provenance-relevant state of one fetched document (identity A).
+    Only strings / nulls / lists / objects → stable under jsonb round-trip."""
+    return {
+        "format": SNAPSHOT_STATE_FORMAT,
+        "final_url": final_url,
+        "media_type": media_type,
+        "content": {"sha256": content_sha256, "basis": content_basis},
+        "title_original": title,
+        "language": language,
+        "language_method": language_method,
+        "stated_publication": stated_publication,
+        "source_updated": {"value": source_updated, "field": source_updated_field} if source_updated else None,
+        "discovery": discovery,
+        "retention_mode": retention_mode,
+    }
+
+
+DISCOVERY_IDENTITY_KEYS = ("guid", "title", "author")
+
+
 class DatabaseSnapshotSink:
     def __init__(self, conn, store: ObjectStore):
         self.conn = conn
@@ -111,9 +150,8 @@ class DatabaseSnapshotSink:
         ex = extract(fetched.content, fetched.media_type, fetched.charset,
                      language_hint=item.language_hint, source_language=source.get("primary_language"))
         raw_hash = sha256_hex(fetched.content)
-        identity = text_sha256(ex.clean_text) if ex.clean_text else raw_hash
+        content_hash = text_sha256(ex.clean_text) if ex.clean_text else raw_hash
 
-        raw_key = self.objects.put_if_absent(fetched.content) if retention == "FULL" else None
         text = None
         if ex.clean_text and retention == "FULL":
             text = _text_payload("CANONICAL_CLEAN_TEXT", ex.clean_text, ex.language)
@@ -126,7 +164,25 @@ class DatabaseSnapshotSink:
         if updated is None and item.updated_at is not None:
             updated = item.updated_at
             updated_field = item.metadata.get("sitemap_lastmod_basis") and "sitemap:lastmod" or "feed:updated"
+        title = ex.title or item.title
+        discovery = {**item.metadata, **({"title": item.title} if item.title else {})}
 
+        state = source_state(
+            final_url=fetched.final_url, media_type=fetched.media_type, content_sha256=content_hash,
+            content_basis="clean_text" if ex.clean_text else "raw", title=title, language=ex.language,
+            language_method=ex.language_method,
+            stated_publication=time_flags.get("stated_publication_timestamps", []),
+            source_updated=_iso(updated), source_updated_field=updated_field,
+            discovery={k: str(discovery[k]) for k in DISCOVERY_IDENTITY_KEYS if discovery.get(k)},
+            retention_mode=retention)
+        state_hash = canonical_sha256(state)
+
+        if self.conn.execute("SELECT lfhe.snapshot_state_is_current(%s, %s, %s) AS cur",
+                             (str(source["id"]), canonical_url, state_hash)).fetchone()["cur"]:
+            self.last_result = {"outcome": "DUPLICATE", "precheck": True}
+            return "DUPLICATE"  # nothing written: no object, no row
+
+        raw_key = self.objects.put_if_absent(fetched.content) if retention == "FULL" else None
         headers = {k: v for k, v in fetched.headers.items() if k.lower() in KEPT_RESPONSE_HEADERS}
         payload = {
             "source_id": str(source["id"]), "collection_run_id": run_id,
@@ -135,16 +191,16 @@ class DatabaseSnapshotSink:
             "http_status": fetched.status_code, "content_type": fetched.content_type or "",
             "response_headers": headers, "raw_content_sha256": raw_hash,
             "raw_size_bytes": len(fetched.content), "raw_storage_key": raw_key,
-            "retention_mode_applied": retention, "content_identity_sha256": identity,
-            "title_original": ex.title or item.title, "language": ex.language,
+            "retention_mode_applied": retention, "content_identity_sha256": content_hash,
+            "title_original": title, "language": ex.language,
             "language_method": ex.language_method,
             **times,
             "source_updated_datetime": _iso(updated), "source_updated_datetime_field": updated_field,
             "system_retrieval_datetime": _iso(fetched.retrieved_at),
-            "metadata": {"discovery": {**item.metadata, **({"title": item.title} if item.title else {})},
-                         "extraction": ex.notes, "content_identity_basis":
-                             "clean_text_sha256" if ex.clean_text else "raw_sha256",
+            "metadata": {"discovery": discovery, "extraction": ex.notes,
+                         "content_identity_basis": "clean_text_sha256" if ex.clean_text else "raw_sha256",
                          **time_flags},
+            "source_state": state, "source_state_sha256": state_hash,
             "text": text,
         }
         result = self.conn.execute("SELECT lfhe.record_snapshot(%s::jsonb) AS r", (Jsonb(payload),)).fetchone()["r"]
