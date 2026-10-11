@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { credentialKeyPaths } from "./credentials";
+import { credentialKeyPaths, credentialUrlPaths } from "./credentials";
 
 /**
  * Client-side mirror of the database constraints on lfhe.sources. It exists
@@ -27,7 +27,9 @@ export const SourceCreateSchema = z.object({
   collection_config: z
     .record(z.string(), z.unknown())
     .refine((cfg) => credentialKeyPaths(cfg).length === 0,
-      "collection config must not contain credentials or headers (at any depth)"),
+      "collection config must not contain credentials or headers (at any depth)")
+    .refine((cfg) => credentialUrlPaths(cfg).length === 0,
+      "collection config URLs must not contain credentials (userinfo or credential parameters)"),
   collection_frequency: z.string().regex(/^\d+ (minutes|hour|hours|day|days)$/).default("1 hour"),
   retention_mode: z.enum(RETENTION_MODES).default("METADATA_ONLY"),
   terms_notes: z.string().trim().max(4000).optional(),

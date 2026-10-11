@@ -20,7 +20,9 @@ from urllib.parse import urljoin, urlsplit
 
 import defusedxml.ElementTree as SafeET
 import feedparser
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, ValidationError, model_validator
+
+from lfhe_shared.credentials import credential_key_paths, credential_url_paths
 
 from .http import FetchResult, PoliteHttpClient
 
@@ -48,6 +50,15 @@ class _StrictConfig(BaseModel):
     # Used only when the source's retention_mode is PERMITTED_EXCERPT.
     excerpt_max_chars: int = Field(default=500, ge=50, le=5000)
 
+    @model_validator(mode="before")
+    @classmethod
+    def _no_credentials(cls, data):
+        # Mirror of the database rule (CG1-03 / CG1-08); paths only, never values.
+        problems = credential_key_paths(data) + credential_url_paths(data)
+        if problems:
+            raise ValueError(f"credentials not allowed in collection config (found at {', '.join(problems)})")
+        return data
+
 
 class Adapter:
     method: ClassVar[str]
@@ -57,7 +68,10 @@ class Adapter:
         try:
             self.config = self.config_model.model_validate(config)
         except ValidationError as exc:
-            raise AdapterConfigError(f"{self.method} config invalid: {exc}") from exc
+            # never echo input values (they could contain a secret)
+            detail = "; ".join(f"{'.'.join(map(str, e['loc'])) or '$'}: {e['msg']}"
+                               for e in exc.errors(include_input=False, include_url=False))
+            raise AdapterConfigError(f"{self.method} config invalid: {detail}") from None
 
     def discover(self, http: PoliteHttpClient) -> list[DiscoveredItem]:  # pragma: no cover
         raise NotImplementedError

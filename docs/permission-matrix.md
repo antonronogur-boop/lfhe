@@ -41,3 +41,11 @@ whole; no function uses them before its phase.
   (`USER_ROLE_CHANGED`).
 - The first ADMIN is bootstrapped by the operator with the owner-only
   `lfhe.bootstrap_grant_role()` (see runbooks/environments.md).
+
+## Credential exclusion (CG1-03, CG1-08)
+`sources.collection_config`, `model_configurations.settings` and
+`processing_jobs.payload` reject, at any depth: credential-like key names, URL
+userinfo, and URL query/fragment parameters with credential-like names. The
+check runs in a BEFORE trigger (errors list paths/parameter names only) with
+CHECK constraints as backstop, so a rejected secret never reaches a row, the
+audit log or an error message.

@@ -36,7 +36,8 @@ operator/Product Owner; record the JSON output of step 6 in PROJECT_STATUS.
    ```
    Checks: migrations present; password sign-in; RLS (anon/viewer); viewer
    permissions; HUMAN_ONLY refusal for anon / viewer / service_role; nested
-   credential key rejected via RPC (CG1-03); admin source lifecycle; audit
+   credential key (CG1-03) and credential-bearing URL (CG1-08) rejected via RPC;
+   admin source lifecycle; audit
    events + hash-chain verification; pg_cron job scheduled and (optionally) run.
    The script refuses to run unless `lfhe.deployment_environment = 'DEV'`.
 7. Unset the exported variables afterwards.

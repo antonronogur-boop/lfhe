@@ -31,6 +31,8 @@
 | CG1-03 Recursive credential-key rejection | resolved (migration 1000) |
 | CG1-04 Cross-domain redirects | resolved (docs/collection-semantics.md) |
 | CG1-05 Model-run envelope / input / context hashes | resolved (docs/model-run-traceability.md) |
+| CG1-07 robots.txt fail-closed + non-poisoned cache | resolved (docs/collection-semantics.md, robots section) |
+| CG1-08 Credentials in URL values | resolved (migration 1300; DB authoritative, Python/TS mirrors) |
 | CG1-06 Toolchain / CI / DEV Supabase | resolved — lock + Python 3.13 + gitleaks + GitHub CI PASS (run 38143832019) + DEV Supabase: 13/13 migrations, smoke 16/16 PASS incl. pg_cron (2026-10-11) |
 
 PO decisions on D-01…D-06 (2026-10-11): D-01 approved with condition (transactional
@@ -74,4 +76,6 @@ testing); D-06 approved conditionally (CG1-06 verification since completed: CI +
 | L-10 | Language detection (py3langid) is a fallback only; html `lang` / feed language take precedence | Recorded per snapshot in `language_method` |
 
 | L-11 | A later *scheduled* collection re-requests an item that was access-denied in an earlier job (once per schedule interval; never via job retry) | Optional per-URL suppression list later |
+| L-13 | Before Phase 2 real providers: model settings need a provider-specific allow-listed, non-secret schema; provider credentials only from approved secret management (PO, CG1-08) | Phase 2 prerequisite |
+| L-14 | Credential detection inspects key names and URL userinfo/parameter names; a secret placed in a free-text value under a benign key, or in a URL path segment, is not detected | Operator guidance; no free-text secrets in config |
 | L-12 | Snapshots created before migration 0900 have no `source_state` (test databases only) | Next collection creates a new version with state |

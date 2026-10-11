@@ -82,3 +82,18 @@ describe("credential-key rule (mirror of lfhe.credential_key_paths)", () => {
     ).toThrow(/credentials/);
   });
 });
+
+describe("credential URL rule (mirror of lfhe.url_credential_problems)", () => {
+  it("rejects userinfo and credential parameters, accepts benign queries", async () => {
+    const { urlCredentialProblems } = await import("../lib/credentials");
+    expect(urlCredentialProblems("https://u:p@example.org/feed")).toEqual(["USERINFO"]);
+    expect(urlCredentialProblems("https://example.org/f?api_key=x")).toEqual(["CREDENTIAL_PARAMETER:api_key"]);
+    expect(urlCredentialProblems("https://example.org/f#access_token=x")).toEqual(["CREDENTIAL_PARAMETER:access_token"]);
+    expect(urlCredentialProblems("https://example.org/f?lang=en&page=2")).toEqual([]);
+  });
+  it("form parsing rejects a credential-bearing feed URL", () => {
+    expect(() =>
+      parseSourceForm(form({ ...base, collection_config: '{"feed_url":"https://example.org/f?token=x"}' })),
+    ).toThrow(/credentials/);
+  });
+});
