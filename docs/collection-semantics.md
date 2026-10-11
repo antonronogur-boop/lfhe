@@ -45,3 +45,23 @@ origin is explicit: `article_snapshots.final_origin_host` (generated from
 `final_url`), `final_url_in_source_domain = false`, and `final_url` is part of
 the snapshot source state. Later lineage processing must treat such documents
 as originating from that external host, not from the source.
+
+## robots.txt (CG1-07)
+
+| robots.txt response | Outcome | Target document requested? | Cached |
+| --- | --- | --- | --- |
+| 2xx | parsed; rules applied | only if allowed | 24 h (`robots_cache_ttl`) |
+| 401, 403 | disallow all (`ROBOTS_DISALLOWED`, permanent) | no | 24 h |
+| 404, 410 | no policy → allow (RFC 9309 §2.3.1.3) | yes | 24 h |
+| other 4xx (400, 405, 451, …) | disallow all — conservative, documented deviation from RFC 9309 | no | 24 h |
+| 429, 5xx | `SOURCE_UNAVAILABLE` (retryable) | **no** | failure TTL only (60 s) |
+| network error / timeout | `SOURCE_UNAVAILABLE` (retryable) | **no** | failure TTL only (60 s) |
+| 3xx | followed up to 5 hops, each hop through the same destination (SSRF) checks | after a final answer only | as final answer |
+| 3xx without Location, > 5 hops, other status | `SOURCE_UNAVAILABLE` (retryable) — never allow-all | no | failure TTL only |
+| 3xx to a refused destination (scheme / private address) | `DESTINATION_REFUSED` (permanent) | no | not cached |
+| body larger than `max_bytes` | disallow all | no | 24 h |
+
+A temporary robots failure is remembered for at most `robots_failure_ttl`
+(default 60 s, shorter than the minimum job backoff of 1 min), so a later job
+attempt using the same long-running client retrieves robots.txt again and
+recovers. robots.txt is checked for every redirect hop of the target document.

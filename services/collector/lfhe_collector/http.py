@@ -3,7 +3,8 @@
 Guarantees:
 * identifies itself with a configured User-Agent; sends no credentials,
   cookies or custom auth headers (none can be configured);
-* respects robots.txt (cached per origin) unless explicitly disabled;
+* respects robots.txt (fail-closed semantics, see _fetch_robots) unless
+  explicitly disabled; temporary robots failures are never cached permanently;
 * enforces a minimum interval between requests to the same host (per process);
 * bounds response size and total time; streams and aborts oversized bodies;
 * accepts only allow-listed content types;
@@ -102,7 +103,8 @@ class PoliteHttpClient:
     def __init__(self, user_agent: str, *, timeout: float = 30.0, max_bytes: int = 10 * 1024 * 1024,
                  min_interval: float = 5.0, respect_robots: bool = True,
                  allow_private_hosts: bool = False, max_redirects: int = 5,
-                 transport: httpx.BaseTransport | None = None):
+                 transport: httpx.BaseTransport | None = None,
+                 robots_cache_ttl: float = 24 * 3600.0, robots_failure_ttl: float = 60.0):
         self.user_agent = user_agent
         self.max_bytes = max_bytes
         self.min_interval = min_interval
@@ -115,7 +117,10 @@ class PoliteHttpClient:
             cookies=None, trust_env=False,
         )
         self._last_request: dict[str, float] = {}
-        self._robots: dict[str, robotparser.RobotFileParser | None] = {}
+        self.robots_cache_ttl = robots_cache_ttl
+        self.robots_failure_ttl = robots_failure_ttl
+        # origin -> (expires_at monotonic, RobotFileParser | SourceUnavailable)
+        self._robots: dict[str, tuple[float, object]] = {}
         self._lock = threading.Lock()
 
     def close(self) -> None:
@@ -157,28 +162,75 @@ class PoliteHttpClient:
         if wait > 0:
             time.sleep(wait)
 
+    # -- robots.txt (CG1-07: fail closed, no poisoned cache) -------------------
+    # Semantics (docs/collection-semantics.md, "robots.txt"):
+    #   2xx            parse; policy cached for robots_cache_ttl (default 24 h)
+    #   401 / 403      disallow all (fail closed); cached
+    #   404 / 410      no robots policy → allow all (RFC 9309 §2.3.1.3); cached
+    #   other 4xx      disallow all (fail closed, conservative); cached
+    #   429, 5xx       SourceUnavailable (retryable); target NOT fetched
+    #   network error  SourceUnavailable (retryable); target NOT fetched
+    #   3xx            followed up to ROBOTS_MAX_REDIRECTS hops, every hop through
+    #                  the same destination (SSRF) checks; missing Location or
+    #                  too many hops → SourceUnavailable; never allow-all
+    #   other status   SourceUnavailable (retryable)
+    # A temporary failure is remembered only for robots_failure_ttl (default
+    # 60 s, shorter than the minimum job backoff) and then retried, so a later
+    # attempt with the same client recovers. Body > max_bytes → disallow all.
+    ROBOTS_MAX_REDIRECTS = 5
+
+    def _robots_state(self, origin: str):
+        now = time.monotonic()
+        with self._lock:
+            cached = self._robots.get(origin)
+        if cached is not None and cached[0] > now:
+            return cached[1]
+        state = self._fetch_robots(origin)
+        ttl = self.robots_failure_ttl if isinstance(state, SourceUnavailable) else self.robots_cache_ttl
+        with self._lock:
+            self._robots[origin] = (time.monotonic() + ttl, state)
+        return state
+
+    def _fetch_robots(self, origin: str):
+        """Returns a RobotFileParser, or a SourceUnavailable instance (temporary)."""
+        parser = robotparser.RobotFileParser()
+        url = urljoin(origin, "/robots.txt")
+        try:
+            for _ in range(self.ROBOTS_MAX_REDIRECTS + 1):
+                resp = self._raw_get(url, check_robots=False)
+                code = resp.status_code
+                if code in (301, 302, 303, 307, 308):
+                    location = resp.headers.get("location")
+                    if not location:
+                        return SourceUnavailable(f"robots.txt redirect without Location at {url}")
+                    url = urljoin(url, location)
+                    continue
+                if 200 <= code < 300:
+                    parser.parse(resp.content.decode("utf-8", errors="replace").splitlines())
+                elif code in (404, 410):
+                    parser.allow_all = True
+                elif code == 429 or code >= 500:
+                    return SourceUnavailable(f"robots.txt for {origin} temporarily unavailable (HTTP {code})")
+                elif 400 <= code < 500:  # 401, 403 and any other client error: fail closed
+                    parser.disallow_all = True
+                else:
+                    return SourceUnavailable(f"robots.txt for {origin}: unexpected HTTP {code}")
+                return parser
+            return SourceUnavailable(f"robots.txt for {origin}: too many redirects")
+        except SourceUnavailable as exc:
+            return exc
+        except ContentRejected:
+            parser.disallow_all = True  # oversized robots.txt: fail closed
+            return parser
+
     def _robots_allows(self, url: str) -> bool:
         if not self.respect_robots:
             return True
         parts = urlsplit(url)
-        origin = f"{parts.scheme}://{parts.netloc}"
-        if origin not in self._robots:
-            parser: robotparser.RobotFileParser | None = robotparser.RobotFileParser()
-            try:
-                resp = self._raw_get(urljoin(origin, "/robots.txt"), check_robots=False)
-                if resp.status_code == 200:
-                    parser.parse(resp.content.decode("utf-8", errors="replace").splitlines())
-                elif resp.status_code in (401, 403):
-                    parser.disallow_all = True
-                else:
-                    parser.allow_all = True
-            except SourceUnavailable:
-                parser = None  # robots unknown: do not fetch now, retry later
-            self._robots[origin] = parser
-        parser = self._robots[origin]
-        if parser is None:
-            raise SourceUnavailable(f"robots.txt for {origin} could not be retrieved")
-        return parser.can_fetch(self.user_agent, url)
+        state = self._robots_state(f"{parts.scheme}://{parts.netloc}")
+        if isinstance(state, SourceUnavailable):
+            raise SourceUnavailable(f"robots.txt unavailable, {url} not fetched: {state}")
+        return state.can_fetch(self.user_agent, url)
 
     # -- fetching --------------------------------------------------------------
     def _raw_get(self, url: str, *, check_robots: bool = True) -> FetchResult:
