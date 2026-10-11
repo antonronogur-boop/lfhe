@@ -10,7 +10,7 @@ from psycopg.types.json import Jsonb
 from conftest import REPO_ROOT, create_database
 from lfhe_orchestrator.providers import FakeProvider, ProviderError
 from lfhe_orchestrator.runner import NoActivePromptVersion, run_structured_task
-from lfhe_shared.canonical_json import canonical_sha256
+from lfhe_shared.envelopes import EnvelopeItem, TaskEnvelope, verify_envelope
 from lfhe_shared.prompts import bundle_sha256, load_bundle, register, verify_registered
 
 pytestmark = pytest.mark.db
@@ -30,6 +30,13 @@ def write_bundle(root: Path, module: str, semver: str, system: str = "Synthetic 
     (d / "output_schema.json").write_text(json.dumps(SCHEMA), encoding="utf-8")
     prefix = "tests/fixtures/prompts" if fixture else "packages/prompts"
     return load_bundle(d, git_path=f"{prefix}/{module}/{semver}")
+
+
+def env(text):
+    return {"task": {"text": text},
+            "inputs": [EnvelopeItem("text_representation", "11111111-1111-4111-8111-111111111111",
+                                    {"text": f"Synthetic evidence {text}"})],
+            "context": [EnvelopeItem("reference_context", "ctx-synthetic-1", {"note": "synthetic context"})]}
 
 
 def module_code():
@@ -202,14 +209,15 @@ def test_model_run_records_exact_prompt_and_model_identity(pg, tmp_path, admin_u
     mc = model_config(pg)
     with pg.worker() as c:
         with pytest.raises(NoActivePromptVersion):
-            run_structured_task(c, module_code=mod, envelope={"text": "x"}, model_configuration_id=mc,
+            run_structured_task(c, module_code=mod, **env("x"), model_configuration_id=mc,
                                 provider=FakeProvider(lambda m, e: "{}"), worker_id="model-test")
     activate(pg, admin_user, pv)
-    provider = FakeProvider(lambda m, e: json.dumps({"echo": e["text"]}))
-    envelope = {"text": "Пример тексту", "n": 1}
+    provider = FakeProvider(lambda m, e: json.dumps({"echo": e["task"]["text"]}))
+    kwargs = env("Пример тексту")
+    envelope = TaskEnvelope(mod, kwargs["task"], kwargs["inputs"], kwargs["context"])
     with pg.worker() as c:
-        res = run_structured_task(c, module_code=mod, envelope=envelope, model_configuration_id=mc,
-                                  provider=provider, worker_id="model-test", input_refs={"fixture": True})
+        res = run_structured_task(c, module_code=mod, **kwargs, model_configuration_id=mc,
+                                  provider=provider, worker_id="model-test")
         row = c.execute("SELECT r.*, pv.content_hash AS pv_hash, m.config_hash FROM lfhe.model_runs r "
                         "JOIN lfhe.prompt_versions pv ON pv.id=r.prompt_version_id "
                         "JOIN lfhe.model_configurations m ON m.id=r.model_configuration_id WHERE r.id=%s",
@@ -218,7 +226,10 @@ def test_model_run_records_exact_prompt_and_model_identity(pg, tmp_path, admin_u
     assert str(row["prompt_version_id"]) == pv and row["prompt_semver"] == "1.0.0"
     assert row["prompt_content_hash"] == row["pv_hash"] and row["module_version"] == "test-fixture"
     assert (row["provider"], row["model"], row["model_config_hash"]) == ("fake", "fake-model-1", row["config_hash"])
-    assert row["input_sha256"] == canonical_sha256(envelope) and row["environment"] == "TEST"
+    assert row["envelope_sha256"] == envelope.envelope_sha256 and row["environment"] == "TEST"
+    assert row["input_snapshot_sha256"] == envelope.input_snapshot_sha256
+    assert row["context_snapshot_sha256"] == envelope.context_snapshot_sha256
+    assert verify_envelope(provider.calls[0][1], row) == []
     assert row["parsed_output"] == {"echo": "Пример тексту"} and row["raw_output_sha256"]
     module_seen = provider.calls[0][0]
     assert module_seen.content_hash == row["pv_hash"] and module_seen.system == "Synthetic fixture."
@@ -236,11 +247,11 @@ def test_schema_failures_and_provider_errors_are_recorded_not_repaired(pg, tmp_p
         raise ProviderError("PROVIDER_TIMEOUT", "synthetic timeout")
 
     with pg.worker() as c:
-        r1 = run_structured_task(c, module_code=mod, envelope={"text": "a"}, model_configuration_id=mc,
+        r1 = run_structured_task(c, module_code=mod, **env("a"), model_configuration_id=mc,
                                  provider=FakeProvider(lambda m, e: next(outputs)), worker_id="model-test")
-        r2 = run_structured_task(c, module_code=mod, envelope={"text": "b"}, model_configuration_id=mc,
+        r2 = run_structured_task(c, module_code=mod, **env("b"), model_configuration_id=mc,
                                  provider=FakeProvider(lambda m, e: next(outputs)), worker_id="model-test")
-        r3 = run_structured_task(c, module_code=mod, envelope={"text": "c"}, model_configuration_id=mc,
+        r3 = run_structured_task(c, module_code=mod, **env("c"), model_configuration_id=mc,
                                  provider=FakeProvider(flaky), worker_id="model-test")
         rows = {str(r["id"]): r for r in c.execute("SELECT * FROM lfhe.model_runs WHERE id IN (%s,%s,%s)",
                                                      (r1.run_id, r2.run_id, r3.run_id)).fetchall()}
@@ -259,12 +270,13 @@ def test_runs_require_active_version_and_are_immutable_once_finished(pg, tmp_pat
     mc = model_config(pg)
     activate(pg, admin_user, old)
     with pg.worker() as c:
-        done = run_structured_task(c, module_code=mod, envelope={"text": "x"}, model_configuration_id=mc,
+        done = run_structured_task(c, module_code=mod, **env("x"), model_configuration_id=mc,
                                    provider=FakeProvider(lambda m, e: '{"echo": "x"}'), worker_id="model-test")
     activate(pg, admin_user, new, "upgrade for test")
     with pg.worker() as c:
         with pytest.raises(psycopg.errors.ObjectNotInPrerequisiteState, match="not the active version"):
-            c.execute("SELECT lfhe.start_model_run(%s, %s, %s, '{}'::jsonb, 'model-test')", (old, mc, "a" * 64))
+            c.execute("SELECT lfhe.start_model_run(%s, %s, %s, '{}'::jsonb, '[]'::jsonb, '[]'::jsonb, 'model-test')",
+                      (old, mc, "a" * 64))
         with pytest.raises(psycopg.errors.ObjectNotInPrerequisiteState):
             c.execute("SELECT lfhe.finish_model_run(%s, 'PROVIDER_ERROR', NULL, NULL, NULL, 'X', 'x', '{}')",
                       (done.run_id,))
@@ -279,9 +291,11 @@ def test_runs_require_active_version_and_are_immutable_once_finished(pg, tmp_pat
         with pytest.raises(psycopg.errors.ForeignKeyViolation):
             c.execute("INSERT INTO lfhe.model_runs (module_code, prompt_version_id, prompt_semver, prompt_content_hash,"
                       " module_version, model_configuration_id, provider, model, model_config_hash, environment,"
-                      " input_sha256, worker_id) SELECT module_code, prompt_version_id, prompt_semver, %s,"
+                      " envelope_sha256, task_parameters, input_manifest, input_snapshot_sha256, context_manifest,"
+                      " context_snapshot_sha256, worker_id) SELECT module_code, prompt_version_id, prompt_semver, %s,"
                       " module_version, model_configuration_id, provider, model, model_config_hash, environment,"
-                      " input_sha256, worker_id FROM lfhe.model_runs WHERE id=%s", ("f" * 64, done.run_id))
+                      " envelope_sha256, task_parameters, input_manifest, input_snapshot_sha256, context_manifest,"
+                      " context_snapshot_sha256, worker_id FROM lfhe.model_runs WHERE id=%s", ("f" * 64, done.run_id))
 
 
 def test_model_configurations_are_immutable_and_secret_free(pg):
@@ -299,3 +313,43 @@ def test_model_configurations_are_immutable_and_secret_free(pg):
             c.execute("UPDATE lfhe.model_configurations SET model='other' WHERE id=%s", (a,))
         assert c.execute("SELECT count(*) AS n FROM lfhe.audit_log WHERE event_type='MODEL_CONFIGURATION_REGISTERED' "
                          "AND object_id=%s", (a,)).fetchone()["n"] == 1
+
+
+def test_database_set_hashes_equal_python_and_reject_bad_manifests(pg, tmp_path, admin_user):
+    from lfhe_shared.envelopes import CONTEXT_SET_FORMAT, INPUT_SET_FORMAT, set_sha256
+    items = env("x")
+    e = TaskEnvelope("T_X", items["task"], items["inputs"] + [EnvelopeItem("text_representation", "z-2", {"t": 2})],
+                     items["context"])
+    with pg.admin() as c:
+        db_in = c.execute("SELECT lfhe.object_set_sha256(%s, %s::jsonb) AS h",
+                          (INPUT_SET_FORMAT, Jsonb(e.input_manifest))).fetchone()["h"]
+        db_ctx = c.execute("SELECT lfhe.object_set_sha256(%s, %s::jsonb) AS h",
+                           (CONTEXT_SET_FORMAT, Jsonb(list(reversed(e.context_manifest))))).fetchone()["h"]
+    assert db_in == e.input_snapshot_sha256 == set_sha256(INPUT_SET_FORMAT, list(reversed(e.input_manifest)))
+    assert db_ctx == e.context_snapshot_sha256
+
+    mod = module_code()
+    with pg.registrar() as c:
+        pv = register(c, write_bundle(tmp_path, mod, "1.0.0"), git_commit=None, git_tree_clean=False)
+    activate(pg, admin_user, pv)
+    mc = model_config(pg)
+    dup = [e.input_manifest[0], e.input_manifest[0]]
+    with pg.worker() as c:
+        for bad in (dup, [{"object_type": "x y", "object_id": "1", "content_sha256": "0" * 64}],
+                    [{"object_type": "t1", "object_id": "1"}], {"not": "array"}):
+            with pytest.raises(psycopg.errors.InvalidParameterValue):
+                c.execute("SELECT lfhe.start_model_run(%s, %s, %s, '{}'::jsonb, %s::jsonb, '[]'::jsonb, 'model-test')",
+                          (pv, mc, "a" * 64, Jsonb(bad)))
+        rid = c.execute("SELECT lfhe.start_model_run(%s, %s, %s, '{}'::jsonb, %s::jsonb, %s::jsonb, 'model-test') AS id",
+                        (pv, mc, e.envelope_sha256, Jsonb(e.input_manifest), Jsonb(e.context_manifest))).fetchone()["id"]
+        row = c.execute("SELECT * FROM lfhe.model_runs WHERE id=%s", (rid,)).fetchone()
+    assert row["input_snapshot_sha256"] == e.input_snapshot_sha256 and row["context_snapshot_sha256"] == e.context_snapshot_sha256
+    with pg.admin() as c:  # a forged set hash cannot be stored, even by the owner
+        with pytest.raises(psycopg.errors.CheckViolation, match="model_run_input_set_hash"):
+            c.execute("INSERT INTO lfhe.model_runs (module_code, prompt_version_id, prompt_semver, prompt_content_hash,"
+                      " module_version, model_configuration_id, provider, model, model_config_hash, environment,"
+                      " envelope_sha256, task_parameters, input_manifest, input_snapshot_sha256, context_manifest,"
+                      " context_snapshot_sha256, worker_id) SELECT module_code, prompt_version_id, prompt_semver,"
+                      " prompt_content_hash, module_version, model_configuration_id, provider, model, model_config_hash,"
+                      " environment, envelope_sha256, task_parameters, input_manifest, %s, context_manifest,"
+                      " context_snapshot_sha256, worker_id FROM lfhe.model_runs WHERE id=%s", ("e" * 64, rid))

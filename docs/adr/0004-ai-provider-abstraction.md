@@ -17,3 +17,10 @@ enters analytical tables.
 Interface, model-run recording and a deterministic **fake** adapter for tests.
 No real provider adapter and no analytical module (M02–M10) is implemented in
 Phase 1 (PO decision, Control Gate 0).
+
+
+## Amendment (CG1-05)
+
+The runner entry point is `run_structured_task(conn, module_code, task, inputs, context, …)`;
+the provider receives the canonical `lfhe-task-envelope/1` dict. Input (evidence) and context
+objects are recorded as separately hashed manifests — see `docs/model-run-traceability.md`.

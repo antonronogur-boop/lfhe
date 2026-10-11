@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from jsonschema import Draft202012Validator
 from psycopg.types.json import Jsonb
 
-from lfhe_shared.canonical_json import canonical_sha256
+from lfhe_shared.envelopes import EnvelopeItem, TaskEnvelope
 from lfhe_shared.prompts import bundle_sha256
 
 from .providers import ModelConfig, PromptModule, Provider, ProviderError
@@ -68,9 +68,16 @@ def validate_output(schema: dict, raw_text: str) -> tuple[dict | None, list | No
     return parsed, None
 
 
-def run_structured_task(conn, *, module_code: str, envelope: dict, model_configuration_id: str,
-                        provider: Provider, worker_id: str, job_id: str | None = None,
-                        input_refs: dict | None = None) -> ModelRunResult:
+class TraceIntegrityError(RuntimeError):
+    pass
+
+
+def run_structured_task(conn, *, module_code: str, task: dict, inputs: list[EnvelopeItem],
+                        context: list[EnvelopeItem], model_configuration_id: str,
+                        provider: Provider, worker_id: str, job_id: str | None = None) -> ModelRunResult:
+    """``inputs`` = evidence/input objects, ``context`` = supplied context
+    objects (CG1-05); both are recorded as separately hashed manifests."""
+    envelope = TaskEnvelope(module_code, task, inputs, context)
     prompt_version_id, module = load_active_module(conn, module_code)
     mc = conn.execute("SELECT * FROM lfhe.model_configurations WHERE id=%s", (model_configuration_id,)).fetchone()
     if mc is None:
@@ -80,9 +87,16 @@ def run_structured_task(conn, *, module_code: str, envelope: dict, model_configu
     config = ModelConfig(mc["provider"], mc["model"], mc["settings"])
 
     run_id = str(conn.execute(
-        "SELECT lfhe.start_model_run(%s, %s, %s, %s::jsonb, %s, %s) AS id",
-        (prompt_version_id, model_configuration_id, canonical_sha256(envelope), Jsonb(input_refs or {}),
-         worker_id, job_id)).fetchone()["id"])
+        "SELECT lfhe.start_model_run(%s, %s, %s, %s::jsonb, %s::jsonb, %s::jsonb, %s, %s) AS id",
+        (prompt_version_id, model_configuration_id, envelope.envelope_sha256, Jsonb(task),
+         Jsonb(envelope.input_manifest), Jsonb(envelope.context_manifest), worker_id, job_id)).fetchone()["id"])
+    stored = conn.execute("SELECT input_snapshot_sha256, context_snapshot_sha256 FROM lfhe.model_runs WHERE id=%s",
+                          (run_id,)).fetchone()
+    if (stored["input_snapshot_sha256"], stored["context_snapshot_sha256"]) != (
+            envelope.input_snapshot_sha256, envelope.context_snapshot_sha256):
+        conn.execute("SELECT lfhe.finish_model_run(%s, 'PROVIDER_ERROR', NULL, NULL, NULL, "
+                     "'TRACE_INTEGRITY_ERROR', 'set hash mismatch', '{}'::jsonb)", (run_id,))
+        raise TraceIntegrityError("database and runner disagree on input/context set hashes")
 
     def finish(status, raw=None, parsed=None, errors=None, code=None, message=None, usage=None):
         conn.execute("SELECT lfhe.finish_model_run(%s, %s::lfhe.model_run_status, %s, %s::jsonb, %s::jsonb, %s, %s, %s::jsonb)",
@@ -90,7 +104,7 @@ def run_structured_task(conn, *, module_code: str, envelope: dict, model_configu
                       Jsonb(errors) if errors is not None else None, code, message, Jsonb(usage or {})))
 
     try:
-        response = provider.run_structured_task(module, envelope, config)
+        response = provider.run_structured_task(module, envelope.as_dict(), config)
     except ProviderError as exc:
         finish("PROVIDER_ERROR", code=exc.code, message=str(exc))
         return ModelRunResult(run_id, "PROVIDER_ERROR", None, None, exc.code)

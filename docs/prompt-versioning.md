@@ -45,7 +45,9 @@ with files sorted bytewise by name.
 6. In PROD, activation is refused for test fixtures and for bundles not registered from a clean, committed Git tree.
 7. `lfhe.start_model_run` accepts only the currently active version of the module, and copies
    `prompt_semver`, `prompt_content_hash`, `module_version`, provider, model and `model_config_hash` from the
-   registries; composite foreign keys make any disagreement impossible.
+   registries; composite foreign keys make any disagreement impossible. Since CG1-05 each run also
+   records `envelope_sha256`, the input and context manifests and their database-computed set hashes
+   (`docs/model-run-traceability.md`).
 8. Terminal model runs are immutable; raw output is stored with its SHA-256; `SCHEMA_VALIDATION_FAILED` and
    `PROVIDER_ERROR` are recorded, never silently repaired.
 9. Model configurations are immutable; `config_hash` is a generated column
