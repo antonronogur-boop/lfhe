@@ -90,7 +90,7 @@ def test_update_and_direct_table_writes_are_also_rejected(pg, make_user):
 def test_model_settings_and_job_payloads_are_checked_recursively(pg):
     with pg.registrar() as c:
         ok = c.execute("SELECT lfhe.register_model_configuration('fake', 'm-benign', %s::jsonb) AS id",
-                       (Jsonb({"temperature": 0, "max_tokens": 1000, "stop": ["x"], "tools": [{"name": "t"}]}),)
+                       (Jsonb({"temperature": 0, "max_tokens": 1000}),)
                        ).fetchone()["id"]
         assert ok is not None
         with pytest.raises(psycopg.errors.CheckViolation, match=r"CREDENTIAL_KEY_REJECTED.*\$\.provider\.api_key"):

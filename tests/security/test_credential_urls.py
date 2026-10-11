@@ -106,8 +106,10 @@ def test_model_settings_and_job_payload_urls_are_checked(pg):
             c.execute("SELECT lfhe.register_model_configuration('fake', 'm-url', %s::jsonb)",
                       (Jsonb({"base_url": f"https://acct:{SECRET}@llm.example.org/v1"}),))
         assert SECRET not in str(exc.value)
-        assert c.execute("SELECT lfhe.register_model_configuration('fake', 'm-url-ok', %s::jsonb) AS id",
-                         (Jsonb({"base_url": "https://llm.example.org/v1?region=eu"}),)).fetchone()["id"]
+        # P2-01 (L-13): a URL is not an allow-listed model setting at all
+        with pytest.raises(psycopg.errors.CheckViolation, match="SETTING_NOT_ALLOWED_FOR_PROVIDER"):
+            c.execute("SELECT lfhe.register_model_configuration('fake', 'm-url-ok', %s::jsonb)",
+                      (Jsonb({"base_url": "https://llm.example.org/v1?region=eu"}),))
     with pg.worker() as c:
         with pytest.raises(psycopg.errors.CheckViolation, match="CREDENTIAL_URL_REJECTED"):
             c.execute("SELECT lfhe.enqueue_job('COLLECT_SOURCE', 'source', 'x', %s, %s::jsonb)",

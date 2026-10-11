@@ -19,6 +19,7 @@ from psycopg.types.json import Jsonb
 from lfhe_shared.envelopes import EnvelopeItem, TaskEnvelope
 from lfhe_shared.prompts import bundle_sha256
 
+from .model_settings import low_variance_problem
 from .providers import ModelConfig, PromptModule, Provider, ProviderError
 
 MAX_VALIDATION_ERRORS = 50
@@ -85,6 +86,8 @@ def run_structured_task(conn, *, module_code: str, task: dict, inputs: list[Enve
     if mc["provider"] != provider.name:
         raise ValueError(f"model configuration is for provider {mc['provider']!r}, not {provider.name!r}")
     config = ModelConfig(mc["provider"], mc["model"], mc["settings"])
+    if (problem := low_variance_problem(module_code, config.settings)) is not None:
+        raise ValueError(problem)
 
     run_id = str(conn.execute(
         "SELECT lfhe.start_model_run(%s, %s, %s, %s::jsonb, %s::jsonb, %s::jsonb, %s, %s) AS id",
