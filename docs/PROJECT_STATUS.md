@@ -31,7 +31,7 @@
 | CG1-03 Recursive credential-key rejection | resolved (migration 1000) |
 | CG1-04 Cross-domain redirects | resolved (docs/collection-semantics.md) |
 | CG1-05 Model-run envelope / input / context hashes | resolved (docs/model-run-traceability.md) |
-| CG1-06 Toolchain / CI / DEV Supabase | partially resolved — lock + Python 3.13 + gitleaks done; GitHub CI, DEV Supabase smoke, pg_cron NOT RUN |
+| CG1-06 Toolchain / CI / DEV Supabase | partially resolved — lock + Python 3.13 + gitleaks + **GitHub CI PASS** (run 38143832019); DEV Supabase smoke, pg_cron NOT RUN |
 
 PO decisions on D-01…D-06 (2026-10-11): D-01 approved with condition (transactional
 migration + append-only checksummed history + fix-forward + tested backup/restore;
@@ -65,7 +65,7 @@ testing); D-06 approved conditionally (CG1-06 verification open).
 | L-01 | Web UI type-checked, unit-tested and built, but **not** exercised end-to-end against a live Supabase project | `scripts/supabase_dev_smoke.py` + `docs/runbooks/dev-supabase-smoke.md` ready; NOT RUN |
 | L-02 | S3 object-storage backend implemented but not exercised (LOCAL backend tested) | Test against the chosen bucket before PROD |
 | L-03 | pg_cron schedule migration is conditional and was not run (no pg_cron in the local cluster) | Covered by the DEV smoke script; NOT RUN |
-| L-04 | GitHub CI not executed (no repository reachable from the session); gitleaks 8.24.3 run locally on full history: no leaks | Create private repo `lfhe`, push, run CI |
+| L-04 | resolved: GitHub CI run 38143832019 green (secret-scan incl. gitleaks, python-tests, web) | — |
 | L-05 | Per-host politeness interval is per worker process | Single collector worker in Phase 1; shared limiter if scaled |
 | L-06 | Audit writes are serialised by one advisory lock (by design, guardrail 1) | Acceptable at Phase 1 volume; revisit with measurements |
 | L-07 | Duplicates write nothing (CG1-02); an orphan object is still possible after a crash between object write and DB insert, or a race with differing raw bytes | Reported by `scripts/object_store_reconcile.py` (report-only) |

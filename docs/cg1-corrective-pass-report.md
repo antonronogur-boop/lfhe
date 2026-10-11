@@ -221,12 +221,11 @@ A tesztszámok kumulatívak, az eredeti 133 tesztből indulnak. Minden „lefutt
 | --- | --- |
 | 1. lock | kész |
 | 2. futtatókörnyezet | Python 3.13 a mérvadó |
-| 3. GitHub CI | **NOT RUN** |
+| 3. GitHub CI | **PASS** — run 38143832019, commit `ada9a55` |
 | 4. gitleaks | lefutott, **nincs szivárgás** a git-előzményben |
 | 5. DEV Supabase | **NOT RUN** |
 
 **REMAINING LIMITATIONS:**
-- **GitHub CI:** ebből a munkamenetből nem hozható létre repó (a `user/repos` 403-at ad), és a kért privát `antonronogur-boop/lfhe` repó még nem létezik.
 - **DEV Supabase:** a Supabase API és a Docker Hub a proxyn 403-at ad, és DEV hozzáférés sincs. A smoke-script csak szintaktikailag ellenőrzött.
 - **pg_cron:** NOT RUN.
 
@@ -241,8 +240,12 @@ A tesztszámok kumulatívak, az eredeti 133 tesztből indulnak. Minden „lefutt
 
 ## GITHUB CI STATUS
 
-**NOT RUN.** A workflow frissítve van.
-- A futtatáshoz hozz létre egy üres privát `lfhe` repót. Utána én pusholok, vagy te futtatod: `git remote add origin … && git push -u origin main`.
+**PASS** (kiegészítés, 2026-10-11 15:4x). Privát repó: `antonronogur-boop/lfhe`, push a `main` ágra, commit `ada9a55`.
+- Run: https://github.com/antonronogur-boop/lfhe/actions/runs/38143832019 — mindhárom job `success`:
+  - `secret-scan`: gitleaks 8.24.3 a teljes git-előzményen + repository secret scan;
+  - `python-tests`: Python 3.13, hash-ellenőrzött lockból telepítés, prompt-lock ellenőrzés, teljes tesztcsomag PostgreSQL 16-on;
+  - `web`: `npm ci`, typecheck, vitest, `next build`.
+- A lépésszintű eredményeket a GitHub API-ból olvastam ki; a részletes naplókat a munkamenet proxyja nem engedi letölteni, ezért a CI-beli tesztszámot innen nem tudtam ellenőrizni.
 
 ## GITLEAKS STATUS
 
@@ -250,7 +253,7 @@ A tesztszámok kumulatívak, az eredeti 133 tesztből indulnak. Minden „lefutt
 - `gitleaks git`, 21 commit (a jelentés-commitot is beleértve): **nincs szivárgás**.
 - `gitleaks dir`: 6 találat, mind a nem verziókezelt `apps/web/.next/` build-kimenetben. Ezek a Next.js által véletlenszerűen generált preview-kulcsok, nem kerülnek commitba.
 
-A CI-ben ugyanez a bináris fut (checksum-ellenőrzéssel), de ott **még nem futott**.
+A CI-ben ugyanez a bináris (checksum-ellenőrzéssel) a teljes előzményen lefutott: **success**.
 
 ## DEV SUPABASE SMOKE STATUS
 
