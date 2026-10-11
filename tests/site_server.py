@@ -3,6 +3,7 @@
 Static files come from tests/fixtures/site with the placeholder ``HOST``
 replaced by the server's host:port. Dynamic routes simulate failures:
   /down/...        503 Service Unavailable
+  /unauthorized.html 401 (access control — must not be bypassed)
   /forbidden.html  403 (access control — must not be bypassed)
   /paywall.html    402
   /big.html        response larger than the client limit
@@ -45,6 +46,8 @@ class SiteServer:
                     return self._send(503, "text/plain", b"down")
                 if path == "/forbidden.html":
                     return self._send(403, "text/html", b"<p>forbidden</p>")
+                if path == "/unauthorized.html":
+                    return self._send(401, "text/html", b"<p>login required</p>")
                 if path == "/paywall.html":
                     return self._send(402, "text/html", b"<p>subscribe</p>")
                 if path == "/big.html":

@@ -57,7 +57,7 @@ def test_f6_unavailable_source_is_logged_and_retryable(pg, site, http_client):
 def test_access_denied_source_fails_permanently_without_bypass(pg, site, http_client):
     src = make_collectable_source(pg, "HTTP_FETCH", {"urls": [site.url("/forbidden.html")]})
     with pg.worker() as c:
-        with pytest.raises(RetryableJobError):  # all items failed → run FAILED, job retried with backoff
+        with pytest.raises(PermanentJobError):  # CG1-01: permanent item failure → no job retry
             collect_source(c, src, http_client, MemorySink(), worker_id="test-worker")
         run = c.execute("SELECT status, details FROM lfhe.collection_runs WHERE source_id=%s",
                         (src["id"],)).fetchone()

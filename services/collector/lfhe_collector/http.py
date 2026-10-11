@@ -37,7 +37,12 @@ KEPT_HEADERS = ("content-type", "content-language", "last-modified", "etag", "da
 
 
 class FetchError(Exception):
-    """Base class. ``retryable`` tells the job layer whether a retry may help."""
+    """Base class. ``retryable`` tells the job layer whether a retry may help.
+
+    Only SourceUnavailable (network errors, timeouts, 429, 5xx, robots.txt
+    temporarily unreachable) is retryable. Every other subclass describes a
+    permanent condition (access control, robots disallow, rejected content,
+    refused destination, domain policy) that a retry cannot change."""
     retryable = False
     code = "FETCH_ERROR"
 
@@ -61,6 +66,12 @@ class ContentRejected(FetchError):
 
 class DestinationRefused(FetchError):
     code = "DESTINATION_REFUSED"
+
+
+class ExternalRedirectRejected(FetchError):
+    """A redirect hop left the approved source domain while external links are
+    not allowed. The external destination is never requested."""
+    code = "EXTERNAL_REDIRECT_REJECTED"
 
 
 @dataclass(frozen=True)
@@ -196,7 +207,12 @@ class PoliteHttpClient:
         except (httpx.TimeoutException, httpx.NetworkError, httpx.RemoteProtocolError) as exc:
             raise SourceUnavailable(f"{type(exc).__name__} fetching {url}: {exc}") from exc
 
-    def get(self, url: str) -> FetchResult:
+    def get(self, url: str, *, redirect_guard=None) -> FetchResult:
+        """Fetch *url*, following redirects manually.
+
+        ``redirect_guard(next_url)`` (optional) is called for every redirect
+        target BEFORE it is requested; it may raise a FetchError (e.g.
+        ExternalRedirectRejected) to stop the chain."""
         redirects: list[str] = []
         current = url
         for _ in range(self.max_redirects + 1):
@@ -207,6 +223,8 @@ class PoliteHttpClient:
                     raise SourceUnavailable(f"redirect without Location from {current}")
                 redirects.append(current)
                 current = urljoin(current, location)
+                if redirect_guard is not None:
+                    redirect_guard(current)
                 continue
             break
         else:

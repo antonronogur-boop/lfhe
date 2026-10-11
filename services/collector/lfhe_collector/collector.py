@@ -12,7 +12,12 @@ Failure semantics (DS §31, Handoff §41, §48):
 * access control (401/403), robots disallow, refused destination, invalid
   config → run FAILED, error recorded, job fails permanently (needs a human);
   nothing is worked around.
-* individual item failures are counted (PARTIAL) and listed in run details.
+* item failures are classified RETRYABLE / NON_RETRYABLE (FetchError.retryable);
+  the run status and job retry decision follow classify_run() — a job-level
+  retry is only requested when it can recover at least one item, and it never
+  re-requests an item that failed permanently earlier in the same job.
+* with allow_external_links=false, redirect hops leaving the source domain are
+  rejected before they are requested (EXTERNAL_REDIRECT_REJECTED).
 """
 from __future__ import annotations
 
@@ -25,10 +30,11 @@ from psycopg.types.json import Jsonb
 from lfhe_shared.jobs import PermanentJobError, RetryableJobError
 
 from .adapters import AdapterConfigError, DiscoveredItem, build_adapter, url_within_domain
-from .http import FetchError, FetchResult, PoliteHttpClient, SourceUnavailable
+from .http import ExternalRedirectRejected, FetchError, FetchResult, PoliteHttpClient, SourceUnavailable
 from .urls import canonicalize_url
 
 MAX_ITEM_ERRORS_IN_DETAILS = 50
+MAX_PERMANENT_URLS = 500
 
 
 class SnapshotSink(Protocol):
@@ -82,9 +88,11 @@ def collect_source(conn: psycopg.Connection, source: dict, http: PoliteHttpClien
 
     counts["discovered"] = len(items)
     allow_external = bool(source["collection_config"].get("allow_external_links", False))
+    redirect_guard = None if allow_external else _domain_redirect_guard(source["canonical_domain"])
+    not_retried = _permanently_failed_in_this_job(conn, job_id, run_id)
     seen: set[str] = set()
     item_errors: list[dict] = []
-    unavailable_items = 0
+    failed_retryable = failed_permanent = 0
 
     for item in items:
         canonical = canonicalize_url(item.url)
@@ -94,44 +102,100 @@ def collect_source(conn: psycopg.Connection, source: dict, http: PoliteHttpClien
         seen.add(canonical)
         if not allow_external and not url_within_domain(canonical, source["canonical_domain"]):
             counts["skipped"] += 1
-            item_errors.append({"url": canonical, "code": "EXTERNAL_LINK_SKIPPED"})
+            item_errors.append({"url": canonical, "code": "EXTERNAL_LINK_SKIPPED", "retryable": False})
+            continue
+        if canonical in not_retried:
+            counts["skipped"] += 1
+            item_errors.append({"url": canonical, "code": "PERMANENT_FAILURE_NOT_RETRIED", "retryable": False,
+                                "message": "failed permanently in an earlier attempt of this job"})
             continue
         try:
-            fetched = http.get(canonical)
+            fetched = http.get(canonical, redirect_guard=redirect_guard)
             outcome = sink.store(source, item, canonical, fetched, run_id)
+        except ExternalRedirectRejected as exc:
+            counts["skipped"] += 1
+            item_errors.append({"url": canonical, "code": exc.code, "retryable": False, "message": str(exc)[:500]})
+            continue
         except FetchError as exc:
             counts["failed"] += 1
-            unavailable_items += isinstance(exc, SourceUnavailable)
-            item_errors.append({"url": canonical, "code": exc.code, "message": str(exc)[:500]})
+            failed_retryable += exc.retryable
+            failed_permanent += not exc.retryable
+            item_errors.append({"url": canonical, "code": exc.code, "retryable": exc.retryable,
+                                "message": str(exc)[:500]})
             continue
-        except Exception as exc:  # storage failure: counted, never silent
+        except Exception as exc:  # storage failure: counted, never silent; may be transient
             counts["failed"] += 1
-            item_errors.append({"url": canonical, "code": "STORE_FAILED",
+            failed_retryable += 1
+            item_errors.append({"url": canonical, "code": "STORE_FAILED", "retryable": True,
                                 "message": f"{type(exc).__name__}: {exc}"[:500]})
             continue
         counts[outcome.lower()] += 1
 
-    attempted = counts["discovered"] - counts["skipped"]
-    if counts["failed"] == 0:
-        status = "SUCCESS"
-    elif counts["failed"] < attempted:
-        status = "PARTIAL"
-    elif unavailable_items == counts["failed"]:
-        status = "SOURCE_UNAVAILABLE"
-    else:
-        status = "FAILED"
-
+    status, retry = classify_run(counts, failed_retryable, failed_permanent)
+    permanent_urls = sorted({e["url"] for e in item_errors
+                             if e["code"] not in ("EXTERNAL_LINK_SKIPPED",) and not e["retryable"]})
     details = {"item_errors": item_errors[:MAX_ITEM_ERRORS_IN_DETAILS],
-               "item_errors_truncated": len(item_errors) > MAX_ITEM_ERRORS_IN_DETAILS}
+               "item_errors_truncated": len(item_errors) > MAX_ITEM_ERRORS_IN_DETAILS,
+               "failed_retryable": failed_retryable, "failed_permanent": failed_permanent,
+               "permanent_failure_urls": permanent_urls[:MAX_PERMANENT_URLS],
+               "job_retry_requested": retry}
     _finish(conn, run_id, status, counts,
             None if status == "SUCCESS" else "ITEM_FAILURES",
             None if status == "SUCCESS" else f"{counts['failed']} item(s) failed", details)
 
     if status in ("FAILED", "SOURCE_UNAVAILABLE"):
+        attempted = counts["discovered"] - counts["skipped"]
         _record(conn, f"COLLECTION_{status}", "WARNING" if status == "SOURCE_UNAVAILABLE" else "ERROR",
-                f"all {attempted} item fetch(es) failed", source_id, job_id, {"run_id": run_id})
-        raise RetryableJobError(f"collection run {run_id} {status}")
+                f"all {attempted} item fetch(es) failed ({failed_retryable} transient, "
+                f"{failed_permanent} permanent)", source_id, job_id, {"run_id": run_id})
+        if retry:
+            raise RetryableJobError(f"collection run {run_id} {status}: {failed_retryable} transient item failure(s)")
+        raise PermanentJobError(f"collection run {run_id} {status}: all item failures are permanent")
     return CollectionOutcome(run_id, status, counts, item_errors)
+
+
+def classify_run(counts: dict, failed_retryable: int, failed_permanent: int) -> tuple[str, bool]:
+    """Deterministic run status and job-retry decision (docs/collection-semantics.md).
+
+    * no failures                         → SUCCESS, no retry
+    * some items succeeded                → PARTIAL, no job retry (the next
+                                            scheduled run re-attempts items)
+    * all attempted items failed:
+        - all transient                   → SOURCE_UNAVAILABLE, retry
+        - all permanent                   → FAILED, permanent job failure
+        - mixed                           → FAILED, retry; the retry re-attempts
+                                            ONLY the transient items (permanent
+                                            failures of the same job are skipped)
+    """
+    attempted = counts["discovered"] - counts["skipped"]
+    if counts["failed"] == 0:
+        return "SUCCESS", False
+    if counts["failed"] < attempted:
+        return "PARTIAL", False
+    if failed_permanent == 0:
+        return "SOURCE_UNAVAILABLE", True
+    if failed_retryable == 0:
+        return "FAILED", False
+    return "FAILED", True
+
+
+def _domain_redirect_guard(canonical_domain: str):
+    def guard(next_url: str) -> None:
+        if not url_within_domain(next_url, canonical_domain):
+            raise ExternalRedirectRejected(
+                f"redirect to {next_url} leaves approved source domain {canonical_domain}; not followed")
+    return guard
+
+
+def _permanently_failed_in_this_job(conn, job_id: str | None, run_id: str) -> set[str]:
+    """URLs that failed permanently in earlier collection runs of the SAME job.
+    A job-level retry never re-requests them (access controls are not retried)."""
+    if job_id is None:
+        return set()
+    rows = conn.execute(
+        "SELECT details -> 'permanent_failure_urls' AS urls FROM lfhe.collection_runs "
+        "WHERE job_id = %s AND id <> %s", (job_id, run_id)).fetchall()
+    return {u for r in rows for u in (r["urls"] or [])}
 
 
 def make_collect_handler(conn: psycopg.Connection, http: PoliteHttpClient, sink: SnapshotSink,
