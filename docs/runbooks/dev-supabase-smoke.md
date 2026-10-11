@@ -41,3 +41,13 @@ operator/Product Owner; record the JSON output of step 6 in PROJECT_STATUS.
    events + hash-chain verification; pg_cron job scheduled and (optionally) run.
    The script refuses to run unless `lfhe.deployment_environment = 'DEV'`.
 7. Unset the exported variables afterwards.
+
+## Phase 2 additions
+
+* Migrations `20261011001600_claims_pipeline.sql` and `20261011001700_claim_jobs.sql` are applied with
+  the same `scripts/apply_migrations.py` command (17 migrations in total).
+* The smoke script adds Phase 2 checks: closed taxonomy seeded (62 items), viewer can read claims
+  (`CLAIM_READ`), anon cannot, viewer / ADMIN / service_role cannot record a claim review, humans cannot
+  call the worker ingestion function. The expected viewer permissions are now
+  `SOURCE_READ, ARTICLE_READ, CLAIM_READ`. The smoke test creates no claims.
+* K-05 real-source validation: `docs/runbooks/k05-real-source-validation.md`.

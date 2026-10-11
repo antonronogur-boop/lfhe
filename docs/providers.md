@@ -25,3 +25,14 @@
 * Error mapping: 401/403 → PROVIDER_AUTH_FAILED, 400 → PROVIDER_REQUEST_REJECTED
   (both non-retryable); 429/5xx/network → PROVIDER_UNAVAILABLE (retryable);
   `stop_reason = max_tokens` → PROVIDER_OUTPUT_TRUNCATED (output discarded).
+
+## Claim-pipeline worker (Phase 2)
+
+```
+LFHE_ENV=DEV LFHE_DATABASE_URL=<worker login>  \
+LFHE_M02_MODEL_CONFIGURATION_ID=<registered id> LFHE_M03_MODEL_CONFIGURATION_ID=<registered id> \
+LFHE_ANTHROPIC_API_KEY=<from the secret manager> python -m lfhe_orchestrator.worker --once --enqueue
+```
+Model configurations are registered by the registrar (`lfhe.register_model_configuration('anthropic',
+'<model>', '{"temperature": 0, "max_tokens": 8000}')`); M02/M03 require an explicit temperature ≤ 0.2.
+M02/M03 prompt versions must be activated by a human (`PROMPT_ACTIVATE`).

@@ -40,6 +40,21 @@
 | `PROMPT_VERSION_ACTIVATED` / `PROMPT_VERSION_DEACTIVATED` | insert into `prompt_activations` |
 | `MODEL_CONFIGURATION_REGISTERED` (Phase 1 impl.) | insert into `model_configurations` |
 
+## Mandatory audited transitions — Phase 2
+
+| Event | Trigger point |
+| --- | --- |
+| `CLAIM_CREATED` | insert into `claims` |
+| `CLAIM_EXTRACTION_RECORDED` (P2 impl.) | insert into `claim_extraction_results` (one per M02 model run) |
+| `CLAIM_EXTRACTION_GROUNDING_FAILED` / `CLAIM_EXTRACTION_REJECTED` (P2 impl.) | insert into `claim_extraction_rejections` (grounding vs other reasons) |
+| `CLAIM_STATUS_CHANGED` | insert into `claim_status_history` |
+| `CLAIM_HIGH_IMPACT_SET` (P2 impl.) / `CLAIM_MARKED_HIGH_IMPACT_BY_HUMAN` | insert into `claim_high_impact` |
+| `HIGH_IMPACT_REVALIDATION_REQUIRED` / `_APPROVED` / `_REJECTED` | `claim_revalidations` / `claim_revalidation_decisions` |
+| `CLAIM_REVIEW_RECORDED` (P2 impl.), `HIGH_IMPACT_CLAIM_REVIEWED`, `CLAIM_MODIFIED`, `REVIEW_ESCALATED`, `REPROCESSING_REQUESTED` | insert into `claim_reviews` (by decision; metadata carries review id, claim hash, previous review) |
+| `CLAIM_STATUS_AUTO_RULE_CONFIGURED` (P2 impl.) | insert into `claim_status_auto_rules` |
+| `ENTITY_CREATED`, `ENTITY_ALIAS_CREATED`, `ENTITY_MENTION_LINKED`, `ENTITY_RELATIONSHIP_CREATED` (P2 impl.) | entity tables |
+| `TAXONOMY_ITEM_CREATED`, `TAXONOMY_ASSIGNMENT_CREATED`, `CLAIM_CLASSIFICATION_RECORDED` (P2 impl.) | taxonomy tables (the v1.2 seed is inserted before the trigger exists) |
+
 Text and prompt contents are not copied into the audit log: the audit entry
 records their SHA-256 (the rows themselves are immutable and hash-checked).
 

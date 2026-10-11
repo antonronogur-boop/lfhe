@@ -16,7 +16,9 @@ whole; no function uses them before its phase.
 | PROMPT_ACTIVATE | 1 | ✔ | | | | | |
 | AUDIT_READ | 1 | ✔ | | ✔ | | | |
 | SYSTEM_READ | 1 | ✔ | ✔ | | | | |
+| CLAIM_READ | 2 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
 | CLAIM_REVIEW | 2 | | ✔ | | | | |
+| ENTITY_MANAGE | 2 | | ✔ | | | | |
 | EVENT_ACTION | 3 | | ✔ | | | | |
 | ASSESSMENT_REVIEW | 4 | | ✔ | ✔ | | | |
 | FINAL_CONFIDENCE_SET | 4 | | ✔ | | | | |
@@ -25,6 +27,20 @@ whole; no function uses them before its phase.
 | QA_WARNING_ACKNOWLEDGE | 6 | | | ✔ | | | |
 | SECURITY_REVIEW | 6 | | | | ✔ | | |
 | RELEASE_DECIDE | 6 | | | | | ✔ | |
+
+## Phase 2 functions (migration `20261011001600_claims_pipeline.sql`)
+
+| Function | Caller | Permission |
+| --- | --- | --- |
+| `review_claim`, `set_claim_status`, `mark_claim_high_impact`, `decide_high_impact_revalidation` | human (HUMAN_ONLY) | `CLAIM_REVIEW` |
+| `create_entity`, `add_entity_alias`, `link_entity_mention`, `create_entity_relationship` | human (HUMAN_ONLY) | `ENTITY_MANAGE` |
+| `ingest_claim_extraction`, `ingest_classification`, `auto_resolve_mention`, `set_claim_high_impact`, `apply_automatic_claim_status`, `enqueue_pending_claim_extractions`, `claim_grounding_problems` | `lfhe_worker` only | — |
+| `claim_status_auto_rules` (insert) | owner / migration only | — (empty in Phase 2) |
+
+ADMIN deliberately has **no** `CLAIM_REVIEW` (technical administration is separate from
+analytical review); the DEV smoke test checks that ADMIN's review attempt is refused.
+Claim, entity and taxonomy tables are readable by humans holding `CLAIM_READ` (RLS) and by
+`lfhe_worker`; nobody writes them directly.
 
 ## Non-human principals
 - `lfhe_registrar` (deployment pipeline): may only register prompt artifacts

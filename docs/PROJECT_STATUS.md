@@ -2,9 +2,23 @@
 
 | Field | Value |
 | --- | --- |
-| Current phase | Phase 1 — Foundation |
-| Current gate | Control Gate 1 NOT YET APPROVED; CG1-01…06 accepted; CG1-07/08 + CG1-PKG-01 final corrective report submitted; CG1-08A patch submitted 2026-10-11 (docs/cg1-08a-patch-report.md); K-05 real-source validation pending |
-| Next authorised action | **None.** Phase 2 must not start without explicit Product Owner approval |
+| Current phase | Phase 2 — Claim Pipeline (implementation complete) |
+| Current gate | Control Gate 1 APPROVED (2026-10-11). Control Gate 2 evidence submitted (docs/control-gate-2-report.md); K-05 real-source validation OPEN (PO run, required before CG2 approval) |
+| Next authorised action | **None.** Phase 3 must not start without explicit Product Owner approval |
+
+## Phase 2 progress (Addendum v1.0)
+
+| Step | Status |
+| --- | --- |
+| P2-00 Baseline texts stored under docs/specs | done |
+| P2-01 Allow-listed model settings (L-13), Anthropic adapter, low-variance guard | done |
+| P2-02 Claim / entity / taxonomy schema, DB-authoritative QA-D18, human-only review | done |
+| P2-03 M02/M03 prompt bundles 1.0.0 + schemas, deterministic M01 inputs | done |
+| P2-04 QA-D18 Python mirror, QA-S18 fidelity foundation | done |
+| P2-05 Orchestration, transparent repair, jobs, worker | done |
+| P2-06 Human review UI (/claims), DEV smoke additions | done |
+| P2-07 Acceptance corpus + §16 metrics, K-05 script | done |
+| P2-08 Docs, CI, CG2 report | done |
 
 ## Phase 1 progress
 
@@ -49,14 +63,14 @@ testing); D-06 approved conditionally (CG1-06 verification since completed: CI +
 | K-02 | Scheduler | NON-BLOCKING | pg_cron enqueue-only, calling `lfhe.enqueue_due_collections()` |
 | K-03 | Queue | NON-BLOCKING | `processing_jobs` table + `SKIP LOCKED` |
 | K-04 | Per-source retention rights | NON-BLOCKING | `retention_mode` per source; METADATA_ONLY sources cannot ground material claims (QA-D18) |
-| **K-05** | **Initial 5–10 source list** | **OPEN** | Product Owner to supply. No operational sources invented. Synthetic fixtures only. |
+| **K-05** | **Real-source collection validation (approved set K05-01…08)** | **OPEN — PO run** | Source set approved by the PO; validation script + runbook delivered (docs/runbooks/k05-real-source-validation.md); required before CG2 approval |
 | K-06 | Separation of duties | NON-BLOCKING | Configurable; one person may hold several roles in the prototype, logged |
 | K-07 | Region | NON-BLOCKING | EU region default |
 | K-08 | Canonical JSON | NON-BLOCKING | RFC 8785 JCS + SHA-256 (ADR-0003) |
 | K-09 | Template / renderer version + PDF hash in manifest | DEFER (P5–P6) | |
 | K-10 | M05 automatic application scope | DEFER (P3) | CREATE → CANDIDATE, UPDATE → AI-originated version; MERGE / SPLIT / SUPERSEDE human |
 | K-11 | GS-001 Patriot-trap test channel | DEFER (P4) | Decide at raw-input materialisation |
-| K-12 | Canonical evidence-span field name | DEFER (P2) | `evidence_span_original` (v1.2.2) |
+| K-12 | Canonical evidence-span field name | RESOLVED (P2) | `claims.evidence_span_original` (v1.2.2), verified by the database |
 | K-13 | QA-04 naming | NON-BLOCKING | Event time is never an eligibility criterion |
 | **DC-01** | **final_analytic_confidence — single source of truth** | **DEFERRED CONSTRAINT (PO guardrail 4)** | Phase 1 creates **no** confidence column anywhere. `human_reviews.modified_value` is a change record, never the canonical store of final confidence. Phase 4 defines canonical ownership on the approved assessment version; no generic approval table may hold an independently mutable copy. |
 
@@ -72,10 +86,20 @@ testing); D-06 approved conditionally (CG1-06 verification since completed: CI +
 | L-06 | Audit writes are serialised by one advisory lock (by design, guardrail 1) | Acceptable at Phase 1 volume; revisit with measurements |
 | L-07 | Duplicates write nothing (CG1-02); an orphan object is still possible after a crash between object write and DB insert, or a race with differing raw bytes | Reported by `scripts/object_store_reconcile.py` (report-only) |
 | L-08 | No down-migrations (D-01 approved with condition) | Transactional apply + checksummed append-only history + fix-forward + tested backup/restore; transactional rollback is not a schema downgrade |
-| L-09 | Model-run foundation uses FakeProvider only; no real provider adapter, no per-module model selection | Phase 2 |
+| L-09 | Anthropic adapter implemented and tested with a mocked transport; **no real provider call has been made** (no key / no egress in the build environment); per-module model configuration via LFHE_M02/M03_MODEL_CONFIGURATION_ID | Real-provider smoke run by the PO (DEV) |
 | L-10 | Language detection (py3langid) is a fallback only; html `lang` / feed language take precedence | Recorded per snapshot in `language_method` |
 
 | L-11 | A later *scheduled* collection re-requests an item that was access-denied in an earlier job (once per schedule interval; never via job retry) | Optional per-URL suppression list later |
-| L-13 | Before Phase 2 real providers: model settings need a provider-specific allow-listed, non-secret schema; provider credentials only from approved secret management (PO, CG1-08) | Phase 2 prerequisite |
+| L-13 | resolved (P2-01): provider-specific allow-listed model settings in DB (trigger + CHECK) and Python; key only from the secret-managed environment | — |
 | L-14 | Credential detection inspects key names and URL userinfo/parameter names; a secret placed in a free-text value under a benign key, or in a URL path segment, is not detected | Operator guidance; no free-text secrets in config |
 | L-12 | Snapshots created before migration 0900 have no `source_state` (test databases only) | Next collection creates a new version with state |
+
+## Known limitations at Control Gate 2
+
+| ID | Limitation | Impact / plan |
+| --- | --- | --- |
+| L-15 | QA-S18 deterministic layer uses closed marker lexicons (en, uk, ru, pl, hu, de, fr) and digit-number comparison; it is a safety net, not a semantic oracle; other languages get the quantity check only | Model self-check + human review remain; extend lexicons by controlled change |
+| L-16 | Phase 2 has no authoritative rule that makes a claim high impact (v1.2 reasons refer to Phase 3+ objects); default `high_impact = false`, humans can mark | Rules arrive with events / assessments (Phase 3–4) |
+| L-17 | `claim_status_auto_rules` is empty; no automatic corroboration exists (M04 is Phase 3) | Guard and revalidation are tested with a synthetic rule |
+| L-18 | `/claims` UI built, type-checked and unit-tested; not yet clicked through on DEV with real claims | Walkthrough after the first real extraction |
+| L-19 | Instruction-like source detection is pattern based (en + a few uk/pl/hu/ru phrases) | Flag only adds human review; never removes evidence |
