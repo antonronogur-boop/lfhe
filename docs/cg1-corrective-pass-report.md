@@ -193,7 +193,7 @@ A tesztszámok kumulatívak, az eredeti 133 tesztből indulnak. Minden „lefutt
 
 ## CG1-06 — Reprodukálható toolchain / CI
 
-**STATUS:** PARTIALLY_RESOLVED
+**STATUS:** RESOLVED (kiegészítve 2026-10-11 16:19-kor: a GitHub CI és a DEV Supabase smoke teszt is lefutott)
 
 **FILES CHANGED:**
 - `requirements/py313-test.lock`: hash-ellenőrzött, a tesztelt verziók.
@@ -223,11 +223,11 @@ A tesztszámok kumulatívak, az eredeti 133 tesztből indulnak. Minden „lefutt
 | 2. futtatókörnyezet | Python 3.13 a mérvadó |
 | 3. GitHub CI | **PASS** — run 38143832019, commit `ada9a55` |
 | 4. gitleaks | lefutott, **nincs szivárgás** a git-előzményben |
-| 5. DEV Supabase | **NOT RUN** |
+| 5. DEV Supabase | **PASS** — 13/13 migráció, a smoke teszt 16/16 ellenőrzése sikeres |
 
 **REMAINING LIMITATIONS:**
-- **DEV Supabase:** a Supabase API és a Docker Hub a proxyn 403-at ad, és DEV hozzáférés sincs. A smoke-script csak szintaktikailag ellenőrzött.
-- **pg_cron:** NOT RUN.
+- A DEV futtatást a Product Owner végezte a saját Windows gépén. Ott a Python-függőségek nem a Linux lockból települtek (`pip install -e .`, pl. pydantic 2.14.0 a lockban szereplő 2.13.5 helyett). A teljes tesztcsomag a lockból épített környezetben a CI-ben és helyben futott.
+- A webes felületet böngészőben nem kattintottuk végig. A smoke teszt ugyanazokat a Supabase Auth, PostgREST és RPC hívásokat ellenőrzi, amelyeket a felület használ.
 
 ---
 
@@ -257,20 +257,36 @@ A CI-ben ugyanez a bináris (checksum-ellenőrzéssel) a teljes előzményen lef
 
 ## DEV SUPABASE SMOKE STATUS
 
-**NOT RUN.**
-- Elkészült: futtatható smoke-script és runbook.
-- A script ellenőrzi:
-  - Auth, RLS;
-  - HUMAN_ONLY elutasítás (anon / viewer / service_role);
-  - CG1-03 RPC-n keresztül;
-  - a forrás teljes életciklusa;
-  - audit és hash-lánc;
-  - pg_cron.
-- Csak DEV környezetben fut.
+**PASS** (2026-10-11, PO futtatta a saját gépén; a kimenet a beszélgetésben rögzítve).
+- DEV projekt: `lfhe-dev` (külön LFHÉ szervezet, eu-north-1). `lfhe.deployment_environment = 'DEV'`. Az adatbázis nincs GitHubhoz kötve; a Data API „Automatically expose new tables” kapcsolója ki van kapcsolva.
+- **Migrációk:** mind a 13 hiba nélkül lefutott (`scripts/apply_migrations.py`, Session pooler).
+- **Smoke teszt: 16/16 PASS:**
+
+| Ellenőrzés | Eredmény |
+| --- | --- |
+| migrációk jelen | PASS (13) |
+| jelszavas bejelentkezés (admin, viewer) | PASS |
+| RLS: anon nem olvashatja a `sources` táblát | PASS (HTTP 401) |
+| RLS: viewer olvashatja a `sources` táblát | PASS (HTTP 200) |
+| RLS: viewer nem lát audit sorokat | PASS (HTTP 200, üres) |
+| viewer jogosultságai | PASS (`ARTICLE_READ`, `SOURCE_READ`) |
+| HUMAN_ONLY: anon → `create_source` | PASS (HTTP 401) |
+| HUMAN_ONLY: viewer → `create_source` | PASS (HTTP 403) |
+| HUMAN_ONLY: **service_role** → `create_source` | PASS (HTTP 403) |
+| CG1-03: beágyazott hitelesítőkulcs RPC-n át | PASS (HTTP 400, `CREDENTIAL_KEY_REJECTED`) |
+| admin létrehoz forrást | PASS (HTTP 200) |
+| jóváhagyás / aktiválás / deaktiválás | PASS (204/204/204) |
+| audit: forrás-életciklus | PASS (4 eseménytípus) |
+| audit: hash-lánc ellenőrzés | PASS (7 bejegyzés, head `21caf087…`) |
+| pg_cron: `lfhe-enqueue-due-collections` ütemezve | PASS (`*/5 * * * *`, aktív) |
+| pg_cron: sikeres futás | PASS (`succeeded`, 2026-10-11 14:15:00 UTC) |
+
+- A DEV adatbázisban maradt egy `smoke-…` nevű, deaktivált forrás és a hozzá tartozó audit bejegyzések. A források szándékosan nem törölhetők.
 
 ## PG_CRON STATUS
 
-**NOT RUN.** A migráció feltételes. Az ellenőrzést a smoke-script `LFHE_SMOKE_WAIT_CRON_SECONDS` opciója végzi DEV-en.
+**PASS** a DEV Supabase-en. A feltételes migráció létrehozta a `lfhe-enqueue-due-collections` jobot (jobid 1, `*/5 * * * *`, aktív), a `cron.job_run_details` táblában pedig sikeres (`succeeded`) futás szerepel 2026-10-11 14:15:00 UTC-kor.
+- A smoke teszt a legutóbbi 15 perc sikeres futását fogadja el. Ez a futás a teszt indítása előtt pár perccel történt, de ugyanennek a jobnak valódi, sikeres futása.
 
 ## SPECIFICATION DEVIATIONS
 
@@ -289,7 +305,7 @@ Nincs.
 ## OPEN ITEMS
 
 - **K-05 OPEN.** Nem találtam ki forráslistát. A valós forrásokon történő validálás még hiányzik.
-- CG1-06/3–5: GitHub CI, DEV Supabase smoke, pg_cron.
+- A CG1-06 lezárult. Maradék: a webes felület kézi végigkattintása DEV-en (L-01, nem blokkoló).
 - L-02 (S3), L-11, L-12.
 
 **STOP.** A Phase 2 nem kezdődött el.
