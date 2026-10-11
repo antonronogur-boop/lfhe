@@ -26,11 +26,12 @@ def test_robots_txt_is_respected_and_disallowed_page_never_requested(site, http_
 
 
 def test_access_controls_are_not_bypassed(site, http_client):
+    before = site.requests.count("/forbidden.html")
     with pytest.raises(AccessDenied):
         http_client.get(site.url("/forbidden.html"))
     with pytest.raises(AccessDenied):
         http_client.get(site.url("/paywall.html"))
-    assert site.requests.count("/forbidden.html") == 1, "no retry / workaround on 403"
+    assert site.requests.count("/forbidden.html") - before == 1, "no retry / workaround on 403"
 
 
 def test_server_errors_are_source_unavailable(site, http_client):
