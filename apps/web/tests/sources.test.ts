@@ -65,3 +65,20 @@ describe("source form parsing (mirrors DB constraints)", () => {
     expect(ReasonSchema.safeParse("terms reviewed").success).toBe(true);
   });
 });
+
+describe("credential-key rule (mirror of lfhe.credential_key_paths)", () => {
+  it("rejects credential-like keys at any depth, including inside arrays", async () => {
+    const { credentialKeyPaths, isCredentialKey } = await import("../lib/credentials");
+    expect(credentialKeyPaths({ token: "x" })).toEqual(["$.token"]);
+    expect(credentialKeyPaths({ options: { token: "x" } })).toEqual(["$.options.token"]);
+    expect(credentialKeyPaths({ a: [{ b: { apiKey: "x" } }] })).toEqual(["$.a[0].b.apiKey"]);
+    expect(credentialKeyPaths({ feed_url: "https://x.org", options: { max_items: 5, max_tokens: 10 } })).toEqual([]);
+    expect(["X-Api-Key", "client_secret", "Authorization", "private_key"].every(isCredentialKey)).toBe(true);
+    expect(["keyword", "max_tokens", "monkey"].some(isCredentialKey)).toBe(false);
+  });
+  it("form parsing rejects nested credentials", () => {
+    expect(() =>
+      parseSourceForm(form({ ...base, collection_config: '{"feed_url":"https://x.org","options":{"cookie":"a"}}' })),
+    ).toThrow(/credentials/);
+  });
+});

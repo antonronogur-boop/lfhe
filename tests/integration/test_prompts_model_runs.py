@@ -289,7 +289,7 @@ def test_model_configurations_are_immutable_and_secret_free(pg):
     assert model_config(pg, {"max_tokens": 1000, "temperature": 0}) == a, "same config → same record"
     assert model_config(pg, {"temperature": 0.2, "max_tokens": 1000}) != a
     with pg.registrar() as c:
-        with pytest.raises(psycopg.errors.CheckViolation, match="no_credentials"):
+        with pytest.raises(psycopg.errors.CheckViolation, match="CREDENTIAL_KEY_REJECTED"):
             c.execute("SELECT lfhe.register_model_configuration('fake', 'm', '{\"api_key\": \"x\"}')")
     with pg.worker() as c:
         with pytest.raises(psycopg.errors.InsufficientPrivilege):

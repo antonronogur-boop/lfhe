@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { credentialKeyPaths } from "./credentials";
 
 /**
  * Client-side mirror of the database constraints on lfhe.sources. It exists
@@ -11,9 +12,6 @@ export const SOURCE_TYPES = [
   "INDUSTRY", "WIRE_SERVICE", "MEDIA", "THINK_TANK", "OTHER",
 ] as const;
 export const RETENTION_MODES = ["METADATA_ONLY", "PERMITTED_EXCERPT", "FULL"] as const;
-
-const FORBIDDEN_CONFIG_KEYS = ["headers", "auth", "authorization", "cookies", "cookie",
-  "password", "token", "api_key", "apikey", "secret"];
 
 const domain = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/;
 
@@ -28,8 +26,8 @@ export const SourceCreateSchema = z.object({
   collection_method: z.enum(COLLECTION_METHODS),
   collection_config: z
     .record(z.string(), z.unknown())
-    .refine((cfg) => !Object.keys(cfg).some((k) => FORBIDDEN_CONFIG_KEYS.includes(k.toLowerCase())),
-      "collection config must not contain credentials or headers"),
+    .refine((cfg) => credentialKeyPaths(cfg).length === 0,
+      "collection config must not contain credentials or headers (at any depth)"),
   collection_frequency: z.string().regex(/^\d+ (minutes|hour|hours|day|days)$/).default("1 hour"),
   retention_mode: z.enum(RETENTION_MODES).default("METADATA_ONLY"),
   terms_notes: z.string().trim().max(4000).optional(),
