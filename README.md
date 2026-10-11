@@ -23,9 +23,9 @@ Current phase: **Phase 1 — Foundation** (no analytical AI pipeline yet).
 | `services/shared` | Python: configuration, DB access, jobs, audit verification, object storage |
 | `services/collector` | Python: collection adapters, snapshot storage, deterministic text extraction |
 | `services/ai-orchestrator` | Python: provider abstraction, prompt registration, model-run records (no LLM modules yet) |
-| `packages/prompts` | Version-controlled prompt artifacts (empty until Phase 2) |
+| `packages/prompts` | Version-controlled prompt artifacts + lock file (no modules until Phase 2) |
 | `database/migrations` | Versioned SQL migrations (Supabase CLI compatible) |
-| `tests/` | Unit, integration and security tests (run against a real PostgreSQL) |
+| `tests/` | Unit, integration, security and F1–F10 acceptance tests (real PostgreSQL) |
 | `docs/` | Spec index, project status, ADRs, runbooks |
 
 ## Running the tests locally
@@ -37,8 +37,12 @@ then the real migrations.
 
 ```bash
 pip install -e ".[test]"
-pytest
+python3 scripts/prompt_registry.py check-lock
+pytest -W error::DeprecationWarning
 ```
+
+Operational docs: `docs/runbooks/environments.md`, `docs/runbooks/backup-restore.md`,
+`docs/prompt-versioning.md`, `docs/audit-catalogue.md`, `docs/permission-matrix.md`.
 
 The shim emulates only what Supabase provides in production (`auth` schema,
 `auth.uid()`, the `anon` / `authenticated` / `service_role` roles). It is never

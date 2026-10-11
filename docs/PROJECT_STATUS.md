@@ -3,24 +3,24 @@
 | Field | Value |
 | --- | --- |
 | Current phase | Phase 1 — Foundation |
-| Current gate | Control Gate 0 APPROVED (2026-10-11); working towards Control Gate 1 |
-| Next authorised action | Complete P1-01 … P1-11, then return the Control Gate 1 report and STOP |
+| Current gate | Control Gate 1 report submitted (2026-10-11); **awaiting Product Owner decision** |
+| Next authorised action | **None.** Phase 2 must not start without explicit Product Owner approval |
 
 ## Phase 1 progress
 
 | Step | Status |
 | --- | --- |
-| P1-01 Repository and project skeleton | in progress |
-| P1-02 Environment separation | pending |
-| P1-03 Database foundation | pending |
-| P1-04 Authentication and RBAC | pending |
-| P1-05 Audit foundation | pending |
-| P1-06 Source Registry | pending |
-| P1-07 Jobs and scheduling | pending |
-| P1-08 Collection framework | pending |
-| P1-09 Article and original-language snapshot storage | pending |
-| P1-10 Model-run and prompt-version foundation | pending |
-| P1-11 Security / integration / acceptance tests | pending |
+| P1-01 Repository and project skeleton | done |
+| P1-02 Environment separation | done |
+| P1-03 Database foundation | done |
+| P1-04 Authentication and RBAC | done |
+| P1-05 Audit foundation | done |
+| P1-06 Source Registry | done |
+| P1-07 Jobs and scheduling | done |
+| P1-08 Collection framework | done |
+| P1-09 Article and original-language snapshot storage | done |
+| P1-10 Model-run and prompt-version foundation | done |
+| P1-11 Security / integration / acceptance tests | done |
 
 ## Decision register
 
@@ -41,6 +41,18 @@
 | K-13 | QA-04 naming | NON-BLOCKING | Event time is never an eligibility criterion |
 | **DC-01** | **final_analytic_confidence — single source of truth** | **DEFERRED CONSTRAINT (PO guardrail 4)** | Phase 1 creates **no** confidence column anywhere. `human_reviews.modified_value` is a change record, never the canonical store of final confidence. Phase 4 defines canonical ownership on the approved assessment version; no generic approval table may hold an independently mutable copy. |
 
-## Known issues
+## Known limitations at Control Gate 1
 
-_None yet._
+| ID | Limitation | Impact / plan |
+| --- | --- | --- |
+| L-01 | Web UI (source administration) type-checked, unit-tested and built, but **not** exercised end-to-end against a live Supabase project | Server-side enforcement is tested at DB level; E2E against a DEV Supabase project before first deployment |
+| L-02 | S3 object-storage backend implemented but not exercised (LOCAL backend tested) | Test against the chosen bucket before PROD |
+| L-03 | pg_cron schedule migration is conditional and was not run (no pg_cron in the local cluster) | Verify on the Supabase DEV project |
+| L-04 | CI workflow defined but not executed on GitHub from this environment; gitleaks not run locally (repository scanner + tests run) | First push runs CI |
+| L-05 | Per-host politeness interval is per worker process | Single collector worker in Phase 1; shared limiter if scaled |
+| L-06 | Audit writes are serialised by one advisory lock (by design, guardrail 1) | Acceptable at Phase 1 volume; revisit with measurements |
+| L-07 | Raw object written before the DB row: a DB failure can leave an unreferenced, content-addressed object | Harmless (write-once, hash-named); garbage collection later |
+| L-08 | No down-migrations | Reversibility = transactional apply per file + fix-forward + backup/restore (round-trip tested) |
+| L-09 | Model-run foundation uses FakeProvider only; no real provider adapter, no per-module model selection | Phase 2 |
+| L-10 | Language detection (py3langid) is a fallback only; html `lang` / feed language take precedence | Recorded per snapshot in `language_method` |
+
