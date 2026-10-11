@@ -10,7 +10,7 @@ from lfhe_collector.adapters import AdapterConfigError, build_adapter
 from lfhe_shared.credentials import credential_url_paths, url_credential_problems
 
 pytestmark = pytest.mark.db
-SECRET = "SYNTHETIC-SECRET-7f3a9c"   # synthetic test value only
+SECRET = "SYNTHETIC-SECRET-7f3a9c"  # synthetic test value only  gitleaks:allow
 
 CASES = [
     ("RSS_ATOM", {"feed_url": f"https://reader:{SECRET}@example.org/feed.xml"}, "$.feed_url (USERINFO)"),

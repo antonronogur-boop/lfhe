@@ -1,0 +1,3 @@
+# Reviewed false positives only. Each entry: commit:file:rule:line fingerprint.
+# Synthetic, non-secret test constant used to prove credential URLs are rejected (CG1-08).
+f3be0200eb8809afb1695c32d6efdfa77579412b:tests/security/test_credential_urls.py:generic-api-key:13
