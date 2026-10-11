@@ -9,7 +9,10 @@ export type Permission =
   | "SOURCE_APPROVE_COLLECTION_METHOD"
   | "SOURCE_ACTIVATE"
   | "USER_ROLE_MANAGE"
-  | "AUDIT_READ";
+  | "AUDIT_READ"
+  | "CLAIM_READ"
+  | "CLAIM_REVIEW"
+  | "ENTITY_MANAGE";
 
 export interface Session {
   userId: string;

@@ -136,6 +136,27 @@ def main() -> int:
     check("CG1-08A: whitespace/relative credential URL rejected via RPC, not echoed, not audited",
           r.status_code >= 400 and synthetic not in r.text and leaked == 0, f"HTTP {r.status_code}")
 
+    # 4b. Phase 2 claim pipeline (P2): read/RBAC surface only; no claims are created by the smoke test
+    taxonomy = db.execute("SELECT count(*) AS n FROM lfhe.taxonomy_items WHERE taxonomy_version='LFHE-TAX-1.2'").fetchone()["n"]
+    check("P2: closed taxonomy LFHE-TAX-1.2 seeded (62 items)", taxonomy == 62, f"{taxonomy} item(s)")
+    r = rest.select("claims", viewer)
+    check("P2: viewer can read claims (CLAIM_READ)", r.status_code == 200, f"HTTP {r.status_code}")
+    r = rest.select("claims", None)
+    check("P2: anon cannot read claims", r.status_code in (401, 403, 404) or r.json() == [], f"HTTP {r.status_code}")
+    review = {"p_claim_id": "00000000-0000-4000-8000-000000000000", "p_claim_hash": "0" * 64,
+              "p_expected_previous_review_id": None, "p_decision": "APPROVE", "p_reason": "smoke test probe"}
+    r = rest.rpc("review_claim", review, viewer)
+    check("P2: viewer cannot record a claim review (HUMAN_ONLY + CLAIM_REVIEW)",
+          r.status_code >= 400 and "CLAIM_REVIEW" in r.text, f"HTTP {r.status_code}")
+    r = rest.rpc("review_claim", review, admin)
+    check("P2: ADMIN cannot record a claim review (no CLAIM_REVIEW)",
+          r.status_code >= 400 and "CLAIM_REVIEW" in r.text, f"HTTP {r.status_code}")
+    if service_key:
+        r = rest.rpc("review_claim", review, service_key)
+        check("P2: service_role cannot record a claim review", r.status_code >= 400, f"HTTP {r.status_code}")
+    r = rest.rpc("ingest_claim_extraction", {"p": {}}, admin)
+    check("P2: humans cannot call the worker ingestion function", r.status_code >= 400, f"HTTP {r.status_code}")
+
     # 5. source administration end-to-end
     r = rest.rpc("create_source", payload, admin)
     ok = check("source admin: admin creates source", r.status_code == 200, f"HTTP {r.status_code} {r.text}")
