@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Current phase | Phase 1 — Foundation |
-| Current gate | Control Gate 1 NOT YET APPROVED; CG1 corrective pass (CG1-01…06) submitted 2026-10-11; **awaiting Product Owner decision** |
+| Current gate | Control Gate 1 NOT YET APPROVED; CG1-01…06 accepted; CG1-07/08 + CG1-PKG-01 final corrective report submitted 2026-10-11 (docs/cg1-final-corrective-report.md); K-05 real-source validation pending |
 | Next authorised action | **None.** Phase 2 must not start without explicit Product Owner approval |
 
 ## Phase 1 progress
@@ -33,7 +33,7 @@
 | CG1-05 Model-run envelope / input / context hashes | resolved (docs/model-run-traceability.md) |
 | CG1-07 robots.txt fail-closed + non-poisoned cache | resolved (docs/collection-semantics.md, robots section) |
 | CG1-08 Credentials in URL values | resolved (migration 1300; DB authoritative, Python/TS mirrors) |
-| CG1-06 Toolchain / CI / DEV Supabase | resolved — lock + Python 3.13 + gitleaks + GitHub CI PASS (run 38143832019) + DEV Supabase: 13/13 migrations, smoke 16/16 PASS incl. pg_cron (2026-10-11) |
+| CG1-06 Toolchain / CI / DEV Supabase | resolved — lock + Python 3.13 + gitleaks + GitHub CI PASS (run 38143832019) + DEV Supabase: 14/14 migrations, smoke 17/17 PASS incl. CG1-08 and pg_cron (2026-10-11 17:21) |
 
 PO decisions on D-01…D-06 (2026-10-11): D-01 approved with condition (transactional
 migration + append-only checksummed history + fix-forward + tested backup/restore;
