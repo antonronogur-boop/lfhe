@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Example Ministry press releases (SYNTHETIC TEST FIXTURE)</title>
+    <link>http://HOST/</link>
+    <language>en</language>
+    <description>Synthetic, topic-neutral fixture for LFHÉ collector tests.</description>
+    <item>
+      <title>Example Ministry announces annual logistics training</title>
+      <link>http://HOST/news/logistics-training-en.html?utm_source=rss</link>
+      <guid>synthetic-001</guid>
+      <pubDate>Mon, 05 Oct 2026 08:30:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Logistics training: duplicate link with tracking parameter</title>
+      <link>http://HOST/news/logistics-training-en.html?utm_campaign=x</link>
+      <guid>synthetic-001-dup</guid>
+      <pubDate>Mon, 05 Oct 2026 08:31:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Міністерство прикладу оголосило про навчання</title>
+      <link>http://HOST/news/navchannia-uk.html</link>
+      <guid>synthetic-002</guid>
+    </item>
+    <item>
+      <title>External link (must be skipped)</title>
+      <link>http://external.invalid/story.html</link>
+      <guid>synthetic-003</guid>
+    </item>
+    <item>
+      <title>Robots-disallowed page</title>
+      <link>http://HOST/private/internal.html</link>
+      <guid>synthetic-004</guid>
+    </item>
+  </channel>
+</rss>

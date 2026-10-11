@@ -183,3 +183,46 @@ def wait_for(predicate, timeout: float = 10.0, interval: float = 0.05):
             return True
         time.sleep(interval)
     return False
+
+
+# ---------------------------------------------------------------------------
+# Collector support
+# ---------------------------------------------------------------------------
+@pytest.fixture(scope="session")
+def site():
+    from site_server import SiteServer
+    server = SiteServer()
+    yield server
+    server.stop()
+
+
+@pytest.fixture
+def http_client():
+    from lfhe_collector.http import PoliteHttpClient
+    client = PoliteHttpClient("LFHE-Test-Collector/0.1 (+tests)", timeout=5, max_bytes=200_000,
+                              min_interval=0, respect_robots=True, allow_private_hosts=True)
+    yield client
+    client.close()
+
+
+def make_collectable_source(pg: PgCluster, method: str, config: dict, *, name: str | None = None,
+                            retention: str = "FULL", language: str = "en",
+                            domain: str = "127.0.0.1") -> dict:
+    """Register, approve and activate a source through the real human functions."""
+    admin = new_user(pg)
+    grant_role(pg, admin, "ADMIN")
+    payload = {
+        "name": name or f"synthetic-{uuid.uuid4().hex[:10]}",
+        "canonical_domain": domain,
+        "source_type": "OFFICIAL_GOVERNMENT",
+        "primary_language": language,
+        "collection_method": method,
+        "collection_config": config,
+        "retention_mode": retention,
+    }
+    with pg.as_user(admin) as c:
+        sid = c.execute("SELECT lfhe.create_source(%s::jsonb) AS id", (json.dumps(payload),)).fetchone()["id"]
+        c.execute("SELECT lfhe.set_collection_method_approval(%s, true, 'synthetic test fixture')", (sid,))
+        c.execute("SELECT lfhe.set_source_active(%s, true, 'synthetic test fixture')", (sid,))
+    with pg.worker() as c:
+        return c.execute("SELECT * FROM lfhe.collectable_sources WHERE id=%s", (sid,)).fetchone()
