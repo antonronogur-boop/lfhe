@@ -73,3 +73,26 @@ def test_excerpt_never_splits_a_combining_sequence():
     text = unicodedata.normalize("NFC", "ab" + "é" * 3)  # NFC composes é
     assert excerpt(text, 3) == text[:3]
     assert normalise_lines(" x \n\n  y  ") == "x\ny"
+
+
+def test_concurrent_writers_never_observe_a_partial_object(tmp_path):
+    """Regression (found in Phase 2): a second writer must not read a half-written object."""
+    import threading
+    store = LocalObjectStore(tmp_path)
+    data = os.urandom(4 * 1024 * 1024)
+    barrier, errors, keys = threading.Barrier(8), [], []
+
+    def write():
+        try:
+            barrier.wait()
+            keys.append(store.put_if_absent(data))
+        except Exception as exc:  # surfaced below
+            errors.append(exc)
+
+    threads = [threading.Thread(target=write) for _ in range(8)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    assert errors == [] and len(set(keys)) == 1
+    assert store.get(keys[0]) == data and list(store.iter_keys()) == keys[:1]

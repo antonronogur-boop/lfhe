@@ -15,6 +15,7 @@ NOT exercised by the Phase 1 test-suite — see Control Gate 1 report.
 from __future__ import annotations
 
 import os
+import tempfile
 from pathlib import Path
 from typing import Protocol
 
@@ -52,18 +53,30 @@ class LocalObjectStore:
         return path
 
     def put_if_absent(self, data: bytes, prefix: str = "raw") -> str:
+        """Write-once and atomic: the bytes go to a private temporary file which is
+        then hard-linked into place. link() fails if the key exists, so an object is
+        never overwritten, and a concurrent reader can never observe a partially
+        written object (fix found by the P2 concurrency test)."""
         digest = sha256_hex(data)
         key = content_key(digest, prefix)
         path = self._path(key)
         path.parent.mkdir(parents=True, exist_ok=True)
+        if path.exists():
+            self.get(key)  # verifies the existing object
+            return key
+        fd, tmp = tempfile.mkstemp(prefix=".tmp-", dir=path.parent)
         try:
-            with open(path, "xb") as fh:  # exclusive create: never overwrite
+            with os.fdopen(fd, "wb") as fh:
                 fh.write(data)
                 fh.flush()
                 os.fsync(fh.fileno())
-            os.chmod(path, 0o444)
-        except FileExistsError:
-            self.get(key)  # verifies the existing object
+            os.chmod(tmp, 0o444)
+            try:
+                os.link(tmp, path)
+            except FileExistsError:
+                self.get(key)  # a concurrent writer won; verify its complete object
+        finally:
+            os.unlink(tmp)
         return key
 
     def iter_keys(self, prefix: str = "raw"):
@@ -71,7 +84,7 @@ class LocalObjectStore:
         if not base.exists():
             return
         for path in sorted(base.rglob("*")):
-            if path.is_file():
+            if path.is_file() and not path.name.startswith(".tmp-"):
                 yield path.relative_to(self.root).as_posix()
 
     def get(self, key: str) -> bytes:
