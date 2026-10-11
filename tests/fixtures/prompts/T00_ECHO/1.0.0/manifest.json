@@ -1,0 +1,8 @@
+{
+  "format": "lfhe-prompt-manifest/1",
+  "module_code": "T00_ECHO",
+  "semver": "1.0.0",
+  "module_version": "test-fixture",
+  "test_fixture": true,
+  "description": "Synthetic test fixture for the model-run foundation. Not an LFHÉ analytical module."
+}

@@ -38,6 +38,10 @@
 | `TEXT_REPRESENTATION_CREATED` | insert into `text_representations` |
 | `PROMPT_VERSION_CREATED` | insert into `prompt_versions` |
 | `PROMPT_VERSION_ACTIVATED` / `PROMPT_VERSION_DEACTIVATED` | insert into `prompt_activations` |
+| `MODEL_CONFIGURATION_REGISTERED` (Phase 1 impl.) | insert into `model_configurations` |
+
+Text and prompt contents are not copied into the audit log: the audit entry
+records their SHA-256 (the rows themselves are immutable and hash-checked).
 
 Later phases attach triggers for the remaining catalogue entries (Prompt Pack
 v1.2 §55, v1.2.1 §10) as their tables are introduced. Collection runs, jobs,

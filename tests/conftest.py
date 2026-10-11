@@ -6,6 +6,7 @@
 * Records the deployment environment as TEST.
 * Creates test login roles that mirror production topology:
     - worker_test       : member of lfhe_worker (Python workers)
+    - registrar_test    : member of lfhe_registrar (prompt registration pipeline)
     - authenticator     : PostgREST-style login that SET ROLEs to
                           authenticated / service_role (from the shim)
 """
@@ -77,6 +78,9 @@ class PgCluster:
     def worker(self, autocommit: bool = True) -> psycopg.Connection:
         return psycopg.connect(self.worker_url, autocommit=autocommit, row_factory=dict_row)
 
+    def registrar(self, autocommit: bool = True, dbname: str | None = None) -> psycopg.Connection:
+        return psycopg.connect(self.url("registrar_test", dbname), autocommit=autocommit, row_factory=dict_row)
+
     @contextlib.contextmanager
     def as_role(self, db_role: str, claims: dict | None, autocommit: bool = True):
         """PostgREST-style session: login as authenticator, SET ROLE, set JWT claims."""
@@ -142,7 +146,12 @@ def create_database(cluster: PgCluster, dbname: str, environment: str = "TEST") 
             "CREATE ROLE worker_test LOGIN; END IF; END $$"
         )
         c.execute("GRANT lfhe_worker TO worker_test")
-        c.execute(f'GRANT CONNECT ON DATABASE "{dbname}" TO worker_test, authenticator')
+        c.execute(
+            "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='registrar_test') THEN "
+            "CREATE ROLE registrar_test LOGIN; END IF; END $$"
+        )
+        c.execute("GRANT lfhe_registrar TO registrar_test")
+        c.execute(f'GRANT CONNECT ON DATABASE "{dbname}" TO worker_test, registrar_test, authenticator')
 
 
 @pytest.fixture(scope="session")

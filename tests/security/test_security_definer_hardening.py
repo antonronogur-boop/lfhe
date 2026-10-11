@@ -7,7 +7,7 @@ import pytest
 
 pytestmark = pytest.mark.db
 
-APP_ROLES = ("anon", "authenticated", "service_role", "lfhe_worker", "lfhe_evaluator")
+APP_ROLES = ("anon", "authenticated", "service_role", "lfhe_worker", "lfhe_evaluator", "lfhe_registrar")
 OWNER_ONLY = {"set_deployment_environment", "bootstrap_grant_role"}
 
 
@@ -56,7 +56,7 @@ def test_human_only_functions_are_closed_to_non_human_roles(pg):
         for f in human_only:
             if not f["prosecdef"]:
                 problems.append(f"{f['proname']}: not SECURITY DEFINER")
-            for role in ("anon", "service_role", "lfhe_worker", "lfhe_evaluator"):
+            for role in ("anon", "service_role", "lfhe_worker", "lfhe_evaluator", "lfhe_registrar"):
                 if _can_execute(c, role, f["oid"]):
                     problems.append(f"{f['proname']}: executable by {role}")
             if not _can_execute(c, "authenticated", f["oid"]):

@@ -36,8 +36,10 @@ jobs:
           echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"
       - name: install
         run: pip install -e ".[test]"
+      - name: prompt artifacts unchanged since locking
+        run: python3 scripts/prompt_registry.py check-lock
       - name: tests (throw-away PostgreSQL cluster)
-        run: pytest
+        run: pytest -W error::DeprecationWarning
 
   web:
     runs-on: ubuntu-latest

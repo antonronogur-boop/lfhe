@@ -27,7 +27,11 @@ whole; no function uses them before its phase.
 | RELEASE_DECIDE | 6 | | | | | ✔ | |
 
 ## Non-human principals
-- `lfhe_worker`, `service_role`, `anon`: **no** EXECUTE on any HUMAN_ONLY
+- `lfhe_registrar` (deployment pipeline): may only register prompt artifacts
+  and model configurations (`register_prompt_version`,
+  `register_model_configuration`); it can never activate a prompt.
+- `lfhe_worker`: collection, queue, snapshot and model-run write paths only.
+- `lfhe_worker`, `lfhe_registrar`, `service_role`, `anon`: **no** EXECUTE on any HUMAN_ONLY
   function; additionally rejected inside every such function
   (`lfhe.current_human_user()` requires `role = authenticated`, JWT role
   `authenticated`, an existing `auth.users` id, and no `lfhe_worker`
