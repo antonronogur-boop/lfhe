@@ -45,6 +45,8 @@ class _StrictConfig(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
     allow_external_links: bool = False
     max_items: int = Field(default=50, ge=1, le=500)
+    # Used only when the source's retention_mode is PERMITTED_EXCERPT.
+    excerpt_max_chars: int = Field(default=500, ge=50, le=5000)
 
 
 class Adapter:

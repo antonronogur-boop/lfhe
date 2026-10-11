@@ -1,0 +1,111 @@
+"""Write-once, content-addressed object storage for raw snapshots.
+
+Keys are derived from the SHA-256 of the bytes (``raw/sha256/ab/cd/<hash>``),
+so an object can never be replaced by different content under the same key:
+
+* ``put_if_absent`` never overwrites. If the key already exists the stored
+  bytes are re-hashed; a mismatch raises ``ObjectIntegrityError``.
+* ``get`` re-hashes on read and raises ``ObjectIntegrityError`` on mismatch
+  (tamper / corruption detection; storage is tamper-evident, not tamper-proof).
+
+LOCAL is for DEV/TEST only (config refuses LOCAL in PROD). The S3 backend is
+implemented against the S3 API (conditional PUT with If-None-Match) but is
+NOT exercised by the Phase 1 test-suite — see Control Gate 1 report.
+"""
+from __future__ import annotations
+
+import os
+from pathlib import Path
+from typing import Protocol
+
+from .hashing import sha256_hex
+
+
+class ObjectIntegrityError(RuntimeError):
+    pass
+
+
+def content_key(sha256: str, prefix: str = "raw") -> str:
+    if len(sha256) != 64 or any(c not in "0123456789abcdef" for c in sha256):
+        raise ValueError("not a sha256 hex digest")
+    return f"{prefix}/sha256/{sha256[:2]}/{sha256[2:4]}/{sha256}"
+
+
+class ObjectStore(Protocol):
+    def put_if_absent(self, data: bytes, prefix: str = "raw") -> str: ...
+    def get(self, key: str) -> bytes: ...
+
+
+def _expected_hash(key: str) -> str:
+    return key.rsplit("/", 1)[-1]
+
+
+class LocalObjectStore:
+    def __init__(self, root: Path | str):
+        self.root = Path(root).resolve()
+        self.root.mkdir(parents=True, exist_ok=True)
+
+    def _path(self, key: str) -> Path:
+        path = (self.root / key).resolve()
+        if self.root not in path.parents:
+            raise ValueError("object key escapes storage root")
+        return path
+
+    def put_if_absent(self, data: bytes, prefix: str = "raw") -> str:
+        digest = sha256_hex(data)
+        key = content_key(digest, prefix)
+        path = self._path(key)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            with open(path, "xb") as fh:  # exclusive create: never overwrite
+                fh.write(data)
+                fh.flush()
+                os.fsync(fh.fileno())
+            os.chmod(path, 0o444)
+        except FileExistsError:
+            self.get(key)  # verifies the existing object
+        return key
+
+    def get(self, key: str) -> bytes:
+        data = self._path(key).read_bytes()
+        if sha256_hex(data) != _expected_hash(key):
+            raise ObjectIntegrityError(f"stored object {key} does not match its content hash")
+        return data
+
+
+class S3ObjectStore:  # pragma: no cover - not exercised in Phase 1 tests
+    def __init__(self, *, endpoint: str, bucket: str, region: str | None,
+                 access_key_id: str, secret_access_key: str):
+        import boto3  # optional dependency: pip install .[s3]
+        self.bucket = bucket
+        self.client = boto3.client("s3", endpoint_url=endpoint, region_name=region,
+                                   aws_access_key_id=access_key_id,
+                                   aws_secret_access_key=secret_access_key)
+
+    def put_if_absent(self, data: bytes, prefix: str = "raw") -> str:
+        from botocore.exceptions import ClientError
+        key = content_key(sha256_hex(data), prefix)
+        try:
+            self.client.put_object(Bucket=self.bucket, Key=key, Body=data, IfNoneMatch="*")
+        except ClientError as exc:
+            if exc.response.get("Error", {}).get("Code") not in ("PreconditionFailed", "412"):
+                raise
+            self.get(key)
+        return key
+
+    def get(self, key: str) -> bytes:
+        data = self.client.get_object(Bucket=self.bucket, Key=key)["Body"].read()
+        if sha256_hex(data) != _expected_hash(key):
+            raise ObjectIntegrityError(f"stored object {key} does not match its content hash")
+        return data
+
+
+def build_object_store(settings) -> ObjectStore:
+    if settings.storage_backend.value == "LOCAL":
+        return LocalObjectStore(settings.storage_local_root)
+    return S3ObjectStore(
+        endpoint=settings.storage_s3_endpoint, bucket=settings.storage_s3_bucket,
+        region=settings.storage_s3_region,
+        access_key_id=settings.storage_s3_access_key_id.get_secret_value(),
+        secret_access_key=settings.storage_s3_secret_access_key.get_secret_value(),
+    )
