@@ -383,3 +383,73 @@ def test_human_review_of_ai_version_is_hash_bound(pg, analyst):
         h.execute("SELECT lfhe.review_event_version(%s, %s, 'APPROVE', 'checked against both claims')",
                   (v["head_version_id"], v["head_content_hash"]))
     assert head(pg, event)["head_review_decision"] == "APPROVE" and not head(pg, event)["head_pending_review"]
+
+
+# --- CG3-02: a full split is terminal; a split with retained keeps only the remainder ------
+def _m05_candidates(pg, probe):
+    from datetime import datetime, timedelta, timezone
+    from lfhe_orchestrator.event_inputs import build_m05_inputs
+    with pg.worker() as c:
+        x = build_m05_inputs(c, [probe["claim_id"]], report_mode="LIVE",
+                             information_cutoff=datetime.now(timezone.utc) + timedelta(minutes=5))
+    return {i.content["event_id"]: i for i in x.context if i.object_type == "event_version"}
+
+
+def test_full_split_parent_is_no_longer_open_or_current(pg, analyst):
+    a = grounded_claim(pg, T1, "4 tanker aircraft arrived at Base North", locations=["Base North"])
+    c = grounded_claim(pg, T3, "3 patrol drones were tested", locations=["Base North"])
+    with pg.as_user(analyst) as h:
+        parent = str(h.execute("SELECT lfhe.create_event(%s::jsonb, 'analyst created event') AS id", (json.dumps(
+            candidate_event([a, c], title="Mixed Base North activity", locations=["Base North"])),)).fetchone()["id"])
+    hv = head(pg, parent)
+    spec = {"children": [candidate_event([a], title="Tanker arrival", locations=["Base North"]),
+                         candidate_event([c], title="Drone test", event_type="TEST", locations=["Base North"])]}  # no retained
+    with pg.as_user(analyst) as h:
+        out = h.execute("SELECT lfhe.split_event(%s, %s, %s::jsonb, 'two developments, nothing retained') AS r",
+                        (parent, hv["head_version_id"], json.dumps(spec))).fetchone()["r"]
+    after = head(pg, parent)
+    assert after["head_version_id"] == hv["head_version_id"] and after["head_content_hash"] == hv["head_content_hash"]
+    assert after["structural_status"] == "SPLIT_INTO" and after["is_current"] is False and after["current_version_id"] is None
+    with pg.admin() as x:
+        assert x.execute("SELECT count(*) n FROM lfhe.event_relationships WHERE from_event_id=%s "
+                         "AND relationship_type='SPLIT_INTO'", (parent,)).fetchone()["n"] == 2
+        assert x.execute("SELECT lfhe.event_version_stored_hash(%s) h", (hv["head_version_id"],)).fetchone()["h"] == hv["head_content_hash"]
+        assert x.execute("SELECT lfhe.event_is_open(%s) o", (parent,)).fetchone()["o"] is False
+    assert set(version_claims(pg, hv["head_version_id"])) == {a["claim_id"], c["claim_id"]}     # history intact
+    children = {ch["event_id"] for ch in out["children"]}
+    current = {cid for e in children for cid in version_claims(pg, head(pg, e)["head_version_id"])}
+    assert current == {a["claim_id"], c["claim_id"]}                                          # no claim lost
+    assert all(head(pg, e)["is_current"] for e in children)
+    probe = grounded_claim(pg, "Another report: tanker aircraft at Base North.", "tanker aircraft at Base North",
+                           locations=["Base North"])
+    cands = _m05_candidates(pg, probe)
+    assert parent not in cands and children <= set(cands)        # old membership never offered as current
+    with pg.as_user(analyst) as h:
+        for sql, args in (("SELECT lfhe.update_event(%s, %s, %s::jsonb, 'edit split parent')",
+                           (parent, hv["head_version_id"], json.dumps(candidate_event([a])))),
+                          ("SELECT lfhe.set_event_state(%s, 'ACTIVE', 'CONFIRMED', 'confirm split parent')", (parent,)),
+                          ("SELECT lfhe.split_event(%s, %s, %s::jsonb, 'split again')", (parent, hv["head_version_id"], json.dumps(spec)))):
+            with pytest.raises(psycopg.errors.ObjectNotInPrerequisiteState, match="EVENT_NOT_OPEN"):
+                h.execute(sql, args)
+
+
+def test_split_with_retained_parent_stays_current_only_with_the_retained_claims(pg, analyst):
+    a = grounded_claim(pg, T1, "4 tanker aircraft arrived at Base North", locations=["Base North"])
+    c = grounded_claim(pg, T3, "3 patrol drones were tested", locations=["Base North"])
+    parent = human_event(pg, analyst, [a, c], title="Mixed Base North activity")
+    old = head(pg, parent)["head_version_id"]
+    spec = {"children": [candidate_event([c], title="Drone test", event_type="TEST")],
+            "retained": candidate_event([a], title="Tanker arrival", locations=["Base North"])}
+    with pg.as_user(analyst) as h:
+        out = h.execute("SELECT lfhe.split_event(%s, %s, %s::jsonb, 'drone test is separate') AS r",
+                        (parent, old, json.dumps(spec))).fetchone()["r"]
+    hd = head(pg, parent)
+    assert hd["is_current"] and str(hd["current_version_id"]) == str(out["retained_version_id"])
+    assert hd["structural_status"] is None
+    assert set(version_claims(pg, hd["current_version_id"])) == {a["claim_id"]}
+    assert set(version_claims(pg, old)) == {a["claim_id"], c["claim_id"]}                        # old version intact
+    probe = grounded_claim(pg, "Another report: tanker aircraft at Base North.", "tanker aircraft at Base North",
+                           locations=["Base North"])
+    item = _m05_candidates(pg, probe)[parent]
+    assert item.object_id == str(out["retained_version_id"])
+    assert {x["claim_id"] for x in item.content["claims"]} == {a["claim_id"]}

@@ -11,9 +11,11 @@ FUTURE = (datetime.now(timezone.utc) + timedelta(days=1)).isoformat()
 PAST = "2020-01-01T00:00:00+00:00"
 
 
-def grounded_claim(pg, text: str, exact: str, *, language: str = "en", **overrides) -> dict:
-    """One outlet (source/article/snapshot) with one persisted claim."""
-    snap = make_text_snapshot(pg, text, language=language)
+def grounded_claim(pg, text: str, exact: str, *, language: str = "en", available_at: str | None = None,
+                   **overrides) -> dict:
+    """One outlet (source/article/snapshot) with one persisted claim. available_at sets a stated
+    public-availability time (needed for REPLAY eligibility)."""
+    snap = make_text_snapshot(pg, text, language=language, available_at=available_at)
     run = extraction_run(pg, snap)
     out = ingest(pg, snap, run, [candidate(text, exact, language=language, **overrides)])
     [cid] = out["claim_ids"]

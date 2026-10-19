@@ -211,21 +211,68 @@ def test_non_humans_cannot_finalise_lineage_or_status(pg, make_user):
         assert x.execute("SELECT claim_status FROM lfhe.claim_state WHERE claim_id=%s", (a["claim_id"],)).fetchone()["claim_status"] == "UNVERIFIED"
 
 
-def test_same_named_external_origin_collapses_into_one_group(pg, analyst):
-    """Migration 2200 (found by the acceptance corpus): two accepted proposals naming the same
-    evidenced external origin share one origin row → one independence group."""
-    a = grounded_claim(pg, "According to the Southland Ministry of Defence, 5 jets landed.",
-                       "the Southland Ministry of Defence, 5 jets landed")
-    b = grounded_claim(pg, "A southland ministry of defence  közlése: 5 vadászgép landolt.",
-                       "A southland ministry of defence  közlése: 5 vadászgép landolt", language="hu")
-    run = lineage_run(pg, [a, b])
-    ingest_lineage(pg, run, [rel(a, origin="Southland Ministry of Defence"),
-                             rel(b, origin="southland ministry of defence")])
-    for p in proposals(pg, run):
-        accept(pg, analyst, p["id"])
-    with pg.admin() as x:
-        origins = {r["external_origin_id"] for r in x.execute(
-            "SELECT external_origin_id FROM lfhe.claim_lineage WHERE child_claim_id = ANY(%s::uuid[])",
-            ([a["claim_id"], b["claim_id"]],))}
-    assert len(origins) == 1
+
+# --- CG3-03: external-origin identity is never inferred from the name alone (migration 2500)
+MOD = "Southland Ministry of Defence"
+
+
+def origin_claim(pg, url=None, n=5):
+    text = f"According to the {MOD}, {n} jets landed." + (f" Statement: {url}" if url else "")
+    return grounded_claim(pg, text, f"the {MOD}, {n} jets landed")
+
+
+def accept_origin(pg, user, claims_urls, *, select=None):
+    """One M04 run proposing COMMON_ORIGINAL_SOURCE for each (claim, url); accept each proposal.
+    select: index → existing external_origin_id chosen explicitly by the human."""
+    claims = [c for c, _ in claims_urls]
+    run = lineage_run(pg, claims)
+    ingest_lineage(pg, run, [rel(c, origin=MOD, url=u) for c, u in claims_urls])
+    origins = []
+    for n, p in enumerate(proposals(pg, run)):
+        with pg.as_user(user) as h:
+            lid = h.execute("SELECT lfhe.decide_lineage_proposal(%s, true, 'origin named in the text', %s) AS id",
+                            (p["id"], (select or {}).get(n))).fetchone()["id"]
+            origins.append(str(h.execute("SELECT external_origin_id FROM lfhe.claim_lineage WHERE id=%s",
+                                         (lid,)).fetchone()["external_origin_id"]))
+    return origins, claims
+
+
+def test_same_name_without_explicit_reuse_does_not_collapse(pg, analyst):
+    (o1, o2), claims = accept_origin(pg, analyst, [(origin_claim(pg), None), (origin_claim(pg, n=6), None)])
+    assert o1 != o2                                                      # case 3: name alone ≠ same origin
+    assert summary(pg, claims)["distinct_groups_upper_bound"] == 2
+
+
+def test_same_name_with_explicit_human_selection_is_one_group(pg, analyst):
+    a, b = origin_claim(pg), origin_claim(pg, n=6)
+    (o1,), _ = accept_origin(pg, analyst, [(a, None)])
+    (o2,), _ = accept_origin(pg, analyst, [(b, None)], select={0: o1})
+    assert o1 == o2                                                      # case 1 / case 5 (L3 via explicit validation)
     assert summary(pg, [a, b])["distinct_groups_upper_bound"] == 1
+
+
+def test_same_name_different_urls_remain_distinct_same_url_is_reused(pg, analyst):
+    u1, u2 = "https://example.org/mod/statement-1", "https://example.org/mod/statement-2"
+    (o1, o2), _ = accept_origin(pg, analyst, [(origin_claim(pg, u1), u1), (origin_claim(pg, u2, 6), u2)])
+    assert o1 != o2                                                      # case 2
+    (o3,), _ = accept_origin(pg, analyst, [(origin_claim(pg, u1, 7), u1)])
+    assert o3 == o1                                                      # unambiguous: same canonical URL + name
+
+
+def test_ambiguous_identity_never_creates_false_dependence(pg, analyst):
+    u1 = "https://example.org/mod/statement-9"
+    (o1, o2), claims = accept_origin(pg, analyst, [(origin_claim(pg, u1), u1), (origin_claim(pg, n=6), None)])
+    assert o1 != o2 and summary(pg, claims)["distinct_groups_upper_bound"] == 2      # URL vs no URL: kept apart
+    other = grounded_claim(pg, "According to the Westland Air Staff, 2 jets landed.", "the Westland Air Staff, 2 jets landed")
+    run = lineage_run(pg, [other])
+    ingest_lineage(pg, run, [rel(other, origin="Westland Air Staff")])
+    [p] = proposals(pg, run)
+    with pg.as_user(analyst) as h, pytest.raises(psycopg.errors.CheckViolation, match="EXTERNAL_ORIGIN_INVALID"):
+        h.execute("SELECT lfhe.decide_lineage_proposal(%s, true, 'wrong origin chosen', %s)", (p["id"], o1))
+    u2 = "https://example.org/mod/statement-10"
+    c = origin_claim(pg, u2, 8)
+    run = lineage_run(pg, [c])
+    ingest_lineage(pg, run, [rel(c, origin=MOD, url=u2)])
+    [p] = proposals(pg, run)
+    with pg.as_user(analyst) as h, pytest.raises(psycopg.errors.CheckViolation, match="EXTERNAL_ORIGIN_IDENTITY_CONFLICT"):
+        h.execute("SELECT lfhe.decide_lineage_proposal(%s, true, 'conflicting URL', %s)", (p["id"], o1))

@@ -30,7 +30,7 @@ def cutoff():
 def make_claims(pg, spec: dict) -> dict:
     out = {}
     for local, c in spec.items():
-        extra = {k: c[k] for k in ("claim_type", "locations") if k in c}
+        extra = {k: c[k] for k in ("claim_type", "locations", "available_at") if k in c}
         out[local] = grounded_claim(pg, c["text"], c["exact"], language=c["language"], **extra)["claim_id"]
     return out
 
@@ -49,7 +49,8 @@ def m04_output(sc, ids):
                                "child_claim_id": ids[r["child"]], "relationship_type": r["type"],
                                "parent_claim_id": ids[r["parent_claim"]] if r.get("parent_claim") else None,
                                "parent_article_id": None, "external_origin_name": r.get("external_origin_name"),
-                               "external_origin_url": None, "confidence": "MODERATE", "explanation": "corpus"}
+                               "external_origin_url": r.get("external_origin_url"), "confidence": "MODERATE",
+                               "explanation": "corpus"}
                                for r in mo["claim_relationships"]],
                            "corroboration_recommendations": [{
                                "claim_id": ids[r["claim"]], "recommendation": r["recommendation"],
@@ -107,7 +108,8 @@ def test_phase3_acceptance_corpus(pg, make_user):
          "surface_difference_independence": 0, "independence_established_true": 0, "silent_status_finalisation": 0,
          "high_impact_changes_without_human": 0, "ai_structural_actions": 0, "unvalidated_ai_grouping_promoted": 0,
          "over_merge_in_validated_events": 0, "claims_lost_in_structural_ops": 0, "ancestry_breaks": 0,
-         "gs_leakage": 0, "model_runs": 0, "model_runs_incomplete_provenance": 0}
+         "gs_leakage": 0, "model_runs": 0, "model_runs_incomplete_provenance": 0,
+         "false_dependence_collapse": 0, "replay_context_leakage": 0}
     all_claims, all_runs, envelopes = set(), [], []
 
     # ---------------- M04 lineage scenarios ----------------
@@ -136,9 +138,15 @@ def test_phase3_acceptance_corpus(pg, make_user):
         unvalidated = summary_of(pg, ids.values())
         if sc["human"].get("accept_lineage"):
             with pg.as_user(analyst) as u:
-                for p in u.execute("SELECT id FROM lfhe.lineage_proposals WHERE model_run_id=%s ORDER BY proposal_index",
-                                   (out.final_run_id,)).fetchall():
-                    u.execute("SELECT lfhe.decide_lineage_proposal(%s, true, 'corpus: lineage evidenced in text')", (p["id"],))
+                chosen = {}          # explicit human identity decisions (CG3-03): origin name → origin id
+                for p in u.execute("SELECT id, external_origin_name FROM lfhe.lineage_proposals WHERE model_run_id=%s "
+                                   "ORDER BY proposal_index", (out.final_run_id,)).fetchall():
+                    select = chosen.get(p["external_origin_name"]) if sc["human"].get("explicit_origin_reuse") else None
+                    lid = u.execute("SELECT lfhe.decide_lineage_proposal(%s, true, 'corpus: lineage evidenced in text', %s) "
+                                    "AS id", (p["id"], select)).fetchone()["id"]
+                    if p["external_origin_name"]:
+                        chosen.setdefault(p["external_origin_name"], u.execute(
+                            "SELECT external_origin_id FROM lfhe.claim_lineage WHERE id=%s", (lid,)).fetchone()["external_origin_id"])
         dec = sc["human"].get("decide_recommendation")
         if dec:
             with pg.as_user(analyst) as u:
@@ -155,6 +163,7 @@ def test_phase3_acceptance_corpus(pg, make_user):
                                                          or validated["independence_established"])
         elif sc["human"].get("accept_lineage"):
             m["republication_inflation"] += max(0, validated["distinct_groups_upper_bound"] - len(truth))
+            m["false_dependence_collapse"] += max(0, len(truth) - validated["distinct_groups_upper_bound"])
         else:   # lineage not validated: nothing may be treated as independent confirmation
             m["republication_inflation"] += sum(statuses(pg, ids.values())[k] != before[k] for k in before
                                                 if not dec)
@@ -292,6 +301,10 @@ def test_phase3_acceptance_corpus(pg, make_user):
             "SELECT count(*) n FROM lfhe.event_relationships r JOIN lfhe.event_actions a ON a.id = r.action_id "
             "WHERE a.actor_user_id IS NULL").fetchone()["n"]
 
+        # ---------------- REPLAY as-of discipline (CG3-01) ----------------
+        m["replay"] = replay_scenario(pg, analyst, mc, all_runs, envelopes)
+        m["replay_context_leakage"] = m["replay"]["leaks"]
+
         # ---------------- provenance + GS isolation ----------------
         runs = x.execute("SELECT * FROM lfhe.model_runs WHERE id = ANY(%s::uuid[])", (all_runs,)).fetchall()
         m["model_runs"] = len(runs)
@@ -317,7 +330,8 @@ def test_phase3_acceptance_corpus(pg, make_user):
     for key in ("republication_inflation", "surface_difference_independence", "independence_established_true",
                 "silent_status_finalisation", "high_impact_changes_without_human", "ai_structural_actions",
                 "unvalidated_ai_grouping_promoted", "over_merge_in_validated_events", "claims_lost_in_structural_ops",
-                "ancestry_breaks", "gs_leakage", "model_runs_incomplete_provenance"):
+                "ancestry_breaks", "gs_leakage", "model_runs_incomplete_provenance", "false_dependence_collapse",
+                "replay_context_leakage"):
         assert m[key] == 0, (key, m)
     assert m["model_runs"] >= len(CORPUS["lineage_scenarios"]) + len(CORPUS["event_scenarios"])
 
@@ -326,3 +340,47 @@ def summary_of(pg, ids):
     with pg.worker() as c:
         return c.execute("SELECT lfhe.independence_summary(%s::uuid[]) AS s", (list(ids),)).fetchone()["s"]
 
+
+
+def replay_scenario(pg, analyst, mc, all_runs, envelopes) -> dict:
+    """R1: v1 from pre-cutoff evidence, v2 (+ CONFIRMED) and a lineage decision from post-cutoff
+    evidence; a REPLAY between them must see none of the later knowledge."""
+    from lfhe_orchestrator.event_inputs import build_m04_inputs, build_m05_inputs
+    from lineage_support import ingest_lineage, rel
+    sc = CORPUS["replay_scenario"]
+    cut = datetime.fromisoformat(sc["information_cutoff"])
+    ids = make_claims(pg, sc["claims"])
+
+    def payload(v):
+        return json.dumps({"title": v["title"], "description": v["description"], "event_type": "DEPLOYMENT",
+                           "locations": v["locations"], "claims": [{"claim_id": ids[k], "role": "SUPPORTS"} for k in v["claims"]]})
+    with pg.as_user(analyst) as u:
+        ev = str(u.execute("SELECT lfhe.create_event(%s::jsonb, 'corpus: replay v1') AS e", (payload(sc["v1"]),)).fetchone()["e"])
+        v1 = str(head(pg, ev)["head_version_id"])
+        u.execute("SELECT lfhe.update_event(%s, %s, %s::jsonb, 'corpus: later reporting')", (ev, v1, payload(sc["v2"])))
+        u.execute("SELECT lfhe.set_event_state(%s, 'ACTIVE', %s, 'corpus: confirmed on the later report')",
+                  (ev, sc["v2"]["then_state"]))
+    ll = sc["later_lineage"]
+    from claims_support import make_model_run       # the M04 run that saw post-cutoff evidence
+    run = make_model_run(pg, "M04_LINEAGE", [("claim", ids[k]) for k in ll["run_inputs"]],
+                         task_parameters={"report_mode": "LIVE", "information_cutoff": "2100-01-01T00:00:00+00:00"})
+    ingest_lineage(pg, run, [rel({"claim_id": ids[ll["child"]]}, "DERIVED_REPORTING", parent_claim={"claim_id": ids[ll["parent"]]})])
+    all_runs.append(run)
+    with pg.as_user(analyst) as u:
+        p = u.execute("SELECT id FROM lfhe.lineage_proposals WHERE model_run_id=%s", (run,)).fetchone()["id"]
+        u.execute("SELECT lfhe.decide_lineage_proposal(%s, true, 'corpus: traced by the later audit')", (p,))
+    with pg.worker() as c:
+        m05 = build_m05_inputs(c, [ids["probe"], ids["copy"]], report_mode="REPLAY", information_cutoff=cut)
+        m04 = build_m04_inputs(c, [ids["pre"], ids["copy"]], report_mode="REPLAY", information_cutoff=cut)
+        groups = c.execute("SELECT lfhe.independence_summary_asof(%s::uuid[], 'REPLAY', %s) s",
+                           ([ids["pre"], ids["copy"]], cut)).fetchone()["s"]
+    events = {i.content["event_id"]: i for i in m05.context if i.object_type == "event_version"}
+    blob = json.dumps([i.content for i in m05.context + m04.context], ensure_ascii=False)
+    leaks = sum(blob.count(x) for x in sc["later_only_markers"]) + blob.count(ids["post"])
+    leaks += int(ev not in events or events[ev].object_id != v1)                       # must see exactly v1
+    leaks += int(ev in events and events[ev].content["state"] != "ACTIVE")             # later CONFIRMED must not leak
+    leaks += sum(1 for i in m04.context + m05.context if i.object_type == "claim_lineage")
+    leaks += int(groups["distinct_groups_upper_bound"] != 2)                           # later lineage must not collapse
+    envelopes.append(blob)
+    return {"leaks": leaks, "event_version_seen": "v1" if ev in events and events[ev].object_id == v1 else "other",
+            "replay_independence": groups}

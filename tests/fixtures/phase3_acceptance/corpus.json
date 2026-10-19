@@ -121,7 +121,7 @@
   },
   {
    "id": "L3_COMMON_EXTERNAL_ORIGIN",
-   "purpose": "two outlets independently citing the same named external origin",
+   "purpose": "two outlets citing the same named external origin; the common identity is established by explicit human selection (CG3-03)",
    "claims": {
     "a": {
      "language": "en",
@@ -150,7 +150,8 @@
     "corroboration_recommendations": []
    },
    "human": {
-    "accept_lineage": true
+    "accept_lineage": true,
+    "explicit_origin_reuse": true
    },
    "truth": {
     "origin_groups": [
@@ -227,6 +228,52 @@
     "origin_groups": [
      [
       "h"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "L6_SAME_NAME_DIFFERENT_ORIGINS",
+   "purpose": "two different statements by an origin with the same name (different URLs); name equality must not collapse them (CG3-03)",
+   "claims": {
+    "a": {
+     "language": "en",
+     "text": "According to the Northland Air Staff, 3 radars moved. Statement: https://example.org/air-staff/statement-101",
+     "exact": "the Northland Air Staff, 3 radars moved"
+    },
+    "b": {
+     "language": "en",
+     "text": "According to the Northland Air Staff, 5 jets deployed. Statement: https://example.org/air-staff/statement-202",
+     "exact": "the Northland Air Staff, 5 jets deployed"
+    }
+   },
+   "model_output": {
+    "claim_relationships": [
+     {
+      "child": "a",
+      "type": "COMMON_ORIGINAL_SOURCE",
+      "external_origin_name": "Northland Air Staff",
+      "external_origin_url": "https://example.org/air-staff/statement-101"
+     },
+     {
+      "child": "b",
+      "type": "COMMON_ORIGINAL_SOURCE",
+      "external_origin_name": "Northland Air Staff",
+      "external_origin_url": "https://example.org/air-staff/statement-202"
+     }
+    ],
+    "corroboration_recommendations": []
+   },
+   "human": {
+    "accept_lineage": true
+   },
+   "truth": {
+    "origin_groups": [
+     [
+      "a"
+     ],
+     [
+      "b"
      ]
     ]
    }
@@ -465,5 +512,94 @@
     "exact": "denied that fighter jets were deployed to Base South"
    }
   }
+ },
+ "replay_scenario": {
+  "id": "R1_REPLAY_AS_OF",
+  "purpose": "historical REPLAY between v1 (pre-cutoff evidence) and v2 (post-cutoff evidence): no later lineage, field, membership, state or structural outcome may leak (CG3-01)",
+  "information_cutoff": "2026-03-01T00:00:00+00:00",
+  "claims": {
+   "pre": {
+    "language": "en",
+    "claim_type": "DEPLOYMENT",
+    "available_at": "2026-01-10T08:00:00+00:00",
+    "locations": [
+     "Fort Aster"
+    ],
+    "text": "Northland deployed 4 jets to Fort Aster.",
+    "exact": "Northland deployed 4 jets to Fort Aster"
+   },
+   "post": {
+    "language": "en",
+    "claim_type": "DEPLOYMENT",
+    "available_at": "2026-05-10T08:00:00+00:00",
+    "locations": [
+     "Port Brill"
+    ],
+    "text": "Northland moved the jets on to Port Brill.",
+    "exact": "Northland moved the jets on to Port Brill"
+   },
+   "copy": {
+    "language": "en",
+    "claim_type": "DEPLOYMENT",
+    "available_at": "2026-01-11T08:00:00+00:00",
+    "locations": [
+     "Fort Aster"
+    ],
+    "text": "A blog repeats: Northland deployed 4 jets to Fort Aster.",
+    "exact": "Northland deployed 4 jets to Fort Aster"
+   },
+   "trace": {
+    "language": "en",
+    "claim_type": "OTHER",
+    "available_at": "2026-05-11T08:00:00+00:00",
+    "text": "A later audit traces the blog post to the deployment report.",
+    "exact": "traces the blog post to the deployment report"
+   },
+   "probe": {
+    "language": "en",
+    "claim_type": "DEPLOYMENT",
+    "available_at": "2026-01-12T08:00:00+00:00",
+    "locations": [
+     "Fort Aster"
+    ],
+    "text": "Northland jets were seen at Fort Aster.",
+    "exact": "Northland jets were seen at Fort Aster"
+   }
+  },
+  "v1": {
+   "title": "Jets to Fort Aster",
+   "description": "Initial deployment report.",
+   "locations": [
+    "Fort Aster"
+   ],
+   "claims": [
+    "pre"
+   ]
+  },
+  "v2": {
+   "title": "LATER: jets relocated to Port Brill",
+   "description": "LATER-ONLY description.",
+   "locations": [
+    "Port Brill"
+   ],
+   "claims": [
+    "pre",
+    "post"
+   ],
+   "then_state": "CONFIRMED"
+  },
+  "later_lineage": {
+   "child": "copy",
+   "parent": "pre",
+   "run_inputs": [
+    "pre",
+    "copy",
+    "trace"
+   ]
+  },
+  "later_only_markers": [
+   "LATER",
+   "Port Brill"
+  ]
  }
 }

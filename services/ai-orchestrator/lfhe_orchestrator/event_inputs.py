@@ -6,8 +6,12 @@
 * Claims a human REJECTED or sent for reprocessing are not used.
 * Minimum necessary context: M04 gets the claims, their articles and the
   validated lineage among them; M05 gets the new claims, a bounded set of
-  candidate existing events (current head versions, open events only, with
-  only their cutoff-eligible claims) and validated lineage.
+  candidate existing events and validated lineage.
+* As-of discipline (CG3-01): lineage, independence groups and events enter an
+  envelope only through their knowledge bound for (report_mode, cutoff) —
+  lfhe.lineage_usable, lfhe.claim_independence_group_asof, lfhe.event_asof.
+  An event is represented by its latest cutoff-eligible version with the
+  state / structural outcome provable at the cutoff, never by a later head.
 * The same database state yields the same envelope.
 """
 from __future__ import annotations
@@ -53,7 +57,7 @@ def _claims(conn, claim_ids, report_mode, cutoff):
                st.effective_claim_text_normalised, st.effective_attribution, st.review_state, st.high_impact,
                st.high_impact_reasons,
                lfhe.claim_cutoff_eligible(c.id, %(mode)s, %(cutoff)s) AS eligible,
-               (lfhe.claim_independence_group(c.id)).independence_group AS independence_group,
+               (lfhe.claim_independence_group_asof(c.id, %(mode)s, %(cutoff)s)).independence_group AS independence_group,
                coalesce((SELECT jsonb_agg(m.mention_text_original ORDER BY m.mention_index)
                          FROM lfhe.entity_mentions m WHERE m.claim_id = c.id), '[]'::jsonb) AS mentions
         FROM lfhe.claims c JOIN lfhe.claim_state st ON st.claim_id = c.id
@@ -74,13 +78,15 @@ def _claims(conn, claim_ids, report_mode, cutoff):
     return usable, excluded
 
 
-def _lineage_context(conn, claim_ids) -> list[EnvelopeItem]:
+def _lineage_context(conn, claim_ids, report_mode, cutoff) -> list[EnvelopeItem]:
     rows = conn.execute(
         """SELECT l.id, l.child_claim_id, l.relationship_type::text AS relationship_type, l.parent_claim_id,
                   l.parent_article_id, o.name AS external_origin_name
            FROM lfhe.active_claim_lineage l LEFT JOIN lfhe.external_origins o ON o.id = l.external_origin_id
-           WHERE l.child_claim_id = ANY(%s::uuid[]) OR l.parent_claim_id = ANY(%s::uuid[]) ORDER BY l.id""",
-        ([str(i) for i in claim_ids],) * 2).fetchall()
+           WHERE (l.child_claim_id = ANY(%(ids)s::uuid[]) OR l.parent_claim_id = ANY(%(ids)s::uuid[]))
+             AND lfhe.lineage_usable(l.id, %(mode)s, %(cutoff)s)
+           ORDER BY l.id""",
+        {"ids": [str(i) for i in claim_ids], "mode": report_mode, "cutoff": cutoff}).fetchall()
     return [EnvelopeItem("claim_lineage", str(r["id"]), {
         "child_claim_id": str(r["child_claim_id"]), "relationship_type": r["relationship_type"],
         "parent_claim_id": str(r["parent_claim_id"]) if r["parent_claim_id"] else None,
@@ -131,50 +137,56 @@ def build_m04_inputs(conn, claim_ids, *, report_mode: str, information_cutoff: d
             "high_impact_context": {str(r["id"]): {"high_impact": bool(r["high_impact"]),
                                                    "high_impact_reasons": list(r["high_impact_reasons"] or [])}
                                     for r in rows}}
-    return AnalysisInputs(task, inputs, _lineage_context(conn, [r["id"] for r in rows]), excluded)
+    return AnalysisInputs(task, inputs, _lineage_context(conn, [r["id"] for r in rows], report_mode, information_cutoff),
+                          excluded)
 
 
 def candidate_events(conn, rows, report_mode, cutoff, limit=MAX_CONTEXT_EVENTS) -> list[EnvelopeItem]:
-    """Open events whose current version shares an event type, a location or an
-    entity mention with the new claims (deterministic, newest first, bounded)."""
+    """Events open AS OF the cutoff whose as-of version shares an event type, a
+    location or an entity mention with the new claims (deterministic, newest
+    as-of version first, bounded). Fields, membership and state come from the
+    as-of representation (lfhe.event_asof); later versions never leak."""
     types = sorted({r["claim_type"] for r in rows})
     locations = sorted({l for r in rows for l in (r["location_mentions"] or [])})
     mentions = sorted({m for r in rows for m in (r["mentions"] or [])})
-    heads = conn.execute(
-        """
-        SELECT h.event_id, h.head_version_id, h.head_version_no, h.head_content_hash, h.state, v.title, v.description,
-               v.event_type::text AS event_type, v.event_date_start, v.event_date_end,
-               v.event_date_confidence::text AS event_date_confidence, v.locations, v.created_at
-        FROM lfhe.event_heads h JOIN lfhe.event_versions v ON v.id = h.head_version_id
-        WHERE h.state IS DISTINCT FROM 'REJECTED' AND h.successor_event_id IS NULL
-          AND (v.event_type::text = ANY(%(types)s) OR v.locations && %(locs)s::text[]
+    match = """(v.event_type::text = ANY(%(types)s) OR v.locations && %(locs)s::text[]
                OR EXISTS (SELECT 1 FROM lfhe.event_claims ec JOIN lfhe.entity_mentions m ON m.claim_id = ec.claim_id
                           WHERE ec.event_version_id = v.id AND m.mention_normalised = ANY(
-                            SELECT lfhe.normalise_entity_name(x) FROM unnest(%(mentions)s::text[]) x)))
-        ORDER BY v.created_at DESC, h.event_id LIMIT %(limit)s
-        """, {"types": types, "locs": locations, "mentions": mentions, "limit": limit}).fetchall()
+                            SELECT lfhe.normalise_entity_name(x) FROM unnest(%(mentions)s::text[]) x)))"""
+    asof = conn.execute(
+        f"""
+        WITH pre AS (            -- cheap superset: some version of the event matches
+          SELECT DISTINCT v.event_id FROM lfhe.event_versions v WHERE {match}
+        )
+        SELECT a.event_id, a.version_id, a.state::text AS state, v.version_no, v.content_hash, v.title, v.description,
+               v.event_type::text AS event_type, v.event_date_start, v.event_date_end,
+               v.event_date_confidence::text AS event_date_confidence, v.locations, v.created_at
+        FROM pre CROSS JOIN LATERAL lfhe.event_asof(pre.event_id, %(mode)s, %(cutoff)s) a
+        JOIN lfhe.event_versions v ON v.id = a.version_id
+        WHERE a.is_open AND {match}
+        ORDER BY v.created_at DESC, a.event_id LIMIT %(limit)s
+        """, {"types": types, "locs": locations, "mentions": mentions, "limit": limit,
+              "mode": report_mode, "cutoff": cutoff}).fetchall()
     items = []
-    for h in sorted(heads, key=lambda x: str(x["event_id"])):
+    for h in sorted(asof, key=lambda x: str(x["event_id"])):
         claims = conn.execute(
             """SELECT ec.claim_id, ec.role::text AS role, st.effective_claim_text_normalised, c.event_date,
                       lfhe.claim_cutoff_eligible(c.id, %s, %s) AS eligible
                FROM lfhe.event_claims ec JOIN lfhe.claims c ON c.id = ec.claim_id
                JOIN lfhe.claim_state st ON st.claim_id = c.id
                WHERE ec.event_version_id = %s ORDER BY ec.claim_id""",
-            (report_mode, cutoff, h["head_version_id"])).fetchall()
-        eligible = [c for c in claims if c["eligible"]]
-        if not eligible:
-            continue        # an event known only through post-cutoff evidence is not supplied
-        items.append(EnvelopeItem("event_version", str(h["head_version_id"]), {
-            "event_id": str(h["event_id"]), "version_id": str(h["head_version_id"]), "version_no": h["head_version_no"],
-            "content_hash": h["head_content_hash"], "state": h["state"], "title": h["title"],
+            (report_mode, cutoff, h["version_id"])).fetchall()
+        if not claims or not all(c["eligible"] for c in claims):
+            continue        # defensive: an as-of version is eligible by construction
+        items.append(EnvelopeItem("event_version", str(h["version_id"]), {
+            "event_id": str(h["event_id"]), "version_id": str(h["version_id"]), "version_no": h["version_no"],
+            "content_hash": h["content_hash"], "state": h["state"], "title": h["title"],
             "description": h["description"], "event_type": h["event_type"], "event_date_start": h["event_date_start"],
             "event_date_end": h["event_date_end"], "event_date_confidence": h["event_date_confidence"],
             "locations": list(h["locations"] or []),
             "claims": [{"claim_id": str(c["claim_id"]), "role": c["role"],
                         "claim_text_normalised": c["effective_claim_text_normalised"], "event_date": c["event_date"]}
-                       for c in eligible],
-            "claims_withheld_by_cutoff": len(claims) - len(eligible)}))
+                       for c in claims]}))
     return items
 
 
@@ -184,6 +196,6 @@ def build_m05_inputs(conn, claim_ids, *, report_mode: str, information_cutoff: d
     if not rows:
         raise InputBuildError("NO_ELIGIBLE_CLAIMS", f"excluded: {excluded}")
     context = candidate_events(conn, rows, report_mode, information_cutoff)
-    context += _lineage_context(conn, [r["id"] for r in rows])
+    context += _lineage_context(conn, [r["id"] for r in rows], report_mode, information_cutoff)
     task = {"report_mode": report_mode, "information_cutoff": information_cutoff.isoformat()}
     return AnalysisInputs(task, [_claim_item(r, for_events=True) for r in rows], context, excluded)

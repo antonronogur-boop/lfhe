@@ -27,7 +27,7 @@ def sha(text: str) -> str:
 
 
 def make_text_snapshot(pg, text: str, *, language: str | None = "en", retention: str = "FULL",
-                       title: str = "Synthetic article") -> dict:
+                       title: str = "Synthetic article", available_at: str | None = None) -> dict:
     """Source → article → snapshot → original-language text representation,
     written through the real worker path (lfhe.record_snapshot)."""
     text = unicodedata.normalize("NFC", text)
@@ -48,7 +48,9 @@ def make_text_snapshot(pg, text: str, *, language: str | None = "en", retention:
         "raw_storage_key": f"sha256/{text_hash}" if retention == "FULL" else None,
         "retention_mode_applied": retention, "content_identity_sha256": text_hash,
         "title_original": title, "language": language, "language_method": "html_lang" if language else "none",
-        "public_availability_basis": "UNKNOWN", "public_availability_confidence": "UNKNOWN",
+        "public_availability_basis": "SOURCE_PUBLISHED_TIMESTAMP" if available_at else "UNKNOWN",
+        "public_availability_confidence": "HIGH" if available_at else "UNKNOWN",
+        "public_availability_datetime": available_at,
         "system_retrieval_datetime": now, "date_status": "DATE_UNCERTAIN", "metadata": {},
         "source_state": state, "source_state_sha256": canonical_sha256(state),
         "text": None if retention == "METADATA_ONLY" else {
