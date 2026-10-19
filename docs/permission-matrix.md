@@ -42,6 +42,23 @@ analytical review); the DEV smoke test checks that ADMIN's review attempt is ref
 Claim, entity and taxonomy tables are readable by humans holding `CLAIM_READ` (RLS) and by
 `lfhe_worker`; nobody writes them directly.
 
+## Phase 3 functions (migrations `…1800_lineage.sql`, `…1900_events.sql`, `…2100`, `…2200`)
+
+| Function | Caller | Permission |
+| --- | --- | --- |
+| `decide_lineage_proposal`, `record_claim_lineage`, `retract_claim_lineage`, `decide_corroboration_recommendation` | human (HUMAN_ONLY) | `CLAIM_REVIEW` |
+| `create_event`, `update_event`, `set_event_state`, `reject_event`, `review_event_version`, `merge_events`, `split_event`, `supersede_event`, `keep_events_separate` | human (HUMAN_ONLY) | `EVENT_ACTION` |
+| `ingest_lineage`, `ingest_event_proposals` | `lfhe_worker` only | — |
+| `claim_cutoff_eligible`, `claim_independence_group`, `independence_summary` | `authenticated`, `lfhe_worker` (invoker rights → RLS applies) | `CLAIM_READ` for the underlying rows |
+| internal writers (`write_event_version`, `insert_claim_lineage`, `resolve_external_origin`, `event_proposal_problems`, …) | no grant (called only inside the functions above) | — |
+
+No new permissions were introduced: lineage / independence / claim-status decisions use
+`CLAIM_REVIEW`; event decisions use `EVENT_ACTION` (both ANALYST). ADMIN, VIEWER, anon,
+`service_role` and `lfhe_worker` are refused (tests + DEV smoke P3 checks). A worker may
+write only the initial `CANDIDATE` state of an AI-created event (CHECK on
+`event_state_history`). All Phase 3 tables are readable with `CLAIM_READ` (RLS) and
+written by nobody directly (`block_mutation` makes them append-only/immutable).
+
 ## Non-human principals
 - `lfhe_registrar` (deployment pipeline): may only register prompt artifacts
   and model configurations (`register_prompt_version`,

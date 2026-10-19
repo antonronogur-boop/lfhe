@@ -55,6 +55,27 @@
 | `ENTITY_CREATED`, `ENTITY_ALIAS_CREATED`, `ENTITY_MENTION_LINKED`, `ENTITY_RELATIONSHIP_CREATED` (P2 impl.) | entity tables |
 | `TAXONOMY_ITEM_CREATED`, `TAXONOMY_ASSIGNMENT_CREATED`, `CLAIM_CLASSIFICATION_RECORDED` (P2 impl.) | taxonomy tables (the v1.2 seed is inserted before the trigger exists) |
 
+
+## Mandatory audited transitions — Phase 3
+
+| Event | Trigger point |
+| --- | --- |
+| `LINEAGE_INGESTION_RECORDED` | insert into `lineage_ingestion_results` (one per M04 model run) |
+| `LINEAGE_RECOMMENDATION_CREATED` | insert into `lineage_proposals` / `corroboration_recommendations` |
+| `LINEAGE_PROPOSAL_DECIDED` | insert into `lineage_proposal_decisions` |
+| `LINEAGE_VALIDATED` + `INDEPENDENCE_GROUP_CHANGED` | insert into `claim_lineage` |
+| `CLAIM_LINEAGE_RETRACTED` + `INDEPENDENCE_GROUP_CHANGED` | insert into `claim_lineage_retractions` |
+| `EXTERNAL_ORIGIN_CREATED` | insert into `external_origins` |
+| `CORROBORATION_RECOMMENDATION_DECIDED` | insert into `corroboration_recommendation_decisions` (the status change itself is `CLAIM_STATUS_CHANGED`, HUMAN) |
+| `EVENT_CREATED` | insert into `events` |
+| `EVENT_VERSION_CREATED` (version 1) / `EVENT_UPDATED` (later versions) | insert into `event_versions` |
+| `EVENT_STATE_CHANGED`; `EVENT_MANUALLY_PROMOTED` when a human moves an event out of `CANDIDATE` | `event_state_history` / `set_event_state` |
+| `EVENT_RELATIONSHIP_CREATED` | insert into `event_relationships` |
+| `EVENT_PROPOSAL_RECORDED` | insert into `event_proposals` |
+| `EVENT_INGESTION_RECORDED` | insert into `event_ingestion_results` (one per M05 model run) |
+| `EVENT_VERSION_REVIEWED` | insert into `event_version_reviews` |
+| `EVENT_MERGED`, `EVENT_SPLIT`, `EVENT_SUPERSEDED`, `EVENT_KEEP_SEPARATE_DECISION`, `EVENT_REJECTED`, `EVENT_ACTION_RECORDED` (CREATE / UPDATE) | insert into `event_actions` (by action) |
+
 Text and prompt contents are not copied into the audit log: the audit entry
 records their SHA-256 (the rows themselves are immutable and hash-checked).
 

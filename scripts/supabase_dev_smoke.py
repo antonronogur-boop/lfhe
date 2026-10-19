@@ -157,6 +157,42 @@ def main() -> int:
     r = rest.rpc("ingest_claim_extraction", {"p": {}}, admin)
     check("P2: humans cannot call the worker ingestion function", r.status_code >= 400, f"HTTP {r.status_code}")
 
+    # 4c. Phase 3 lineage & events (P3): schema / RLS / RBAC surface only; no data is created
+    p3_tables = ["external_origins", "lineage_ingestion_results", "lineage_proposals", "corroboration_recommendations",
+                 "claim_lineage", "claim_lineage_retractions", "events", "event_actions", "event_versions",
+                 "event_claims", "event_state_history", "event_relationships", "event_proposals",
+                 "event_version_reviews", "event_ingestion_results", "event_claim_redistributions"]
+    rls = {r["relname"]: r["relrowsecurity"] for r in db.execute(
+        "SELECT c.relname, c.relrowsecurity FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace "
+        "WHERE n.nspname = 'lfhe' AND c.relname = ANY(%s)", (p3_tables,))}
+    check("P3: lineage/event tables present with RLS", len(rls) == len(p3_tables) and all(rls.values()),
+          f"{sum(rls.values())}/{len(p3_tables)}")
+    rules = db.execute("SELECT count(*) AS n FROM lfhe.claim_status_auto_rules").fetchone()["n"]
+    check("P3: claim_status_auto_rules empty (no automatic status rule)", rules == 0, f"{rules} rule(s)")
+    loose = db.execute(
+        "SELECT count(*) AS n FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace WHERE n.nspname = 'lfhe' "
+        "AND p.prosecdef AND NOT coalesce(p.proconfig @> ARRAY['search_path=pg_catalog, pg_temp'], false)").fetchone()["n"]
+    check("P3: every SECURITY DEFINER pins search_path", loose == 0, f"{loose} function(s)")
+    r = rest.select("events", viewer)
+    check("P3: viewer can read events (CLAIM_READ)", r.status_code == 200, f"HTTP {r.status_code}")
+    r = rest.select("events", None)
+    check("P3: anon cannot read events", r.status_code in (401, 403, 404) or r.json() == [], f"HTTP {r.status_code}")
+    zero = "00000000-0000-4000-8000-000000000000"
+    merge = {"p_target": zero, "p_sources": [zero], "p_expected_heads": {}, "p_reason": "smoke test probe"}
+    for who, token in (("viewer", viewer), ("ADMIN", admin)):
+        r = rest.rpc("merge_events", merge, token)
+        check(f"P3: {who} cannot MERGE (HUMAN_ONLY + EVENT_ACTION)",
+              r.status_code >= 400 and "EVENT_ACTION" in r.text, f"HTTP {r.status_code}")
+        r = rest.rpc("decide_lineage_proposal", {"p_proposal_id": zero, "p_accept": True, "p_reason": "smoke probe"}, token)
+        check(f"P3: {who} cannot validate lineage (CLAIM_REVIEW)",
+              r.status_code >= 400 and "CLAIM_REVIEW" in r.text, f"HTTP {r.status_code}")
+    if service_key:
+        r = rest.rpc("merge_events", merge, service_key)
+        check("P3: service_role cannot MERGE", r.status_code >= 400, f"HTTP {r.status_code}")
+    bad = [fn for fn in ("ingest_lineage", "ingest_event_proposals")
+           if rest.rpc(fn, {"p": {}}, admin).status_code < 400]
+    check("P3: humans cannot call the M04/M05 ingestion functions", not bad, ", ".join(bad))
+
     # 5. source administration end-to-end
     r = rest.rpc("create_source", payload, admin)
     ok = check("source admin: admin creates source", r.status_code == 200, f"HTTP {r.status_code} {r.text}")

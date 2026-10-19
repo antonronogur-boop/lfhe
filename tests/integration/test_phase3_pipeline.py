@@ -165,7 +165,7 @@ def test_event_pipeline_creates_candidate_then_updates_with_context(pg, p3):
     assert set(version_claims(pg, head(pg, event)["head_version_id"])) == {a["claim_id"], b["claim_id"]}
 
 
-def test_m05_context_withholds_rejected_merged_and_post_cutoff_events(pg, p3, make_user):
+def test_m05_context_withholds_rejected_events(pg, p3, make_user):
     analyst = make_user("ANALYST")
     a = grounded_claim(pg, T1, "4 tanker aircraft arrived at Base North")
     mc = model_configuration(pg)
