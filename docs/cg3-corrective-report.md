@@ -31,7 +31,7 @@ A PO 2026-10-19-i végső döntése:
 | Javító kód + migrációk + tesztek | `d3e1302` | **run 39274247863: secret-scan ✔, python-tests ✔, web ✔** |
 | Dokumentáció (javító kör) | `2b40878` / `4ad7b02` | run 39275062633 ✔ |
 | **Végső javítás:** 2600 migráció + tesztek | `128f1a7` | **run 39279160435: secret-scan ✔, python-tests ✔, web ✔** |
-| Végső dokumentáció | lásd FINAL DOCUMENTATION COMMIT | |
+| Végső dokumentáció | `8b7e6ed` | |
 
 ## CG3-01 — REPLAY / CUTOFF AS-OF CONTEXT LEAKAGE — RESOLVED
 
@@ -246,4 +246,4 @@ Várt eredmény:
 
 ## FINAL DOCUMENTATION COMMIT
 
-Javító kör: `2b40878` / `4ad7b02`. Végső javítás dokumentációja: a commit után kerül ide.
+Javító kör: `2b40878` / `4ad7b02`. Végső javítás dokumentációja: `8b7e6ed` (kód és migrációk azonosak a CI-tesztelt `128f1a7`-tel). Ezt a sort a következő commit rögzíti.

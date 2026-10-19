@@ -23,7 +23,7 @@
 | CG3 javító kör: 2300–2500 migráció + tesztek, CI-tesztelt (CI run 39274247863: secret-scan, python-tests, web — mind success) | `d3e1302` |
 | Végső javítás: 2600 migráció + tesztek, CI-tesztelt (CI run 39279160435: mind success) | `128f1a7` |
 | Javító kör dokumentációja | `2b40878` / `4ad7b02` |
-| Végső jelentés és dokumentáció | lásd FINAL DOCUMENTATION COMMIT |
+| Végső jelentés és dokumentáció | `8b7e6ed` (FINAL DOCUMENTATION COMMIT) |
 
 DEV Supabase: a Phase 3 migrációk (1800–2600) még nincsenek alkalmazva a DEV-en. A pontos parancsok: `docs/cg3-corrective-report.md` (DEV MIGRATION + SMOKE) és OPEN ITEMS.
 
@@ -419,4 +419,4 @@ Nincs. Magasabb rendű specifikációval ütköző anyagi konfliktust nem talál
 
 ## FINAL DOCUMENTATION COMMIT
 
-Az első jelentés: `6092849`. A javító kör jelentése: `2b40878` / `4ad7b02`. A végső jelentés commitja a commit után kerül ide.
+Az első jelentés: `6092849`. A javító kör jelentése: `2b40878` / `4ad7b02`. A végső jelentés: `8b7e6ed` (kód és migrációk azonosak a CI-tesztelt `128f1a7`-tel). Ezt a sort a következő commit rögzíti.
