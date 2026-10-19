@@ -2,10 +2,10 @@
 
 | Field | Value |
 | --- | --- |
-| Current phase | **PHASE 3 — Lineage & Events: ACCEPTED AND CLOSED (2026-10-19).** Phase 1 and Phase 2 closed. Phase 4 NOT authorised |
+| Current phase | **Phase 4 — Relevance, Assessment & Challenge: AUTHORISED (2026-10-19), in implementation.** Phase 3 ACCEPTED AND CLOSED (2026-10-19) |
 | Earlier gate | **Control Gate 2 APPROVED** by the PO on 2026-10-19 (docs/control-gate-2-report.md): DEV 18/18 migrations + smoke 22/22 PASS, K-05 CLOSED and ACCEPTED (6/8 PASS; K05-03, K05-04 BLOCKED_BY_ROBOTS accepted), SD-01…SD-12 approved. Commits: implementation/CI baseline `1b31ed5`; K-05 run on `613f61a`; final documentation commit `40c00ff` |
 | Current gate | **CONTROL GATE 3 — APPROVED** by the PO on 2026-10-19 (docs/specs/PO_Decision_2026-10-19_Control_Gate_3.md): CG3-01 RESOLVED; CG3-02, CG3-03 RESOLVED / ACCEPTED; knowledge-bound retraction correction RESOLVED; SD3-01…SD3-12 APPROVED; SD3-13 replaced by the approved knowledge-bound retraction semantics (migration 2600); acceptance criteria 14/14, Phase 3 tests 63/63, Phase 1+2 regression 369/369, web 21/21; DEV 27/27 migrations, smoke 32/32 PASS, audit chain verified (108 entries). Optional service_role smoke check not run — NON-BLOCKING. Final code commit `128f1a7`; DEV evidence commit `106ecd9` |
-| Next authorised action | **None.** Phase 4 is NOT authorised. Under SD-12 Phase 4 may begin only after its authoritative phase-specific baseline is versioned under docs/specs/ and explicitly authorised by the Product Owner |
+| Next authorised action | Phase 4 implementation P4-00…P4-09 per docs/specs/PO_Decision_2026-10-19_Authorise_Phase4.md, then the CG4 evidence report and STOP. Phase 5 NOT authorised |
 
 ## Phase 3 progress (Addendum v1.0)
 
