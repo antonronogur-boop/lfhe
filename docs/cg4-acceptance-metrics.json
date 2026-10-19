@@ -1,0 +1,158 @@
+{
+  "metrics": {
+    "scenario_expectation_mismatches": 0,
+    "below_threshold_hidden": 0,
+    "manual_promotion_failures": 0,
+    "recommended_without_concrete_or_not_established_rationale": 0,
+    "hindsight_leakage": 0,
+    "unsupported_factual_statements_persisted": 0,
+    "statements_without_provenance": 0,
+    "category_violations": 0,
+    "unlabelled_contradiction_removal": 0,
+    "republication_inflation": 0,
+    "unsupported_causal_accepted_as_fact": 0,
+    "m07_final_confidence_set": 0,
+    "m08_modified_m07": 0,
+    "non_human_final_approvals": 0,
+    "hash_mismatch_accepted": 0,
+    "assessment_version_mutations": 0,
+    "gs_leakage": 0,
+    "traceability_gaps": 0,
+    "relevance_scenarios": 5,
+    "assessment_scenarios": 13,
+    "assessments_recorded": 3,
+    "human_approvals": 2,
+    "model_runs": 27
+  },
+  "scenarios": [
+    {
+      "id": "R01",
+      "expected": "RELEVANCE_RECORDED",
+      "got": [
+        "RELEVANCE_RECORDED"
+      ]
+    },
+    {
+      "id": "R02",
+      "expected": "RELEVANCE_RECORDED",
+      "got": [
+        "RELEVANCE_RECORDED"
+      ]
+    },
+    {
+      "id": "R03",
+      "expected": "OUTPUT_REJECTED:HU_NATO_RATIONALE_GENERIC",
+      "got": [
+        "OUTPUT_REJECTED:HU_NATO_RATIONALE_GENERIC"
+      ]
+    },
+    {
+      "id": "R04",
+      "expected": "SCHEMA_VALIDATION_FAILED",
+      "got": [
+        "SCHEMA_VALIDATION_FAILED"
+      ]
+    },
+    {
+      "id": "R05",
+      "expected": "OUTPUT_REJECTED:HU_NATO_NOT_ESTABLISHED_STATEMENT_REQUIRED",
+      "got": [
+        "OUTPUT_REJECTED:HU_NATO_NOT_ESTABLISHED_STATEMENT_REQUIRED"
+      ]
+    },
+    {
+      "id": "A01",
+      "expected": "ASSESSMENT_RECORDED",
+      "got": [
+        "ASSESSMENT_RECORDED"
+      ]
+    },
+    {
+      "id": "A02",
+      "expected": "ASSESSMENT_RECORDED",
+      "got": [
+        "ASSESSMENT_RECORDED"
+      ]
+    },
+    {
+      "id": "A03",
+      "expected": "OUTPUT_REJECTED:FACTUAL_STATEMENT_WITHOUT_EVIDENCE",
+      "got": [
+        "OUTPUT_REJECTED:FACTUAL_STATEMENT_WITHOUT_EVIDENCE"
+      ]
+    },
+    {
+      "id": "A04",
+      "expected": "OUTPUT_REJECTED:EVIDENCE_NOT_SUPPLIED",
+      "got": [
+        "OUTPUT_REJECTED:EVIDENCE_NOT_SUPPLIED"
+      ]
+    },
+    {
+      "id": "A05",
+      "expected": "OUTPUT_REJECTED:UNSUPPORTED_CAUSALITY_AS_FACT",
+      "got": [
+        "OUTPUT_REJECTED:ATTRIBUTION_MISSING",
+        "OUTPUT_REJECTED:UNSUPPORTED_CAUSALITY_AS_FACT"
+      ]
+    },
+    {
+      "id": "A06",
+      "expected": "OUTPUT_REJECTED:NEGATIVE_EVIDENCE_FROM_SILENCE",
+      "got": [
+        "OUTPUT_REJECTED:ATTRIBUTION_MISSING",
+        "OUTPUT_REJECTED:NEGATIVE_EVIDENCE_FROM_SILENCE"
+      ]
+    },
+    {
+      "id": "A07",
+      "expected": "OUTPUT_REJECTED:CONTRADICTION_OMITTED",
+      "got": [
+        "OUTPUT_REJECTED:CONTRADICTION_OMITTED"
+      ]
+    },
+    {
+      "id": "A08",
+      "expected": "OUTPUT_REJECTED:CONFIDENCE_INFLATION_SINGLE_LINEAGE",
+      "got": [
+        "OUTPUT_REJECTED:CONFIDENCE_INFLATION_SINGLE_LINEAGE"
+      ]
+    },
+    {
+      "id": "A09",
+      "expected": "OUTPUT_REJECTED:ATTRIBUTION_CONTRADICTS_WORKFLOW_STATE",
+      "got": [
+        "OUTPUT_REJECTED:ATTRIBUTION_CONTRADICTS_WORKFLOW_STATE",
+        "OUTPUT_REJECTED:ATTRIBUTION_MISSING"
+      ]
+    },
+    {
+      "id": "A10",
+      "expected": "SCHEMA_VALIDATION_FAILED",
+      "got": [
+        "SCHEMA_VALIDATION_FAILED"
+      ]
+    },
+    {
+      "id": "A11",
+      "expected": "OUTPUT_REJECTED:OPERATIONAL_RECOMMENDATION_PROHIBITED",
+      "got": [
+        "OUTPUT_REJECTED:OPERATIONAL_RECOMMENDATION_PROHIBITED"
+      ]
+    },
+    {
+      "id": "A12",
+      "expected": "OUTPUT_REJECTED:JUDGMENT_WITHOUT_PREMISES",
+      "got": [
+        "OUTPUT_REJECTED:JUDGMENT_WITHOUT_PREMISES"
+      ]
+    },
+    {
+      "id": "A13",
+      "expected": "ASSESSMENT_RECORDED",
+      "got": [
+        "ASSESSMENT_RECORDED"
+      ]
+    }
+  ]
+}

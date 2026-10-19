@@ -62,3 +62,18 @@ operator/Product Owner; record the JSON output of step 6 in PROJECT_STATUS.
   present with RLS, `claim_status_auto_rules` empty, every SECURITY DEFINER pins `search_path`,
   viewer can read events / anon cannot, viewer and ADMIN cannot MERGE or validate lineage,
   service_role cannot MERGE, humans cannot call the M04/M05 ingestion functions.
+
+## Phase 4 additions
+
+* Migrations `20261011002700` … `20261011003300` (7 files: baselines / reference contexts, relevance,
+  assessments, challenges, analytical review, trends / indicators, phase 4 jobs) are applied with the
+  same `scripts/apply_migrations.py` command (34 migrations in total). Already applied files are
+  skipped by checksum.
+* The smoke script adds 10 Phase 4 checks (11 with `LFHE_SMOKE_SERVICE_ROLE_KEY`): Phase 4 tables
+  present with RLS, `final_analytic_confidence` has exactly one owner (DC-01), likelihood vocabulary
+  empty (CR4-01), viewer can read assessment versions / anon cannot, viewer and ADMIN cannot APPROVE
+  an assessment or dispose of an M08 flag, service_role cannot APPROVE, humans cannot call the
+  M06/M07/M08 ingestion functions. Expected result without the service-role key: 42/42 PASS. The
+  smoke test creates no Phase 4 data.
+* Worker configuration for Phase 4 jobs: `LFHE_M06_MODEL_CONFIGURATION_ID`,
+  `LFHE_M07_MODEL_CONFIGURATION_ID`, `LFHE_M08_MODEL_CONFIGURATION_ID` (registered rows, low-variance).

@@ -72,6 +72,29 @@ write only the initial `CANDIDATE` state of an AI-created event (CHECK on
 `event_state_history`). All Phase 3 tables are readable with `CLAIM_READ` (RLS) and
 written by nobody directly (`block_mutation` makes them append-only/immutable).
 
+## Phase 4 functions (migrations `…2700` … `…3300`)
+
+| Function | Caller | Permission |
+| --- | --- | --- |
+| `create_reference_context_version`, `decide_reference_context_version`, `create_baseline_version`, `decide_baseline_version` | human (HUMAN_ONLY) | `ASSESSMENT_REVIEW` |
+| `decide_relevance` (VALIDATE / OVERRIDE), `promote_event_version` (PROMOTE / REQUEST_ASSESSMENT) | human (HUMAN_ONLY) | `ASSESSMENT_REVIEW` |
+| `dispose_challenge_flag` | human (HUMAN_ONLY) | `ASSESSMENT_REVIEW` |
+| `review_assessment` — REJECT / ESCALATE / REQUEST_REPROCESSING | human (HUMAN_ONLY) | `ASSESSMENT_REVIEW` |
+| `review_assessment` — APPROVE; `modify_and_approve_assessment` | human (HUMAN_ONLY) | `ASSESSMENT_REVIEW` **and** `FINAL_CONFIDENCE_SET` (ANALYST only) |
+| `create_trend_version`, `create_indicator_version` | human (HUMAN_ONLY) | `ASSESSMENT_REVIEW` |
+| `ingest_relevance`, `ingest_assessment`, `ingest_challenge`, `m07_context`, as-of helpers (`baseline_asof`, `reference_context_asof`, `claim_status_asof`, `assessment_version_approved_asof`, `trend_asof`, `trend_version_usable`, `indicator_version_usable`, `p4_object_eligible`, …) | `lfhe_worker` only | — |
+| internal writers / checks (`write_assessment_version`, `set_assessment_state`, `assessment_statement_problems`, `require_reviewable_version`, `supersede_previous_approvals`, `p4_refs`, …) | no grant (called only inside the functions above) | — |
+
+No new permissions were introduced; the Phase 4 permissions seeded in Phase 1 are used:
+`ASSESSMENT_REVIEW` (ANALYST, REVIEWER) and `FINAL_CONFIDENCE_SET` (ANALYST). A REVIEWER can
+reject, escalate or request reprocessing and dispose of M08 flags, but cannot set final
+analytic confidence. ADMIN, SECURITY_REVIEWER, RELEASE_AUTHORITY, VIEWER, anon,
+`service_role` and `lfhe_worker` are refused by every Phase 4 HUMAN_ONLY function
+(`tests/security/test_p4_rbac.py`, DEV smoke P4 checks). All Phase 4 tables are readable with
+`CLAIM_READ` (RLS) and by `lfhe_worker`, written by nobody directly, and immutable
+(`block_mutation`); `assessment_state_history` is append-only and the worker may write only
+NULL→DRAFT, DRAFT→CHALLENGED and CHALLENGED→IN_REVIEW.
+
 ## Non-human principals
 - `lfhe_registrar` (deployment pipeline): may only register prompt artifacts
   and model configurations (`register_prompt_version`,

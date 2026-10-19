@@ -2,10 +2,25 @@
 
 | Field | Value |
 | --- | --- |
-| Current phase | **Phase 4 — Relevance, Assessment & Challenge: AUTHORISED (2026-10-19), in implementation.** Phase 3 ACCEPTED AND CLOSED (2026-10-19) |
+| Current phase | **Phase 4 — Relevance, Assessment & Challenge: IMPLEMENTED (P4-00…P4-09), awaiting Control Gate 4.** Phase 3 ACCEPTED AND CLOSED (2026-10-19) |
 | Earlier gate | **Control Gate 2 APPROVED** by the PO on 2026-10-19 (docs/control-gate-2-report.md): DEV 18/18 migrations + smoke 22/22 PASS, K-05 CLOSED and ACCEPTED (6/8 PASS; K05-03, K05-04 BLOCKED_BY_ROBOTS accepted), SD-01…SD-12 approved. Commits: implementation/CI baseline `1b31ed5`; K-05 run on `613f61a`; final documentation commit `40c00ff` |
 | Current gate | **CONTROL GATE 3 — APPROVED** by the PO on 2026-10-19 (docs/specs/PO_Decision_2026-10-19_Control_Gate_3.md): CG3-01 RESOLVED; CG3-02, CG3-03 RESOLVED / ACCEPTED; knowledge-bound retraction correction RESOLVED; SD3-01…SD3-12 APPROVED; SD3-13 replaced by the approved knowledge-bound retraction semantics (migration 2600); acceptance criteria 14/14, Phase 3 tests 63/63, Phase 1+2 regression 369/369, web 21/21; DEV 27/27 migrations, smoke 32/32 PASS, audit chain verified (108 entries). Optional service_role smoke check not run — NON-BLOCKING. Final code commit `128f1a7`; DEV evidence commit `106ecd9` |
-| Next authorised action | Phase 4 implementation P4-00…P4-09 per docs/specs/PO_Decision_2026-10-19_Authorise_Phase4.md, then the CG4 evidence report and STOP. Phase 5 NOT authorised |
+| Next authorised action | PO review of docs/control-gate-4-report.md; DEV apply of migrations 2700–3300 + `scripts/supabase_dev_smoke.py` (P4 checks) by the PO. Implementation STOPPED after P4-09. **Phase 5 NOT authorised** |
+
+## Phase 4 progress (Addendum v1.0)
+
+| Step | Status |
+| --- | --- |
+| P4-00 Baseline + PO authorisation stored under docs/specs, SPEC_INDEX rows 15–16 | done |
+| P4-01 Baselines + reference contexts + eligibility (migration 2700) | done |
+| P4-02 M06 relevance: schema, bundle, inputs, human validate/override/promote/request (2800) | done |
+| P4-03 Statement-centric assessments, provenance, categories, attribution, likelihood (2900) | done |
+| P4-04 M07 bundle, input builder (previous assessment as-of), orchestration | done |
+| P4-05 M08 structured challenge + human flag disposition (3000) | done |
+| P4-06 Human analytical review, final analytic confidence (DC-01), MODIFY_AND_APPROVE (3100) | done |
+| P4-07 Trends (human/manual path) and indicators (3200) | done |
+| P4-08 Jobs/worker (3300), security/reproducibility tests, RBAC sweep, acceptance corpus | done |
+| P4-09 DEV smoke P4 checks, docs, CG4 report | done — DEV apply/smoke pending (PO) |
 
 ## Phase 3 progress (Addendum v1.0)
 
@@ -88,7 +103,7 @@ testing); D-06 approved conditionally (CG1-06 verification since completed: CI +
 | K-11 | GS-001 Patriot-trap test channel | DEFER (P4) | Decide at raw-input materialisation |
 | K-12 | Canonical evidence-span field name | RESOLVED (P2) | `claims.evidence_span_original` (v1.2.2), verified by the database |
 | K-13 | QA-04 naming | NON-BLOCKING | Event time is never an eligibility criterion |
-| **DC-01** | **final_analytic_confidence — single source of truth** | **DEFERRED CONSTRAINT (PO guardrail 4)** | Phase 1 creates **no** confidence column anywhere. `human_reviews.modified_value` is a change record, never the canonical store of final confidence. Phase 4 defines canonical ownership on the approved assessment version; no generic approval table may hold an independently mutable copy. |
+| **DC-01** | **final_analytic_confidence — single source of truth** | **RESOLVED (P4-06)** | Phases 1–3 had no confidence column. Phase 4: the only owner is the immutable human approval row `lfhe.analytical_approvals.final_analytic_confidence` (one approval per assessment version, bound to version + hash; projected read-only by the view `assessment_version_states`). No model-written row holds it; `ai_recommended_confidence` is a separate field. Guarded by `test_final_analytic_confidence_has_exactly_one_canonical_owner` and the DEV smoke. |
 
 ## Known limitations at Control Gate 1
 
@@ -133,3 +148,15 @@ testing); D-06 approved conditionally (CG1-06 verification since completed: CI +
 | L-26 | As-of evaluation is computed on read (recursive eligibility over immutable data); cost grows with version chains and run manifests | Adequate at prototype volume; materialise bounds if measurements require |
 | L-27 | Human-recorded lineage without a declared `evidence_basis` is never used in REPLAY (fail closed) | Analysts should declare the evidence they relied on |
 | L-28 | A lineage retraction without a declared `evidence_basis` never alters REPLAY (it applies in LIVE when recorded ≤ cutoff) | Analysts should declare the evidence a retraction relies on |
+
+## Known limitations at Control Gate 4
+
+| ID | Limitation | Impact / plan |
+| --- | --- | --- |
+| L-29 | Causal / absence / operational / vague-indicator / generic-relevance guards are deterministic lexical heuristics (English); they are a safety net, not a semantic oracle | M08 challenge + mandatory human review remain; extend lexicons by controlled change |
+| L-30 | Likelihood vocabulary table is empty (CR4-01): any model likelihood is rejected | PO to supply the approved vocabulary (higher-authority value) |
+| L-31 | Trend direction / velocity are human free text (CR4-02); no AI trend creation (none defined in the prompt baseline) | PO to supply vocabularies if required |
+| L-32 | No Phase 4 review UI (not in the Phase 4 baseline); human decisions go through HUMAN_ONLY RPCs | Later phase if requested |
+| L-33 | Relevance/assessment/challenge quality is a model property; measured with scripted outputs (sound, naive, adversarial). No real-provider call (see L-09) | Real-provider trial non-blocking (§20) |
+| L-34 | The DS-38 automatic-assessment threshold is not defined by a higher-authority document: `automatic_assessment_recommended` is advisory and gates nothing | PO decision if a threshold is wanted |
+| L-35 | As-of checks are recursive on read (see L-26); full suite now ≈ 2 min 10 s | Materialise bounds if measurements require |

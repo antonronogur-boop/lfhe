@@ -76,6 +76,29 @@
 | `EVENT_VERSION_REVIEWED` | insert into `event_version_reviews` |
 | `EVENT_MERGED`, `EVENT_SPLIT`, `EVENT_SUPERSEDED`, `EVENT_KEEP_SEPARATE_DECISION`, `EVENT_REJECTED`, `EVENT_ACTION_RECORDED` (CREATE / UPDATE) | insert into `event_actions` (by action) |
 
+
+## Mandatory audited transitions — Phase 4
+
+| Event | Trigger point |
+| --- | --- |
+| `REFERENCE_CONTEXT_CREATED` / `REFERENCE_CONTEXT_VERSION_CREATED` | insert into `reference_contexts` / `reference_context_versions` |
+| `REFERENCE_CONTEXT_APPROVED` / `REFERENCE_CONTEXT_REJECTED` | insert into `reference_context_decisions` |
+| `BASELINE_CREATED` / `BASELINE_VERSION_CREATED` | insert into `baselines` / `baseline_versions` |
+| `BASELINE_VERSION_APPROVED` / `BASELINE_VERSION_REJECTED` | insert into `baseline_version_decisions` |
+| `RELEVANCE_INGESTION_RECORDED` / `RELEVANCE_RESULT_RECORDED` | insert into `relevance_ingestion_results` (one per M06 run) / `relevance_results` |
+| `EXECUTIVE_RELEVANCE_VALIDATED`, `RELEVANCE_SCORE_OVERRIDDEN`, `EVENT_MANUALLY_PROMOTED`, `MANUAL_ASSESSMENT_REQUESTED` | insert into `relevance_decisions` (by action) |
+| `ASSESSMENT_INGESTION_RECORDED` | insert into `assessment_ingestion_results` (one per M07 run) |
+| `ASSESSMENT_VERSION_CREATED` (AI) / `ASSESSMENT_MODIFIED` (HUMAN, MODIFY_AND_APPROVE) | insert into `assessment_versions` |
+| `ASSESSMENT_STATE_CHANGED`; `ASSESSMENT_SUPERSEDED` when the new state is SUPERSEDED | insert into `assessment_state_history` |
+| `CHALLENGE_INGESTION_RECORDED` / `CHALLENGE_RECORDED` | insert into `challenge_ingestion_results` (one per M08 run) / `challenge_runs` |
+| `CHALLENGER_FLAG_DISPOSITIONED` | insert into `challenge_flag_dispositions` |
+| `ASSESSMENT_APPROVED` (APPROVE and MODIFY_AND_APPROVE), `ASSESSMENT_REJECTED`, `REVIEW_ESCALATED`, `REPROCESSING_REQUESTED`; plus `FINAL_CONFIDENCE_SET` when an approval carries final analytic confidence | insert into `analytical_approvals` |
+| `TREND_CREATED` / `TREND_VERSION_CREATED` | insert into `trends` / `trend_versions` |
+| `INDICATOR_CREATED` / `INDICATOR_VERSION_CREATED` | insert into `indicators` / `indicator_versions` |
+
+`ASSESSMENT_REVIEW_RECORDED` is registered by migration 3100 but not emitted (the decision-specific
+codes above are used); it is kept, because audit codes are append-only.
+
 Text and prompt contents are not copied into the audit log: the audit entry
 records their SHA-256 (the rows themselves are immutable and hash-checked).
 

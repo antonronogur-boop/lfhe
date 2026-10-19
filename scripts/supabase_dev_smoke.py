@@ -193,6 +193,46 @@ def main() -> int:
            if rest.rpc(fn, {"p": {}}, admin).status_code < 400]
     check("P3: humans cannot call the M04/M05 ingestion functions", not bad, ", ".join(bad))
 
+    # 4d. Phase 4 relevance / assessment / challenge / review (P4): schema / RLS / RBAC surface only
+    p4_tables = ["reference_contexts", "reference_context_versions", "baselines", "baseline_versions", "relevance_results",
+                 "relevance_decisions", "assessments", "assessment_versions", "assessment_statements",
+                 "assessment_statement_evidence", "assessment_state_history", "challenge_runs", "challenge_flags",
+                 "challenge_flag_dispositions", "analytical_approvals", "trends", "trend_versions", "trend_events",
+                 "indicators", "indicator_versions", "indicator_claims"]
+    rls = {r["relname"]: r["relrowsecurity"] for r in db.execute(
+        "SELECT c.relname, c.relrowsecurity FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace "
+        "WHERE n.nspname = 'lfhe' AND c.relname = ANY(%s)", (p4_tables,))}
+    check("P4: assessment/challenge/trend tables present with RLS", len(rls) == len(p4_tables) and all(rls.values()),
+          f"{sum(rls.values())}/{len(p4_tables)}")
+    owners = [f"{r['table_name']}.{r['column_name']}" for r in db.execute(
+        "SELECT c.table_name, c.column_name FROM information_schema.columns c JOIN information_schema.tables t "
+        "ON t.table_schema = c.table_schema AND t.table_name = c.table_name AND t.table_type = 'BASE TABLE' "
+        "WHERE c.table_schema = 'lfhe' AND (c.column_name ILIKE '%%analytic%%' OR c.column_name = 'confidence')")]
+    check("P4: final_analytic_confidence has exactly one owner (DC-01)",
+          owners == ["analytical_approvals.final_analytic_confidence"], ", ".join(owners))
+    terms = db.execute("SELECT count(*) AS n FROM lfhe.likelihood_terms").fetchone()["n"]
+    check("P4: likelihood vocabulary empty pending CR4-01", terms == 0, f"{terms} term(s)")
+    r = rest.select("assessment_versions", viewer)
+    check("P4: viewer can read assessment versions (CLAIM_READ)", r.status_code == 200, f"HTTP {r.status_code}")
+    r = rest.select("assessment_versions", None)
+    check("P4: anon cannot read assessment versions", r.status_code in (401, 403, 404) or r.json() == [], f"HTTP {r.status_code}")
+    approve_args = {"p_version": zero, "p_hash": "0" * 64, "p_decision": "APPROVE", "p_final_confidence": "LOW",
+                    "p_confidence_rationale": "smoke test probe rationale text", "p_reason": "smoke test probe"}
+    dispose_args = {"p_flag": zero, "p_disposition": "ACCEPTED", "p_reason": "smoke test probe"}
+    for who, token in (("viewer", viewer), ("ADMIN", admin)):
+        r = rest.rpc("review_assessment", approve_args, token)
+        check(f"P4: {who} cannot APPROVE an assessment (HUMAN_ONLY + ASSESSMENT_REVIEW)",
+              r.status_code >= 400 and "ASSESSMENT_REVIEW" in r.text, f"HTTP {r.status_code}")
+        r = rest.rpc("dispose_challenge_flag", dispose_args, token)
+        check(f"P4: {who} cannot dispose of an M08 flag (ASSESSMENT_REVIEW)",
+              r.status_code >= 400 and "ASSESSMENT_REVIEW" in r.text, f"HTTP {r.status_code}")
+    if service_key:
+        r = rest.rpc("review_assessment", approve_args, service_key)
+        check("P4: service_role cannot APPROVE an assessment", r.status_code >= 400, f"HTTP {r.status_code}")
+    bad = [fn for fn in ("ingest_relevance", "ingest_assessment", "ingest_challenge")
+           if rest.rpc(fn, {"p": {}}, admin).status_code < 400]
+    check("P4: humans cannot call the M06/M07/M08 ingestion functions", not bad, ", ".join(bad))
+
     # 5. source administration end-to-end
     r = rest.rpc("create_source", payload, admin)
     ok = check("source admin: admin creates source", r.status_code == 200, f"HTTP {r.status_code} {r.text}")
