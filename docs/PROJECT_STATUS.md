@@ -4,7 +4,7 @@
 | --- | --- |
 | Current phase | Phase 3 — Lineage & Events (M04 + M05): implementation complete, **awaiting Control Gate 3** (docs/control-gate-3-report.md). Phase 2 ACCEPTED AND CLOSED (2026-10-19) |
 | Previous gate | **Control Gate 2 APPROVED** by the PO on 2026-10-19 (docs/control-gate-2-report.md): DEV 18/18 migrations + smoke 22/22 PASS, K-05 CLOSED and ACCEPTED (6/8 PASS; K05-03, K05-04 BLOCKED_BY_ROBOTS accepted), SD-01…SD-12 approved. Commits: implementation/CI baseline `1b31ed5`; K-05 run on `613f61a`; final documentation commit `40c00ff` |
-| Current gate | **Control Gate 3 — evidence submitted, PO decision pending.** Phase 3 authorised by the PO on 2026-10-19 (docs/specs/PO_Decision_2026-10-19_Authorise_Phase3.md; baseline docs/specs/LFHE_Phase3_Authoritative_Baseline_Addendum_v1.0.md) |
+| Current gate | **Control Gate 3 — targeted corrective pass (CG3-01…03) completed, PO decision pending.** SD3-01…SD3-11 APPROVED by the PO (2026-10-19); CG3 not yet approved pending CG3-01…03 (docs/cg3-corrective-report.md). Phase 3 authorised by the PO on 2026-10-19 (docs/specs/PO_Decision_2026-10-19_Authorise_Phase3.md; baseline docs/specs/LFHE_Phase3_Authoritative_Baseline_Addendum_v1.0.md) |
 | Next authorised action | **None.** Phase 4 must not start without explicit Product Owner approval; its authoritative baseline must first be versioned under docs/specs/ (SD-12) |
 
 ## Phase 3 progress (Addendum v1.0)
@@ -17,7 +17,8 @@
 | P3-03 M04/M05 prompt bundles 1.0.0 + schemas, deterministic input builders | done |
 | P3-04 Orchestration, repair, ANALYSE_LINEAGE / BUILD_EVENTS jobs, worker; migration 2100 (AI update carries claims forward) | done |
 | P3-05 Acceptance corpus + §16 metrics, GS isolation test; migration 2200 (external-origin reuse) | done |
-| P3-06 Docs, DEV smoke additions, CI, CG3 report | done (DEV apply of migrations 1800–2200 by the PO pending) |
+| P3-06 Docs, DEV smoke additions, CI, CG3 report | done |
+| CG3-C CG3 corrective pass: 2300 as-of context (CG3-01), 2400 terminal full split (CG3-02), 2500 no name-only origin collapse (CG3-03) | done — DEV apply of 1800–2500 deferred by PO decision |
 
 ## Phase 2 progress (Addendum v1.0)
 
@@ -124,6 +125,9 @@ testing); D-06 approved conditionally (CG1-06 verification since completed: CI +
 | L-20 | Event clustering quality is a model property; Phase 3 measures it with scripted model outputs (conservative and deliberately over-eager). The deterministic guarantees are: AI cannot MERGE/SPLIT/SUPERSEDE/REJECT, AI updates only add claims and stay pending review, context is bounded and cutoff-filtered | Real-provider clustering evaluation together with L-09 (non-blocking for CG3) |
 | L-21 | No Phase 3 review UI (not in the Phase 3 baseline); human decisions are made through the HUMAN_ONLY RPCs | UI in a later phase if the PO requests it |
 | L-22 | `distinct_groups_upper_bound` is an upper bound: claims without validated lineage each count as their own group and `claims_with_unknown_lineage` must be read with it; `independence_established` is always false | By design (baseline §5: unknown stays unknown) |
-| L-23 | Same-named external origins are reused (migration 2200); two genuinely different origins with the same name need an explicit `external_origin_id` from a human | Conservative direction (collapses, never inflates) |
+| L-23 | resolved (CG3-03, migration 2500): no name-only reuse; identity only by explicit human selection or same canonical URL + name | — |
 | L-24 | ANALYSE_LINEAGE / BUILD_EVENTS are enqueued explicitly; no automatic chaining after extraction | Same pattern as SD-11; later phase may automate |
+| L-25 | The knowledge bound of a human-authored event version (and of a human state change) is its evidence set — member claims and consumed versions; free-text fields are the analyst's summary of that evidence and cannot be machine-proven free of later knowledge (SD3-12) | Analyst guidance; PO decision on SD3-12 |
+| L-26 | As-of evaluation is computed on read (recursive eligibility over immutable data); cost grows with version chains and run manifests | Adequate at prototype volume; materialise bounds if measurements require |
+| L-27 | Human-recorded lineage without a declared `evidence_basis` is never used in REPLAY (fail closed) | Analysts should declare the evidence they relied on |
 

@@ -1,8 +1,9 @@
 # Phase 3 — test traceability (Addendum v1.0 §15 and §16)
 
 Files: `tests/integration/test_lineage.py` (L), `tests/integration/test_events.py` (E),
-`tests/integration/test_phase3_pipeline.py` (P), `tests/acceptance/test_phase3_acceptance.py`
-(A, corpus `tests/fixtures/phase3_acceptance/corpus.json`), `tests/security/test_gs_isolation.py` (G).
+`tests/integration/test_phase3_pipeline.py` (P), `tests/integration/test_asof_context.py` (R),
+`tests/acceptance/test_phase3_acceptance.py` (A, corpus `tests/fixtures/phase3_acceptance/corpus.json`),
+`tests/security/test_gs_isolation.py` (G).
 
 ## §15 required tests
 
@@ -10,7 +11,7 @@ Files: `tests/integration/test_lineage.py` (L), `tests/integration/test_events.p
 |---|---|---|
 | 1 | Same underlying source in two outlets ≠ two independent confirmations | L `test_same_underlying_source_in_two_outlets_is_one_independence_group`; A scenario L1 (4 outlets → 1 group) |
 | 2 | Different language / publisher / wording ≠ independence | L `test_surface_differences_never_establish_independence`; A scenario L4; P `test_m04_output_cannot_assert_independence` |
-| 3 | Explicit common origin → one independence group | L `test_same_underlying_source_in_two_outlets_is_one_independence_group`, `test_same_named_external_origin_collapses_into_one_group`; A scenario L3 |
+| 3 | Explicit common origin → one independence group | L `test_same_underlying_source_in_two_outlets_is_one_independence_group`, `test_same_name_with_explicit_human_selection_is_one_group`; A scenario L3 (common identity by explicit human selection) |
 | 4 | DERIVED_REPORTING does not increase independent confirmations | L `test_derived_reporting_does_not_increase_independent_groups`; A scenario L1 |
 | 5 | Unknown lineage remains uncertain | L `test_surface_differences_never_establish_independence`, `test_retraction_preserves_history_and_restores_unknown`; A scenarios L2, L4 |
 | 6 | M04 recommendation alone does not change claim status | L `test_m04_recommendation_does_not_change_status_until_a_human_decides`; P `test_lineage_pipeline_end_to_end_with_complete_traceability`; A metric `silent_status_finalisation` |
@@ -47,6 +48,24 @@ prompt injection — P `test_injection_in_claim_text_does_not_change_instruction
 jobs — P `test_worker_jobs_analyse_lineage_and_build_events_end_in_human_review`;
 review binding — E `test_human_review_of_ai_version_is_hash_bound`.
 
+## CG3 corrective pass (PO decision 2026-10-19, CG3-01…03)
+
+| Required test | Tests |
+|---|---|
+| CG3-01.1–3 v1 from pre-cutoff evidence; v2 adds a post-cutoff claim and new title/description/location; REPLAY between them sees only v1 | R `test_replay_sees_only_the_cutoff_eligible_version_never_later_fields`; A scenario R1 |
+| CG3-01.4 later CONFIRMED / REJECTED does not leak backwards | R `test_later_state_does_not_leak_backwards_but_later_processing_on_eligible_evidence_counts`; A R1 |
+| CG3-01.5 later MERGE / SUPERSEDE does not alter the earlier replay | R `test_later_merge_and_supersede_do_not_alter_the_replay` |
+| CG3-01.6 lineage established with later evidence stays out of the earlier replay (context and independence groups) | R `test_lineage_from_later_evidence_is_not_used_in_an_earlier_replay`, `test_human_recorded_lineage_needs_a_declared_evidence_bound_for_replay`; A R1 |
+| CG3-01.7 processing after the cutoff on eligible evidence remains allowed | R (positive controls in the state, merge and lineage tests) |
+| CG3-01 ingestion: only the as-of version is accepted; no update on a later head | R `test_replay_ingestion_accepts_only_the_asof_version_and_never_materialises_on_a_later_head` |
+| CG3-02 full split parent not an M05 candidate; update / state change / re-split refused; history and SPLIT_INTO intact; no claim lost; no old membership as current | E `test_full_split_parent_is_no_longer_open_or_current` |
+| CG3-02 retained split parent current only with the retained claims | E `test_split_with_retained_parent_stays_current_only_with_the_retained_claims` |
+| CG3-03.1 same name + explicit human selection → one group | L `test_same_name_with_explicit_human_selection_is_one_group` |
+| CG3-03.2 same name + different URLs → distinct (same URL + name → reused) | L `test_same_name_different_urls_remain_distinct_same_url_is_reused`; A scenario L6 |
+| CG3-03.3 same name, no URL, no explicit reuse → no collapse | L `test_same_name_without_explicit_reuse_does_not_collapse` |
+| CG3-03.4 ambiguous identity → no false dependence (URL vs no URL; unevidenced / conflicting explicit selection refused) | L `test_ambiguous_identity_never_creates_false_dependence`; A metric `false_dependence_collapse` |
+| CG3-03.5 L3 common origin through explicit human validation | L `test_same_name_with_explicit_human_selection_is_one_group`; A scenario L3 |
+
 ## §16 acceptance metrics
 
 `tests/acceptance/test_phase3_acceptance.py::test_phase3_acceptance_corpus` (set
@@ -56,4 +75,5 @@ review binding — E `test_human_review_of_ai_version_is_hash_bound`.
 `high_impact_changes_without_human`, `ai_structural_actions`,
 `unvalidated_ai_grouping_promoted`, `over_merge_in_validated_events`,
 `claims_lost_in_structural_ops`, `ancestry_breaks`, `gs_leakage`,
-`model_runs_incomplete_provenance`.
+`model_runs_incomplete_provenance`, and since the CG3 corrective pass
+`false_dependence_collapse` (L6) and `replay_context_leakage` (R1).

@@ -42,6 +42,7 @@
    ]
   }
  },
+ "false_dependence_collapse": 0,
  "gs_leakage": 0,
  "high_impact_changes_without_human": 0,
  "independence_established_true": 0,
@@ -155,12 +156,49 @@
    "outcome": "PROPOSALS_RECORDED",
    "status_after_ai": true,
    "truth_origin_groups": 1
+  },
+  "L6_SAME_NAME_DIFFERENT_ORIGINS": {
+   "after_human_decision": {
+    "basis": "VALIDATED_LINEAGE_DEPENDENCE_ONLY",
+    "claims": 2,
+    "claims_with_unknown_lineage": 0,
+    "claims_with_validated_lineage": 2,
+    "distinct_groups_upper_bound": 2,
+    "independence_established": false
+   },
+   "before_validation": {
+    "basis": "VALIDATED_LINEAGE_DEPENDENCE_ONLY",
+    "claims": 2,
+    "claims_with_unknown_lineage": 2,
+    "claims_with_validated_lineage": 0,
+    "distinct_groups_upper_bound": 2,
+    "independence_established": false
+   },
+   "claims": 2,
+   "outcome": "PROPOSALS_RECORDED",
+   "status_after_ai": true,
+   "truth_origin_groups": 2
   }
  },
- "model_runs": 9,
+ "model_runs": 11,
  "model_runs_incomplete_provenance": 0,
  "old_event_new_reporting_updated": true,
  "over_merge_in_validated_events": 0,
+ "replay": {
+  "event_version_seen": "v1",
+  "leaks": 0,
+  "replay_independence": {
+   "basis": "VALIDATED_LINEAGE_DEPENDENCE_ONLY",
+   "claims": 2,
+   "claims_with_unknown_lineage": 2,
+   "claims_with_validated_lineage": 0,
+   "distinct_groups_upper_bound": 2,
+   "independence_established": false,
+   "information_cutoff": "2026-03-01T01:00:00+01:00",
+   "report_mode": "REPLAY"
+  }
+ },
+ "replay_context_leakage": 0,
  "republication_inflation": 0,
  "silent_status_finalisation": 0,
  "surface_difference_independence": 0,

@@ -4,7 +4,10 @@ Authority: `docs/specs/LFHE_Phase3_Authoritative_Baseline_Addendum_v1.0.md`
 (PO decision `docs/specs/PO_Decision_2026-10-19_Authorise_Phase3.md`).
 Migrations: `20261011001800_lineage.sql`, `20261011001900_events.sql`,
 `20261011002000_phase3_jobs.sql`, `20261011002100_event_ai_update_carry_forward.sql`,
-`20261011002200_external_origin_reuse.sql`.
+`20261011002200_external_origin_reuse.sql`; CG3 corrective pass (PO decision
+`docs/specs/PO_Decision_2026-10-19_CG3_Targeted_Corrective_Pass.md`):
+`20261011002300_cg3_01_asof_context.sql`, `20261011002400_cg3_02_full_split_terminal.sql`,
+`20261011002500_cg3_03_external_origin_identity.sql`.
 
 ## 1. Principle
 
@@ -35,18 +38,27 @@ triggers, CHECK constraints), not only in Python.
 4. The output becomes `lineage_proposals` and `corroboration_recommendations`,
    both `human_review_required = true`.
 5. A human with `CLAIM_REVIEW` decides:
-   `decide_lineage_proposal`, `record_claim_lineage`, `retract_claim_lineage`,
+   `decide_lineage_proposal(id, accept, reason [, external_origin_id])`,
+   `record_claim_lineage` (optional `evidence_basis`, see §4), `retract_claim_lineage`,
    `decide_corroboration_recommendation` (STATUS_STALE-checked; writes a
    `HUMAN_DECISION` status-history row that names the recommending model run).
 
 `claim_lineage` is append-only; corrections are retractions plus new rows.
 
-### External origins
+### External origins (identity never inferred from the name — CG3-03)
 `external_origins` rows exist only when a validated lineage row needs one, and
-only when explicitly evidenced. Since migration 2200 an accepted origin reuses
-the earliest existing origin with the same normalised name — collapsing is the
-conservative direction (found by the acceptance corpus, scenario L3). A human
-who needs two distinct same-named origins passes an explicit `external_origin_id`.
+only when explicitly evidenced. Identity of two origins is established only by:
+- **explicit human selection** of an existing origin
+  (`decide_lineage_proposal(..., p_external_origin_id)` or
+  `record_claim_lineage({external_origin_id})`); the selected origin's name must
+  be evidenced in the child claim's span, and a proposal URL must not contradict
+  the origin's URL (`EXTERNAL_ORIGIN_IDENTITY_CONFLICT`); or
+- **unambiguous identity evidence**: the same canonical URL and the same
+  normalised name, with exactly one existing origin.
+
+A matching name alone (no URL, different URLs, several candidates) creates a new
+origin: the distinction is preserved and no dependence is inferred (migration
+2500 replaces the name-only reuse of migration 2200).
 
 ### Independence groups (derived, never inferred)
 `lfhe.claim_independence_group(claim)` computes connected components over
@@ -123,19 +135,34 @@ Reviews (`event_version_reviews`) bind to `(version_id, content_hash)`.
   a child (`SPLIT_WOULD_DROP_CLAIMS`), no foreign claims
   (`SPLIT_INTRODUCES_FOREIGN_CLAIMS`); children are new HUMAN events linked by
   `SPLIT_INTO`; `event_claim_redistributions` records where each claim went.
+  - *with retained*: the parent gets the retained version and stays open,
+    current only with the retained claim set;
+  - *full split* (no retained, CG3-02): the parent keeps its ID, versions and
+    `SPLIT_INTO` lineage but is terminal — `event_is_open` false, no M05
+    candidate, `update_event` / `set_event_state` / further structural actions
+    refused (`EVENT_NOT_OPEN`); `event_heads` shows `structural_status =
+    SPLIT_INTO`, `is_current = false`, `current_version_id = NULL`.
+    `resolve_event(parent)` stays relationship-based (one-to-many).
 - **SUPERSEDE**: old event keeps its versions, gains `SUPERSEDED_BY`;
   `resolve_event(old)` follows the chain.
 - **REJECT**: a state change only; versions and history stay.
 
 `event_relationships` bind both sides to `(version_id, content_hash)`.
 
-### Context for M05 (minimum necessary, cutoff-disciplined)
-`build_m05_inputs` supplies the new claims plus at most 20 candidate open events
-(not REJECTED, no successor) whose current head shares an event type, a location
-or a normalised entity mention, each with only its cutoff-eligible claims
-(`claims_withheld_by_cutoff` is reported); events known only through post-cutoff
-evidence are not supplied. Clustering quality beyond these guards is a model
-property — see the CG3 report (EVENT CLUSTERING RESULTS).
+### Context for M05 (minimum necessary, as-of the cutoff)
+`build_m05_inputs` supplies the new claims plus at most 20 candidate events that
+are **open as of the cutoff** and whose **as-of version** shares an event type, a
+location or a normalised entity mention (`lfhe.event_asof`, §4). Title,
+description, dates, locations, membership, state and structural outcome all come
+from that as-of representation; events with no provable as-of version are not
+supplied. Clustering quality beyond these guards is a model property — see the
+CG3 report (EVENT CLUSTERING RESULTS).
+
+M05 ingestion requires each referenced event to have been supplied by exactly its
+as-of version for that run, and materialises an `UPDATE_EXISTING_EVENT` only if
+the version shown to the model is the current head
+(`UPDATE_TARGET_VERSION_NOT_SUPPLIED` / `TARGET_VERSION_NOT_CURRENT_HEAD`): a
+replay never writes onto a head that contains later knowledge.
 
 ## 4. Cutoff discipline
 `lfhe.claim_cutoff_eligible(claim, mode, cutoff)`:
@@ -144,6 +171,27 @@ property — see the CG3 report (EVENT CLUSTERING RESULTS).
 Every M04/M05 run must declare `report_mode` and `information_cutoff` in
 `task_parameters` (`CUTOFF_NOT_DECLARED` otherwise). Event time is never an
 eligibility criterion.
+
+### Knowledge bounds of authoritative objects (CG3-01, migration 2300)
+Claims and articles are eligible by the rule above. Derived authoritative objects
+are usable for a run only if their **knowledge bound** — the evidence they were
+established on, reproducibly computed from immutable stored data — is entirely
+eligible. Processing or human decisions after the cutoff are fine when the
+evidence itself is eligible; `created_at ≤ cutoff` is never the rule on its own.
+
+| Object | Knowledge bound | Function |
+| --- | --- | --- |
+| validated lineage | child claim, parent claim / article, origin evidence claim; + `PROPOSAL_ACCEPTED`: every input/context object of the proposing M04 run (context lineage recursively); + `HUMAN_RECORDED`: the declared `evidence_basis` (`claim_lineage_evidence`). No declared basis → no provable bound: never in REPLAY, LIVE only if recorded ≤ cutoff | `lfhe.lineage_usable` |
+| independence group | connected components over usable lineage only | `lfhe.claim_independence_group_asof`, `lfhe.independence_summary_asof` |
+| event version | member claims, every previous version, the AI run's inputs/context (incl. event versions shown), consumed versions (MERGED_INTO sources, SPLIT_INTO parent) | `lfhe.event_version_eligible` |
+| event state | the head version current when the state row was written (`event_state_version_bindings`, trigger); unbound rows fail closed | in `lfhe.event_asof` |
+| merge / supersede / split outcome | both versions of the relationship | in `lfhe.event_asof` |
+
+`lfhe.event_asof(event, mode, cutoff)` returns the latest eligible version, the
+latest usable state, the usable structural outcome and `is_open`; nothing when no
+version is provable. Retracted lineage is never used. The bound of a human event
+version is its evidence set (member claims and consumed versions); its free text
+is the analyst's summary of that evidence (SD3-12).
 
 ## 5. Jobs
 `ANALYSE_LINEAGE` and `BUILD_EVENTS` (payload `claim_ids`, `report_mode`,

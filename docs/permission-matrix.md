@@ -52,6 +52,16 @@ Claim, entity and taxonomy tables are readable by humans holding `CLAIM_READ` (R
 | `claim_cutoff_eligible`, `claim_independence_group`, `independence_summary` | `authenticated`, `lfhe_worker` (invoker rights → RLS applies) | `CLAIM_READ` for the underlying rows |
 | internal writers (`write_event_version`, `insert_claim_lineage`, `resolve_external_origin`, `event_proposal_problems`, …) | no grant (called only inside the functions above) | — |
 
+CG3 corrective pass (migrations 2300–2500): `decide_lineage_proposal` takes an optional 4th
+argument `p_external_origin_id` (explicit human identity decision; same permission);
+`lfhe.lineage_usable`, `lfhe.event_version_eligible`, `lfhe.run_evidence_eligible`,
+`lfhe.event_asof`, `lfhe.claim_independence_group_asof`, `lfhe.independence_summary_asof` are
+SECURITY DEFINER, executable by `lfhe_worker` only (envelope building);
+`lfhe.article_cutoff_eligible` (invoker) and `lfhe.event_fully_split` are readable by
+`authenticated` and `lfhe_worker`. New tables `claim_lineage_evidence` and
+`event_state_version_bindings` are immutable and readable with `CLAIM_READ`; they are written
+only inside `record_claim_lineage` and by the state-history trigger.
+
 No new permissions were introduced: lineage / independence / claim-status decisions use
 `CLAIM_REVIEW`; event decisions use `EVENT_ACTION` (both ANALYST). ADMIN, VIEWER, anon,
 `service_role` and `lfhe_worker` are refused (tests + DEV smoke P3 checks). A worker may
