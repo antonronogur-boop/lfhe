@@ -1,11 +1,27 @@
 # LFHÉ — CONTROL GATE 2 REPORT (Phase 2 — Claim Pipeline)
 
-**Dátum:** 2026-10-11, frissítve 2026-10-19 (DEV + K-05 eredmények) · **Alap:** Phase 2 Authoritative Baseline Addendum v1.0 (PO), Module Prompt Pack v1.2 (+v1.1/v1.2.1/v1.2.2 deltas az addendum szerint), jóváhagyott CG0-architektúra · **Repository:** `antonronogur-boop/lfhe` (privát) · **Kód-commit:** `1b31ed5` (CI PASS, run 38170860745)
+**Dátum:** 2026-10-11; DEV + K-05 eredmények 2026-10-19; véglegesítve 2026-10-19 a PO CG2-döntése alapján · **Alap:** Phase 2 Authoritative Baseline Addendum v1.0 (PO), Module Prompt Pack v1.2 (+v1.1/v1.2.1/v1.2.2 deltas az addendum szerint), jóváhagyott CG0-architektúra · **Repository:** `antonronogur-boop/lfhe` (privát)
 
 ## PHASE / GATE
 
-Phase 2 — Claim Pipeline: **megvalósítva**. Control Gate 2: **evidence benyújtva, PO-döntésre vár.** Phase 3 nem kezdődött el.
-A PO gépén futtatott két lépés **elkészült (2026-10-19)**: **(1) DEV migráció + smoke: 18/18 migráció, smoke 22/22 PASS**; **(2) K-05: lezárva — 6/8 PASS, 2 BLOCKED_BY_ROBOTS, a PO elfogadta kontrollált, szabályszerű elutasításként (A döntés)**. Nyitott PO-döntés: SD-01…SD-12 megerősítése.
+**CONTROL GATE 2: APPROVED (PO, 2026-10-19). Phase 2 — Claim Pipeline: ACCEPTED AND CLOSED.** Phase 3 nem kezdődött el; a megkezdéséhez külön PO-jóváhagyás kell.
+
+- DEV migráció + smoke (PO gépén, 2026-10-19): 18/18 migráció, smoke 22/22 PASS, audit hash-lánc ellenőrizve.
+- K-05: CLOSED and ACCEPTED — 6/8 PASS, K05-03 és K05-04 BLOCKED_BY_ROBOTS elfogadott, kontrollált kimenet.
+- SD-01…SD-12: APPROVED (SD-11, SD-12 pontosítással, lásd lent).
+
+### Commit-provenance
+
+Az alábbi repository-állapotok különbözők; egyiket sem írtam át:
+
+| Szerep | Commit |
+|---|---|
+| Phase 2 implementáció / CI-tesztelt alapállapot (369/369 Python, 21/21 web, CI run 38170860745) | `1b31ed5` |
+| Az első CG2-jelentés commitja, egyben a **K-05 futtatásához használt** repository-állapot (CI run 38171168713) | `613f61a` |
+| DEV/K-05 eredmények rögzítése | `b646ee1` |
+| Végső jelentés-/dokumentációs commit | lásd a fájl végén (FINAL DOCUMENTATION COMMIT) |
+
+A `613f61a` és `b646ee1` csak dokumentációt változtatott az `1b31ed5`-höz képest; a Phase 2 kód és migrációk azonosak.
 
 ## IMPLEMENTED
 
@@ -70,7 +86,7 @@ Minden migráció tranzakciós, append-only, checksummel (D-01). **DEV-en alkalm
 - gitleaks a teljes git-előzményen + `scripts/secret_scan.py`; prompt-lock ellenőrzés.
 - Elfogadási korpusz metrikák JSON-ba írva (`LFHE_ACCEPTANCE_REPORT`).
 - **DEV Supabase (PO gépéről, 2026-10-19):** migráció + `scripts/supabase_dev_smoke.py` → **22/22 PASS**, köztük 6 új Phase 2 ellenőrzés (taxonómia 62 elem; VIEWER olvas claimet; anon nem; VIEWER / ADMIN nem rögzíthet review-t: HTTP 403; ember nem hívhatja a worker ingest függvényt: HTTP 403). Audit hash-lánc ellenőrizve (26 bejegyzés, head `36b9a6a2…`); pg_cron ütemezés aktív. A VIEWER jogosultságai: `ARTICLE_READ, CLAIM_READ, SOURCE_READ`.
-- **K-05 (PO gépéről, 2026-10-19 11:24 UTC, kód-commit `613f61a`):** lásd K-05 STATUS; nyers eredmény: `docs/k05-report-20261019.json`.
+- **K-05 (PO gépéről, 2026-10-19 11:24 UTC, a futtatáshoz használt repository-commit: `613f61a`):** lásd K-05 STATUS; eredmény: `docs/k05-report-20261019.json` (helyreállított / szintaktikailag javított másolat, lásd ott).
 - **Nem futott:** valós provider-hívás (L-09).
 
 ## TEST RESULTS
@@ -146,25 +162,26 @@ Tesztelési hibák a fejlesztés során (transzparensen): a P2-01 commit egy egy
 
 ## K-05 STATUS
 
-**COMPLETED (2026-10-19) — PO-döntés: az eredmény elfogadva (A).** A script összesítése szabály szerint `NOT PASSED` (nem minden forrás PASS); a két nem-PASS forrás kontrollált, szabályszerű elutasítás, nem rendszerhiba.
+**CLOSED and ACCEPTED (PO, 2026-10-19).** Bypass vagy újrafuttatás nem szükséges. A script összesítése szabály szerint `NOT PASSED` (nem minden forrás PASS); a két nem-PASS forrás kontrollált, szabályszerű elutasítás, nem rendszerhiba.
 
-| ID | Forrás | Mód / végpont (a PO által megerősített oldalról) | F3 | F4 | F5 | Nyelv | Eredmény |
+| ID | Forrás | Mód — PO által megerősített discovery oldal → feloldott végpont | F3 | F4 | F5 | Nyelv | Eredmény |
 |---|---|---|---|---|---|---|---|
-| K05-01 | UK MoD | RSS_ATOM — `gov.uk/…/ministry-of-defence.atom` (az oldal maga a feed) | PASS | PASS | PASS | en | **PASS** (5 új → 5 duplikátum) |
-| K05-02 | NATO News | **HTTP_FETCH** — `nato.int/en/news-and-events/articles/news` | PASS | PASS | PASS | en | **PASS** |
-| K05-03 | U.S. Air Force | RSS_ATOM — `af.mil/RSS/` | – | – | – | – | **BLOCKED_BY_ROBOTS** (robots.txt tiltja az RSS-listaoldalt) |
-| K05-04 | U.S. DoD | RSS_ATOM — `defense.gov/news/rss/` | – | – | – | – | **BLOCKED_BY_ROBOTS** (robots.txt tiltja az RSS-listaoldalt) |
-| K05-05 | Lengyel MoD | HTTP_FETCH — `gov.pl/web/obrona-narodowa/aktualnosci5` | PASS | PASS | PASS | pl | **PASS** |
-| K05-06 | Ukrán MoD | HTTP_FETCH — `mod.gov.ua/news` | PASS | PASS | PASS | uk | **PASS** |
-| K05-07 | Saab | STRUCTURED_FEED — `robots.txt` → egyetlen `sitemap.xml` | PASS | PASS | PASS | en | **PASS** (5 → 5 duplikátum) |
-| K05-08 | KONGSBERG | STRUCTURED_FEED — `kogmap.xml` (urlset) | PASS | PASS | PASS | en | **PASS** (5 → 5 duplikátum) |
+| K05-01 | UK MoD | RSS_ATOM — `gov.uk/…/ministry-of-defence.atom` → feloldva: ugyanez (a discovery oldal maga a feed) | PASS | PASS | PASS | en | **PASS** (5 új → 5 duplikátum) |
+| K05-02 | NATO News | **HTTP_FETCH** — `nato.int/en/news-and-events/articles/news` → maga az oldal | PASS | PASS | PASS | en | **PASS** |
+| K05-03 | U.S. Air Force | RSS_ATOM — discovery/lista oldal `af.mil/RSS/` → **nincs feloldott feed-végpont** | – | – | – | – | **BLOCKED_BY_ROBOTS** — a robots.txt már a PO által megerősített RSS-listaoldal automatikus lekérését tiltotta, mielőtt végleges feed-végpont feloldható lett volna |
+| K05-04 | U.S. DoD | RSS_ATOM — discovery/lista oldal `defense.gov/news/rss/` → **nincs feloldott feed-végpont** | – | – | – | – | **BLOCKED_BY_ROBOTS** — ugyanígy: a tiltás a discovery oldalon történt, feed-végpont nem lett feloldva |
+| K05-05 | Lengyel MoD | HTTP_FETCH — `gov.pl/web/obrona-narodowa/aktualnosci5` → maga az oldal | PASS | PASS | PASS | pl | **PASS** |
+| K05-06 | Ukrán MoD | HTTP_FETCH — `mod.gov.ua/news` → maga az oldal | PASS | PASS | PASS | uk | **PASS** |
+| K05-07 | Saab | STRUCTURED_FEED — `robots.txt` → feloldva: egyetlen listázott `sitemap.xml` | PASS | PASS | PASS | en | **PASS** (5 → 5 duplikátum) |
+| K05-08 | KONGSBERG | STRUCTURED_FEED — `kogmap.xml` → feloldva: ugyanez (urlset) | PASS | PASS | PASS | en | **PASS** (5 → 5 duplikátum) |
 
 - **F3** (ütemezett COLLECT_SOURCE job gyűjt): 6/6 PASS. **F4** (teljes provenance, PERMITTED_EXCERPT, eredeti nyelvű szövegkivonat, végső URL a forrás domainjén): 6/6 PASS, 0 probléma. **F5** (második futás): 6/6 PASS — csak DUPLICATE, 0 új, 0 azonos-állapotú duplikált snapshot.
 - Nyelv: a lengyel és az ukrán forrás eredeti nyelven (`pl`, `uk`) került tárolásra.
-- robots.txt: két forrásnál a gyűjtő a tiltást betartotta, megkerülés nem történt (fail-closed, PO K-05 szabály).
-- Eltérés a jóváhagyott készlettől (PO-döntés): **K05-02** gyűjtési módja RSS helyett HTTP_FETCH (a hírek főoldala).
+- robots.txt: K05-03 és K05-04 esetén a tiltás a felfedezési (discovery) lépésben, a lista oldalon érvényesült; végleges feed-végpont nem lett feloldva, gyűjtés nem indult, megkerülés nem történt (fail-closed, PO K-05 szabály).
+- Eltérés a jóváhagyott készlettől (PO-döntés, elfogadva és rögzítve): **K05-02** gyűjtési módja RSS_ATOM helyett HTTP_FETCH (a hírek főoldala).
 - A futás végén mind a 8 K-05 forrás deaktiválva lett (újraaktiválás külön, auditált emberi döntés).
-- Eszközök: `scripts/k05_validate_sources.py`, `scripts/k05_sources.template.json`, `docs/runbooks/k05-real-source-validation.md`; nyers eredmény: `docs/k05-report-20261019.json`.
+- Eszközök: `scripts/k05_validate_sources.py`, `scripts/k05_sources.template.json`, `docs/runbooks/k05-real-source-validation.md`.
+- **Eredmény-fájlok provenance-a** (`docs/k05-report-20261019.PROVENANCE.md`): a beérkezett bemenet csonka volt (hiányzott a legfelső szintű objektum záró `}`-e) és CRLF sorvégű. Megőrizve bájtazonosan: `docs/k05-report-20261019.received.txt` (SHA-256 `a5172d7e…88eb`). A jelentés alapja a **helyreállított / szintaktikailag javított másolat** `docs/k05-report-20261019.json` (SHA-256 `e9cc8da6…5d23`); pontos javítás: 429 `\r` eltávolítva + `\n}\n` hozzáfűzve; tartalmi érték nem változott.
 
 ## KNOWN FAILURES
 
@@ -185,7 +202,7 @@ Nincs ismert hibás teszt. A fejlesztés közbeni egyetlen hiba (objektumtár-ve
 - A QA-S18 determinisztikus réteg biztonsági háló, nem szemantikai bizonyíték (L-15); csak flaget ad, sosem vesz el.
 - High impact Phase 2-ben alapból hamis, mert a v1.2-es okok Phase 3+ objektumokra vonatkoznak (L-16); ember jelölhet.
 
-## SPECIFICATION DEVIATIONS (PO-megerősítést kérek)
+## SPECIFICATION DEVIATIONS (PO által jóváhagyva, 2026-10-19)
 
 | # | Eltérés / implementációs döntés | Indok |
 |---|---|---|
@@ -202,23 +219,30 @@ Nincs ismert hibás teszt. A fejlesztés közbeni egyetlen hiba (objektumtár-ve
 | SD-11 | Az extrakció nem indul automatikusan gyűjtés után: `enqueue_pending_claim_extractions` (worker `--enqueue`) | kontrollált LLM-használat DEV-ben |
 | SD-12 | A repo csak a v1.2 Prompt Pack teljes szövegét tartalmazza; a v1.1 / v1.2.1 / v1.2.2 deltákat az addendum összefoglalója alapján követtem | a teljes delta-szövegek nincsenek a repóban |
 
+**PO-döntés:** SD-01…SD-12 APPROVED. Pontosítások:
+- **SD-11:** jóváhagyva mint Phase 2 / jelenlegi DEV implementációs döntés; nem tiltja egy későbbi, specifikáció által jóváhagyott automatikus enqueue/orkesztrációs mechanizmust.
+- **SD-12:** Phase 2-re jóváhagyva. Minden további fázis implementációja előtt az adott fázis autoritatív, fázisspecifikus baseline-jának verziózva jelen kell lennie a `docs/specs/` alatt; a jövőbeli implementáció nem függhet a korábbi beszélgetési kontextusból visszaállított normatív követelményektől.
+- E pontosítások miatt Phase 2 kódváltozás nem szükséges.
+
 ## CHANGE REQUESTS
 
-Nincs blokkoló ellentmondás, ezért formális CHANGE REQUEST nincs. Az SD-01…12 tételekhez PO-megerősítés kell.
+Nincs.
 
 ## OPEN ITEMS
 
-1. ~~DEV Supabase migráció + smoke~~ — **kész** (2026-10-19, 22/22 PASS).
-2. ~~K-05~~ — **lezárva** (6/8 PASS, 2 BLOCKED_BY_ROBOTS elfogadva). K05-03 / K05-04 későbbi bevonása csak a robots.txt által engedélyezett, a PO által a hivatalos oldalról kimásolt feed-címmel lehetséges (külön döntés).
-3. **SD-01…SD-12** PO-megerősítése.
-4. **Valós provider-próba (L-09):** egy DEV-szöveg M02/M03 feldolgozása valódi kulccsal — PO döntés és titokkezelés kell.
-5. Teljes v1.1 / v1.2.1 / v1.2.2 delta-szövegek tárolása a `docs/specs/` alatt (SD-12).
-6. High-impact szabályok (L-16), automatikus státuszszabályok (L-17) — Phase 3+.
-7. `/claims` UI végigkattintása DEV-en valós claimekkel (L-18).
+Nincs CG2-t blokkoló nyitott tétel. Nem blokkoló, a CG2-t újra nem nyitó követő tételek:
+
+1. **Valós provider-próba (L-09):** egy DEV-szöveg M02/M03 feldolgozása valódi kulccsal — PO-döntés és titokkezelés kell.
+2. **`/claims` UI végigkattintása** DEV-en valós claimekkel (L-18).
+3. **Phase 3+:** high-impact szabályok (L-16), automatikus státuszszabályok (L-17).
+4. **SD-12 feltétel a következő fázisokra:** a fázisspecifikus autoritatív baseline verziózva a `docs/specs/` alatt, az adott fázis implementációja előtt.
 
 ## RECOMMENDED NEXT ACTION
 
-1. PO: SD-01…SD-12 megerősítése vagy módosítása.
-2. Ezt követően CG2-döntés (a DEV és a K-05 feltétel teljesült). Phase 3 csak kifejezett PO-jóváhagyással.
+Control Gate 2 jóváhagyva, Phase 2 lezárva. Következő lépés csak PO-döntéssel: Phase 3 engedélyezése és a Phase 3 autoritatív baseline elhelyezése a `docs/specs/` alatt (SD-12). Addig nincs implementációs munka.
+
+## FINAL DOCUMENTATION COMMIT
+
+A végleges jelentés tartalmát rögzítő commit hash-ét a véglegesítés után közvetlenül következő, csak ezt a sort érintő commit írja be ide: **PENDING**
 
 **STOP.**

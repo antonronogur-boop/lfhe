@@ -2,9 +2,9 @@
 
 | Field | Value |
 | --- | --- |
-| Current phase | Phase 2 — Claim Pipeline (implementation complete) |
-| Current gate | Control Gate 1 APPROVED (2026-10-11). Control Gate 2 evidence submitted (docs/control-gate-2-report.md); DEV 18/18 migrations + smoke 22/22 PASS and K-05 COMPLETED (6/8 PASS, 2 BLOCKED_BY_ROBOTS accepted by the PO) on 2026-10-19; awaiting SD-01…12 confirmation and the CG2 decision |
-| Next authorised action | **None.** Phase 3 must not start without explicit Product Owner approval |
+| Current phase | Phase 2 — Claim Pipeline: ACCEPTED AND CLOSED (2026-10-19) |
+| Current gate | **Control Gate 2 APPROVED** by the PO on 2026-10-19 (docs/control-gate-2-report.md): DEV 18/18 migrations + smoke 22/22 PASS, K-05 CLOSED and ACCEPTED (6/8 PASS; K05-03, K05-04 BLOCKED_BY_ROBOTS accepted), SD-01…SD-12 approved. Commits: implementation/CI baseline `1b31ed5`; K-05 run on `613f61a`; final documentation commit recorded in the CG2 report |
+| Next authorised action | **None.** Phase 3 must not start without explicit Product Owner approval; before any later phase its authoritative baseline must be versioned under docs/specs/ (SD-12) |
 
 ## Phase 2 progress (Addendum v1.0)
 
@@ -63,7 +63,7 @@ testing); D-06 approved conditionally (CG1-06 verification since completed: CI +
 | K-02 | Scheduler | NON-BLOCKING | pg_cron enqueue-only, calling `lfhe.enqueue_due_collections()` |
 | K-03 | Queue | NON-BLOCKING | `processing_jobs` table + `SKIP LOCKED` |
 | K-04 | Per-source retention rights | NON-BLOCKING | `retention_mode` per source; METADATA_ONLY sources cannot ground material claims (QA-D18) |
-| K-05 | Real-source collection validation (approved set K05-01…08) | COMPLETED 2026-10-19 | 6/8 PASS (F3/F4/F5); K05-03 af.mil and K05-04 defense.gov BLOCKED_BY_ROBOTS — accepted by the PO as controlled fail-closed outcome; K05-02 collected via HTTP_FETCH (PO decision); docs/k05-report-20261019.json |
+| K-05 | Real-source collection validation (approved set K05-01…08) | CLOSED and ACCEPTED 2026-10-19 | 6/8 PASS (F3/F4/F5); K05-03 af.mil and K05-04 defense.gov BLOCKED_BY_ROBOTS at the RSS discovery/list page (no feed endpoint resolved) — accepted controlled outcome; K05-02 via HTTP_FETCH instead of RSS_ATOM (PO decision); result: docs/k05-report-20261019.json (syntactically repaired copy; received copy and repair in docs/k05-report-20261019.PROVENANCE.md) |
 | K-06 | Separation of duties | NON-BLOCKING | Configurable; one person may hold several roles in the prototype, logged |
 | K-07 | Region | NON-BLOCKING | EU region default |
 | K-08 | Canonical JSON | NON-BLOCKING | RFC 8785 JCS + SHA-256 (ADR-0003) |
@@ -101,5 +101,5 @@ testing); D-06 approved conditionally (CG1-06 verification since completed: CI +
 | L-15 | QA-S18 deterministic layer uses closed marker lexicons (en, uk, ru, pl, hu, de, fr) and digit-number comparison; it is a safety net, not a semantic oracle; other languages get the quantity check only | Model self-check + human review remain; extend lexicons by controlled change |
 | L-16 | Phase 2 has no authoritative rule that makes a claim high impact (v1.2 reasons refer to Phase 3+ objects); default `high_impact = false`, humans can mark | Rules arrive with events / assessments (Phase 3–4) |
 | L-17 | `claim_status_auto_rules` is empty; no automatic corroboration exists (M04 is Phase 3) | Guard and revalidation are tested with a synthetic rule |
-| L-18 | `/claims` UI built, type-checked and unit-tested; not yet clicked through on DEV with real claims | Walkthrough after the first real extraction |
+| L-18 | `/claims` UI built, type-checked and unit-tested; not yet clicked through on DEV with real claims | Non-blocking follow-on (CG2 approved) |
 | L-19 | Instruction-like source detection is pattern based (en + a few uk/pl/hu/ru phrases) | Flag only adds human review; never removes evidence |
