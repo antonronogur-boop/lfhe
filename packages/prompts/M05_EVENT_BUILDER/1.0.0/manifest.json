@@ -1,0 +1,8 @@
+{
+  "format": "lfhe-prompt-manifest/1",
+  "module_code": "M05_EVENT_BUILDER",
+  "semver": "1.0.0",
+  "module_version": "MPP-1.2.2+P3-ADDENDUM-1.0",
+  "test_fixture": false,
+  "description": "Conservative event-structure proposals (Phase 3)."
+}

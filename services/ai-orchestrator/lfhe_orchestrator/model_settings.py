@@ -16,7 +16,7 @@ _RULES = {
 }
 # Low-variance requirement for extraction / classification modules (addendum §14).
 LOW_VARIANCE_MAX_TEMPERATURE = 0.2
-LOW_VARIANCE_MODULES = ("M02_CLAIM_EXTRACTOR", "M03_CLASSIFIER")
+LOW_VARIANCE_MODULES = ("M02_CLAIM_EXTRACTOR", "M03_CLASSIFIER", "M04_LINEAGE", "M05_EVENT_BUILDER")
 
 
 def model_settings_problems(provider: str, model: str, settings) -> list[str]:

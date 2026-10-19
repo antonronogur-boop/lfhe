@@ -13,12 +13,12 @@ FIDELITY_DIMS = ("actor", "action", "attribution", "uncertainty", "modality", "q
                  "location", "negation", "conditionality", "source_assessment_language")
 
 
-def activate_real_prompts(pg) -> dict:
-    """Register (registrar) and activate (ADMIN human) M02/M03 1.0.0. Idempotent."""
+def activate_real_prompts(pg, modules=("M02_CLAIM_EXTRACTOR", "M03_CLASSIFIER")) -> dict:
+    """Register (registrar) and activate (ADMIN human) the real 1.0.0 bundles. Idempotent."""
     admin = new_user(pg)
     grant_role(pg, admin, "ADMIN")
     ids = {}
-    for module in ("M02_CLAIM_EXTRACTOR", "M03_CLASSIFIER"):
+    for module in modules:
         bundle = load_bundle(PROMPTS / module / "1.0.0", repo_root=REPO_ROOT)
         with pg.registrar() as c:
             ids[module] = register(c, bundle, git_commit=None, git_tree_clean=False)

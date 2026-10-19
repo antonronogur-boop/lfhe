@@ -82,9 +82,22 @@ def test_update_creates_a_new_immutable_version_and_keeps_the_old_one(pg):
         assert x.execute("SELECT lfhe.event_version_stored_hash(%s) h", (v1["head_version_id"],)).fetchone()["h"] == v1["head_content_hash"]
 
 
+def test_ai_update_cannot_drop_claims_existing_ones_are_carried_forward(pg):
+    """No silent claim loss: an AI update that omits an existing claim keeps it (migration 2100);
+    existing claims need not be run inputs (they reach the model as context)."""
+    a = c1(pg)
+    event, _ = create(pg, [a])
+    b = grounded_claim(pg, T2, "2 more tanker aircraft arrived at Base North")
+    v1 = head(pg, event)["head_version_id"]
+    run = event_run(pg, [b], context_events=[event])                 # only the new claim is an input
+    out = ingest_events(pg, run, [proposal("UPDATE_EXISTING_EVENT", target=event, target_version=v1, claims=[b],
+                                           event_candidate={**candidate_event([b]),
+                                                            "claims": [{"claim_id": b["claim_id"], "role": "UPDATES"}]})])
+    assert out["outcome"] == "PROPOSALS_RECORDED"
+    assert version_claims(pg, head(pg, event)["head_version_id"]) == {a["claim_id"]: "SUPPORTS", b["claim_id"]: "UPDATES"}
+
+
 @pytest.mark.parametrize("mutate, reason", [
-    (lambda cand, a, b, v: {**cand, "claims": [{"claim_id": b["claim_id"], "role": "SUPPORTS"}]},
-     "AI_UPDATE_MAY_NOT_REMOVE_OR_RECAST_CLAIMS"),
     (lambda cand, a, b, v: {**cand, "claims": [{"claim_id": a["claim_id"], "role": "CONTEXTUALISES"},
                                                 {"claim_id": b["claim_id"], "role": "SUPPORTS"}]},
      "AI_UPDATE_MAY_NOT_REMOVE_OR_RECAST_CLAIMS"),

@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "lfhe:M04_LINEAGE:1.0.0:output",
+  "title": "M04_LINEAGE output (global output envelope)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "module",
+    "status",
+    "result",
+    "warnings",
+    "human_review_required"
+  ],
+  "properties": {
+    "module": {
+      "const": "M04_LINEAGE"
+    },
+    "status": {
+      "enum": [
+        "SUCCESS",
+        "SUCCESS_WITH_WARNINGS",
+        "INSUFFICIENT_INFORMATION",
+        "AMBIGUOUS",
+        "FAILED",
+        "HUMAN_REVIEW_REQUIRED"
+      ]
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claim_relationships",
+        "corroboration_recommendations"
+      ],
+      "properties": {
+        "claim_relationships": {
+          "type": "array",
+          "maxItems": 200,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "child_claim_id",
+              "relationship_type",
+              "parent_claim_id",
+              "parent_article_id",
+              "external_origin_name",
+              "external_origin_url",
+              "confidence",
+              "explanation"
+            ],
+            "properties": {
+              "child_claim_id": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+              },
+              "relationship_type": {
+                "enum": [
+                  "COMMON_ORIGINAL_SOURCE",
+                  "DERIVED_REPORTING"
+                ]
+              },
+              "parent_claim_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+              },
+              "parent_article_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+              },
+              "external_origin_name": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "minLength": 2,
+                "maxLength": 300
+              },
+              "external_origin_url": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 2000
+              },
+              "confidence": {
+                "enum": [
+                  "HIGH",
+                  "MODERATE",
+                  "LOW"
+                ]
+              },
+              "explanation": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              }
+            }
+          }
+        },
+        "corroboration_recommendations": {
+          "type": "array",
+          "maxItems": 200,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "claim_id",
+              "recommendation",
+              "recommended_status",
+              "supporting_claim_ids",
+              "explanation"
+            ],
+            "properties": {
+              "claim_id": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+              },
+              "recommendation": {
+                "enum": [
+                  "NO_CHANGE",
+                  "POTENTIAL_PARTIAL_CORROBORATION",
+                  "POTENTIAL_CORROBORATION",
+                  "POTENTIAL_SOURCE_DEPENDENCE",
+                  "POTENTIAL_CONTESTED"
+                ]
+              },
+              "recommended_status": {
+                "enum": [
+                  "UNVERIFIED",
+                  "PARTIALLY_CORROBORATED",
+                  "CORROBORATED",
+                  "CONFIRMED_PRIMARY",
+                  "CONTESTED",
+                  "DISPROVEN",
+                  "SUPERSEDED",
+                  null
+                ]
+              },
+              "supporting_claim_ids": {
+                "type": "array",
+                "maxItems": 50,
+                "items": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+                }
+              },
+              "explanation": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              }
+            }
+          }
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "string",
+        "maxLength": 500
+      }
+    },
+    "human_review_required": {
+      "type": "boolean"
+    }
+  }
+}

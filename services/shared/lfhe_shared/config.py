@@ -61,6 +61,8 @@ class Settings(BaseSettings):
     ai_provider: str = Field(default="anthropic", pattern=r"^(anthropic)$")
     m02_model_configuration_id: str | None = None
     m03_model_configuration_id: str | None = None
+    m04_model_configuration_id: str | None = None
+    m05_model_configuration_id: str | None = None
 
     @model_validator(mode="after")
     def _safety_rules(self) -> "Settings":
