@@ -10,6 +10,14 @@ Job types
 * ANALYSE_LINEAGE / BUILD_EVENTS (payload: claim_ids, report_mode,
   information_cutoff) → M04 / M05 proposals (Phase 3). Proposals always end
   as HUMAN_REVIEW: lineage, status and structural decisions are human-only.
+* ASSESS_RELEVANCE (object: event_version; payload: event_version_hash, report_mode,
+                  information_cutoff, baseline_code?) → M06 (Phase 4).
+* ASSESS_EVENT    (object: event_version; payload: as above + reference_context_codes?,
+                  previous_assessment_version_id?) → M07 draft; a recorded draft enqueues
+                  CHALLENGE_ASSESSMENT for its exact version + hash.
+* CHALLENGE_ASSESSMENT (object: assessment_version; payload: assessment_version_hash) → M08;
+                  ends in HUMAN_REVIEW: approval / final confidence / flag disposition are
+                  human-only database functions.
 
 Model configurations: LFHE_M02_MODEL_CONFIGURATION_ID / LFHE_M03_MODEL_CONFIGURATION_ID
 (registered rows). Provider credentials come only from the secret-managed
@@ -27,6 +35,7 @@ from lfhe_shared.jobs import Job, JobQueue, PermanentJobError, default_worker_id
 
 from .claim_inputs import InputBuildError
 from .claim_pipeline import classify_claims, extract_claims
+from .assessment_pipeline import run_assessment, run_challenge, run_relevance
 from .event_pipeline import run_event_builder, run_lineage
 from .providers import Provider
 
@@ -34,7 +43,8 @@ log = logging.getLogger("lfhe.claims.worker")
 
 
 def make_handlers(conn, queue: JobQueue, provider: Provider, *, m02_config: str | None, m03_config: str | None,
-                  worker_id: str, m04_config: str | None = None, m05_config: str | None = None) -> dict:
+                  worker_id: str, m04_config: str | None = None, m05_config: str | None = None,
+                  m06_config: str | None = None, m07_config: str | None = None, m08_config: str | None = None) -> dict:
     def extract(job: Job):
         if not m02_config:
             raise PermanentJobError("M02 model configuration is not configured")
@@ -84,10 +94,57 @@ def make_handlers(conn, queue: JobQueue, provider: Provider, *, m02_config: str 
             return "HUMAN_REVIEW" if out.outcome in review_outcomes else "SUCCESS"
         return handle
 
+    def phase4(module_config, label, call, after=None):
+        def handle(job: Job):
+            if not module_config:
+                raise PermanentJobError(f"{label} model configuration is not configured")
+            try:
+                out = call(job, module_config)
+            except (InputBuildError, KeyError, ValueError) as exc:
+                raise PermanentJobError(str(exc)) from exc
+            log.info("%s %s → %s", label, job.object_id, out.outcome)
+            if out.outcome == "PROVIDER_ERROR":
+                raise RuntimeError("provider error (recorded as model run); will retry within max_attempts")
+            if after is not None:
+                after(job, out)
+            return "SUCCESS" if out.outcome in ("RELEVANCE_RECORDED", "ASSESSMENT_RECORDED") else "HUMAN_REVIEW"
+        return handle
+
+    def cutoff_args(p):
+        return {"report_mode": p.get("report_mode"), "information_cutoff": datetime.fromisoformat(p["information_cutoff"])}
+
+    def relevance(job, mc):
+        p = job.payload
+        return run_relevance(conn, job.object_id, p["event_version_hash"], **cutoff_args(p), baseline_code=p.get("baseline_code"),
+                             model_configuration_id=mc, provider=provider, worker_id=worker_id, job_id=job.id)
+
+    def assessment(job, mc):
+        p = job.payload
+        return run_assessment(conn, job.object_id, p["event_version_hash"], **cutoff_args(p),
+                              baseline_code=p.get("baseline_code"),
+                              reference_context_codes=tuple(p.get("reference_context_codes") or ()),
+                              previous_assessment_version_id=p.get("previous_assessment_version_id"),
+                              model_configuration_id=mc, provider=provider, worker_id=worker_id, job_id=job.id)
+
+    def enqueue_challenge(job, out):
+        if out.outcome != "ASSESSMENT_RECORDED":
+            return
+        row = conn.execute("SELECT id, content_hash FROM lfhe.assessment_versions WHERE created_by_model_run_id = %s",
+                           (out.final_run_id,)).fetchone()
+        queue.enqueue("CHALLENGE_ASSESSMENT", "assessment_version", str(row["id"]), f"CHALLENGE_ASSESSMENT:{row['id']}",
+                      {"assessment_version_hash": row["content_hash"]}, max_attempts=3)
+
+    def challenge(job, mc):
+        return run_challenge(conn, job.object_id, job.payload["assessment_version_hash"], model_configuration_id=mc,
+                             provider=provider, worker_id=worker_id, job_id=job.id)
+
     review = ("OUTPUT_REJECTED", "HUMAN_REVIEW_REQUIRED", "SCHEMA_VALIDATION_FAILED", "PROPOSALS_RECORDED")
     return {"EXTRACT_CLAIMS": extract, "CLASSIFY_CLAIMS": classify,
             "ANALYSE_LINEAGE": analysis(m04_config, run_lineage, "ANALYSE_LINEAGE", review),
-            "BUILD_EVENTS": analysis(m05_config, run_event_builder, "BUILD_EVENTS", review)}
+            "BUILD_EVENTS": analysis(m05_config, run_event_builder, "BUILD_EVENTS", review),
+            "ASSESS_RELEVANCE": phase4(m06_config, "ASSESS_RELEVANCE", relevance),
+            "ASSESS_EVENT": phase4(m07_config, "ASSESS_EVENT", assessment, enqueue_challenge),
+            "CHALLENGE_ASSESSMENT": phase4(m08_config, "CHALLENGE_ASSESSMENT", challenge)}
 
 
 def main(argv: list[str] | None = None) -> int:  # pragma: no cover - process entry point
@@ -111,7 +168,10 @@ def main(argv: list[str] | None = None) -> int:  # pragma: no cover - process en
         handlers = make_handlers(conn, queue, provider, m02_config=settings.m02_model_configuration_id,
                                  m03_config=settings.m03_model_configuration_id, worker_id=worker_id,
                                  m04_config=settings.m04_model_configuration_id,
-                                 m05_config=settings.m05_model_configuration_id)
+                                 m05_config=settings.m05_model_configuration_id,
+                                 m06_config=settings.m06_model_configuration_id,
+                                 m07_config=settings.m07_model_configuration_id,
+                                 m08_config=settings.m08_model_configuration_id)
         while True:
             if args.enqueue:
                 conn.execute("SELECT lfhe.enqueue_pending_claim_extractions(50)")

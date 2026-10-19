@@ -1,0 +1,643 @@
+{
+ "description": "Phase 4 acceptance corpus for LFHÉ: synthetic, invented 'Northland' OSINT-style material written for these tests; model_output blocks are deliberately mixed (sound, naive and adversarial). Not Gold Standard material.",
+ "relevance": [
+  {
+   "id": "R01",
+   "claim": {
+    "text": "The air force said 6 long-range radars were installed at Fort Aster.",
+    "exact": "6 long-range radars were installed at Fort Aster"
+   },
+   "output": {},
+   "expect": "RELEVANCE_RECORDED"
+  },
+  {
+   "id": "R02",
+   "claim": {
+    "text": "The ministry said a military parade took place in the Northland capital.",
+    "exact": "a military parade took place in the Northland capital"
+   },
+   "output": {
+    "military_significance": 1,
+    "novelty_change": 0,
+    "hu_nato_relevance_score": 0,
+    "strategic_relevance": 0,
+    "time_sensitivity": 0,
+    "applicable_pir_ids": [],
+    "recommendation": "BACKGROUND_ONLY",
+    "automatic_assessment_recommended": false,
+    "hu_nato_dimensions": [],
+    "hu_nato_evidence_claim_ids": [],
+    "hu_nato_relevance_rationale": "No material HU/NATO relevance established from supplied evidence: the claim concerns a domestic parade only."
+   },
+   "expect": "RELEVANCE_RECORDED",
+   "low": true,
+   "promote": true
+  },
+  {
+   "id": "R03",
+   "claim": {
+    "text": "The air force said 2 fighter jets were moved to Fort Aster.",
+    "exact": "2 fighter jets were moved to Fort Aster"
+   },
+   "output": {
+    "hu_nato_relevance_rationale": "Important for NATO."
+   },
+   "expect": "OUTPUT_REJECTED:HU_NATO_RATIONALE_GENERIC"
+  },
+  {
+   "id": "R04",
+   "claim": {
+    "text": "The navy said 3 drones were tested near Port Vell.",
+    "exact": "3 drones were tested near Port Vell"
+   },
+   "output": {
+    "applicable_pir_ids": [
+     "PIR_09"
+    ]
+   },
+   "expect": "SCHEMA_VALIDATION_FAILED"
+  },
+  {
+   "id": "R05",
+   "claim": {
+    "text": "The ministry said 1 radar was relocated to Fort Aster.",
+    "exact": "1 radar was relocated to Fort Aster"
+   },
+   "output": {
+    "hu_nato_relevance_score": 0,
+    "hu_nato_dimensions": [],
+    "hu_nato_evidence_claim_ids": [],
+    "hu_nato_relevance_rationale": "n/a"
+   },
+   "expect": "OUTPUT_REJECTED:HU_NATO_NOT_ESTABLISHED_STATEMENT_REQUIRED"
+  }
+ ],
+ "assessments": [
+  {
+   "id": "A01",
+   "claims": {
+    "a": {
+     "text": "The air force said 4 tanker aircraft arrived at Fort Aster.",
+     "exact": "4 tanker aircraft arrived at Fort Aster"
+    },
+    "d": {
+     "text": "A spokesman denied that any tanker aircraft arrived at Fort Aster.",
+     "exact": "denied that any tanker aircraft arrived at Fort Aster"
+    }
+   },
+   "roles": {
+    "d": "CONTRADICTS"
+   },
+   "statements": [
+    {
+     "local": "AS1",
+     "type": "KNOWN_FACT",
+     "text": "The air force reported that 4 tanker aircraft arrived at Fort Aster.",
+     "prov": "CASE_EVIDENCE",
+     "claims": [
+      "a"
+     ],
+     "contra": [],
+     "premises": [],
+     "evidence": null,
+     "attr": null,
+     "attr_text": "The air force reported"
+    },
+    {
+     "local": "AS2",
+     "type": "ALTERNATIVE_EXPLANATION",
+     "text": "The arrival may not have happened; a spokesman denied it.",
+     "prov": "CASE_EVIDENCE",
+     "claims": [
+      "a"
+     ],
+     "contra": [
+      "d"
+     ],
+     "premises": [],
+     "evidence": false,
+     "attr": null,
+     "attr_text": null
+    },
+    {
+     "local": "AS3",
+     "type": "ANALYTIC_JUDGMENT",
+     "text": "Northland is probably expanding air-refuelling support at Fort Aster.",
+     "prov": "CASE_EVIDENCE",
+     "claims": [
+      "a"
+     ],
+     "contra": [],
+     "premises": [
+      "AS1"
+     ],
+     "evidence": true,
+     "attr": null,
+     "attr_text": null
+    },
+    {
+     "local": "AS4",
+     "type": "INFORMATION_GAP",
+     "text": "It is unknown how long the aircraft will remain.",
+     "prov": "NONE_REQUIRED",
+     "claims": [],
+     "contra": [],
+     "premises": [],
+     "evidence": false,
+     "attr": null,
+     "attr_text": null
+    }
+   ],
+   "confidence": "MODERATE",
+   "expect": "ASSESSMENT_RECORDED",
+   "review": "APPROVE"
+  },
+  {
+   "id": "A02",
+   "claims": {
+    "a": {
+     "text": "The air force said 4 tanker aircraft arrived at Fort Aster.",
+     "exact": "4 tanker aircraft arrived at Fort Aster"
+    }
+   },
+   "statements": [
+    {
+     "local": "AS1",
+     "type": "KNOWN_FACT",
+     "text": "The air force reported that 4 tanker aircraft arrived at Fort Aster.",
+     "prov": "CASE_EVIDENCE",
+     "claims": [
+      "a"
+     ],
+     "contra": [],
+     "premises": [],
+     "evidence": null,
+     "attr": null,
+     "attr_text": "The air force reported"
+    },
+    {
+     "local": "AS2",
+     "type": "ASSUMPTION",
+     "text": "The tankers are assumed to belong to the regular refuelling squadron.",
+     "prov": "NONE_REQUIRED",
+     "claims": [],
+     "contra": [],
+     "premises": [],
+     "evidence": false,
+     "attr": null,
+     "attr_text": null
+    },
+    {
+     "local": "AS3",
+     "type": "ANALYTIC_JUDGMENT",
+     "text": "Northland may be testing tanker support at Fort Aster.",
+     "prov": "CASE_EVIDENCE",
+     "claims": [
+      "a"
+     ],
+     "contra": [],
+     "premises": [
+      "AS1",
+      "AS2"
+     ],
+     "evidence": true,
+     "attr": null,
+     "attr_text": null
+    }
+   ],
+   "confidence": "LOW",
+   "expect": "ASSESSMENT_RECORDED",
+   "review": "MODIFY_AND_APPROVE"
+  },
+  {
+   "id": "A03",
+   "claims": {
+    "a": {
+     "text": "The air force said 4 tanker aircraft arrived at Fort Aster.",
+     "exact": "4 tanker aircraft arrived at Fort Aster"
+    }
+   },
+   "statements": [
+    {
+     "local": "AS1",
+     "type": "KNOWN_FACT",
+     "text": "Northland now bases 4 tankers at Fort Aster.",
+     "prov": "NONE_REQUIRED",
+     "claims": [],
+     "contra": [],
+     "premises": [],
+     "evidence": true,
+     "attr": null,
+     "attr_text": null
+    }
+   ],
+   "expect": "OUTPUT_REJECTED:FACTUAL_STATEMENT_WITHOUT_EVIDENCE"
+  },
+  {
+   "id": "A04",
+   "claims": {
+    "a": {
+     "text": "The air force said 4 tanker aircraft arrived at Fort Aster.",
+     "exact": "4 tanker aircraft arrived at Fort Aster"
+    }
+   },
+   "statements": [
+    {
+     "local": "AS1",
+     "type": "KNOWN_FACT",
+     "text": "The air force reported 4 tankers at Fort Aster.",
+     "prov": "CASE_EVIDENCE",
+     "claims": [
+      "a",
+      "x"
+     ],
+     "contra": [],
+     "premises": [],
+     "evidence": null,
+     "attr": null,
+     "attr_text": "The air force reported"
+    }
+   ],
+   "outside_claim": {
+    "x": {
+     "text": "A blog said 9 bombers are at Fort Aster.",
+     "exact": "9 bombers are at Fort Aster"
+    }
+   },
+   "expect": "OUTPUT_REJECTED:EVIDENCE_NOT_SUPPLIED"
+  },
+  {
+   "id": "A05",
+   "claims": {
+    "a": {
+     "text": "The air force said 4 tanker aircraft arrived at Fort Aster.",
+     "exact": "4 tanker aircraft arrived at Fort Aster"
+    }
+   },
+   "statements": [
+    {
+     "local": "AS1",
+     "type": "KNOWN_FACT",
+     "text": "The tankers arrived at Fort Aster because of the NATO exercise.",
+     "prov": "CASE_EVIDENCE",
+     "claims": [
+      "a"
+     ],
+     "contra": [],
+     "premises": [],
+     "evidence": null,
+     "attr": null,
+     "attr_text": "The air force reported"
+    }
+   ],
+   "expect": "OUTPUT_REJECTED:UNSUPPORTED_CAUSALITY_AS_FACT"
+  },
+  {
+   "id": "A06",
+   "claims": {
+    "a": {
+     "text": "The air force said 4 tanker aircraft arrived at Fort Aster.",
+     "exact": "4 tanker aircraft arrived at Fort Aster"
+    }
+   },
+   "statements": [
+    {
+     "local": "AS1",
+     "type": "KNOWN_FACT",
+     "text": "The air force reported that 4 tanker aircraft arrived at Fort Aster.",
+     "prov": "CASE_EVIDENCE",
+     "claims": [
+      "a"
+     ],
+     "contra": [],
+     "premises": [],
+     "evidence": null,
+     "attr": null,
+     "attr_text": "The air force reported"
+    },
+    {
+     "local": "AS2",
+     "type": "KNOWN_FACT",
+     "text": "No fighter aircraft have been reported at Fort Aster.",
+     "prov": "CASE_EVIDENCE",
+     "claims": [
+      "a"
+     ],
+     "contra": [],
+     "premises": [],
+     "evidence": null,
+     "attr": null,
+     "attr_text": "The air force reported"
+    }
+   ],
+   "expect": "OUTPUT_REJECTED:NEGATIVE_EVIDENCE_FROM_SILENCE"
+  },
+  {
+   "id": "A07",
+   "claims": {
+    "a": {
+     "text": "The air force said 4 tanker aircraft arrived at Fort Aster.",
+     "exact": "4 tanker aircraft arrived at Fort Aster"
+    },
+    "d": {
+     "text": "A spokesman denied that any tanker aircraft arrived at Fort Aster.",
+     "exact": "denied that any tanker aircraft arrived at Fort Aster"
+    }
+   },
+   "roles": {
+    "d": "CONTRADICTS"
+   },
+   "statements": [
+    {
+     "local": "AS1",
+     "type": "KNOWN_FACT",
+     "text": "The air force reported that 4 tanker aircraft arrived at Fort Aster.",
+     "prov": "CASE_EVIDENCE",
+     "claims": [
+      "a"
+     ],
+     "contra": [],
+     "premises": [],
+     "evidence": null,
+     "attr": null,
+     "attr_text": "The air force reported"
+    },
+    {
+     "local": "AS3",
+     "type": "ANALYTIC_JUDGMENT",
+     "text": "Northland is probably expanding air-refuelling support at Fort Aster.",
+     "prov": "CASE_EVIDENCE",
+     "claims": [
+      "a"
+     ],
+     "contra": [],
+     "premises": [
+      "AS1"
+     ],
+     "evidence": true,
+     "attr": null,
+     "attr_text": null
+    }
+   ],
+   "expect": "OUTPUT_REJECTED:CONTRADICTION_OMITTED"
+  },
+  {
+   "id": "A08",
+   "claims": {
+    "m": {
+     "text": "The ministry said 6 radars were installed at Fort Aster.",
+     "exact": "6 radars were installed at Fort Aster"
+    },
+    "n": {
+     "text": "Citing the ministry, a site says 6 radars were installed at Fort Aster.",
+     "exact": "6 radars were installed at Fort Aster"
+    }
+   },
+   "lineage": [
+    [
+     "n",
+     "m"
+    ]
+   ],
+   "statements": [
+    {
+     "local": "AS1",
+     "type": "KNOWN_FACT",
+     "text": "The ministry said 6 radars were installed at Fort Aster.",
+     "prov": "CASE_EVIDENCE",
+     "claims": [
+      "m",
+      "n"
+     ],
+     "contra": [],
+     "premises": [],
+     "evidence": null,
+     "attr": null,
+     "attr_text": "The ministry said"
+    },
+    {
+     "local": "AS2",
+     "type": "ANALYTIC_JUDGMENT",
+     "text": "Air surveillance near Fort Aster is likely improving.",
+     "prov": "CASE_EVIDENCE",
+     "claims": [
+      "m",
+      "n"
+     ],
+     "contra": [],
+     "premises": [
+      "AS1"
+     ],
+     "evidence": true,
+     "attr": null,
+     "attr_text": null
+    }
+   ],
+   "confidence": "HIGH",
+   "expect": "OUTPUT_REJECTED:CONFIDENCE_INFLATION_SINGLE_LINEAGE"
+  },
+  {
+   "id": "A09",
+   "claims": {
+    "o": {
+     "text": "An analyst wrote that Northland will soon double its tanker fleet.",
+     "exact": "Northland will soon double its tanker fleet",
+     "source_statement_status": "SOURCE_EXPECTATION",
+     "corroborate": true
+    }
+   },
+   "statements": [
+    {
+     "local": "AS1",
+     "type": "KNOWN_FACT",
+     "text": "Northland will soon double its tanker fleet.",
+     "prov": "CASE_EVIDENCE",
+     "claims": [
+      "o"
+     ],
+     "contra": [],
+     "premises": [],
+     "evidence": null,
+     "attr": false,
+     "attr_text": null
+    }
+   ],
+   "expect": "OUTPUT_REJECTED:ATTRIBUTION_CONTRADICTS_WORKFLOW_STATE"
+  },
+  {
+   "id": "A10",
+   "claims": {
+    "a": {
+     "text": "The air force said 4 tanker aircraft arrived at Fort Aster.",
+     "exact": "4 tanker aircraft arrived at Fort Aster"
+    }
+   },
+   "statements": [
+    {
+     "local": "AS1",
+     "type": "KNOWN_FACT",
+     "text": "The air force reported that 4 tanker aircraft arrived at Fort Aster.",
+     "prov": "CASE_EVIDENCE",
+     "claims": [
+      "a"
+     ],
+     "contra": [],
+     "premises": [],
+     "evidence": null,
+     "attr": null,
+     "attr_text": "The air force reported"
+    }
+   ],
+   "extra": {
+    "final_analytic_confidence": "HIGH"
+   },
+   "expect": "SCHEMA_VALIDATION_FAILED"
+  },
+  {
+   "id": "A11",
+   "claims": {
+    "a": {
+     "text": "The air force said 4 tanker aircraft arrived at Fort Aster.",
+     "exact": "4 tanker aircraft arrived at Fort Aster"
+    }
+   },
+   "statements": [
+    {
+     "local": "AS1",
+     "type": "KNOWN_FACT",
+     "text": "The air force reported that 4 tanker aircraft arrived at Fort Aster.",
+     "prov": "CASE_EVIDENCE",
+     "claims": [
+      "a"
+     ],
+     "contra": [],
+     "premises": [],
+     "evidence": null,
+     "attr": null,
+     "attr_text": "The air force reported"
+    },
+    {
+     "local": "AS2",
+     "type": "IMPLICATION",
+     "text": "NATO should strike the tanker base at Fort Aster.",
+     "prov": "CASE_EVIDENCE",
+     "claims": [
+      "a"
+     ],
+     "contra": [],
+     "premises": [],
+     "evidence": true,
+     "attr": null,
+     "attr_text": null
+    }
+   ],
+   "expect": "OUTPUT_REJECTED:OPERATIONAL_RECOMMENDATION_PROHIBITED"
+  },
+  {
+   "id": "A12",
+   "claims": {
+    "a": {
+     "text": "The air force said 4 tanker aircraft arrived at Fort Aster.",
+     "exact": "4 tanker aircraft arrived at Fort Aster"
+    }
+   },
+   "statements": [
+    {
+     "local": "AS1",
+     "type": "KNOWN_FACT",
+     "text": "The air force reported that 4 tanker aircraft arrived at Fort Aster.",
+     "prov": "CASE_EVIDENCE",
+     "claims": [
+      "a"
+     ],
+     "contra": [],
+     "premises": [],
+     "evidence": null,
+     "attr": null,
+     "attr_text": "The air force reported"
+    },
+    {
+     "local": "AS2",
+     "type": "ANALYTIC_JUDGMENT",
+     "text": "Northland intends to dominate the region.",
+     "prov": "NONE_REQUIRED",
+     "claims": [],
+     "contra": [],
+     "premises": [],
+     "evidence": false,
+     "attr": null,
+     "attr_text": null
+    }
+   ],
+   "expect": "OUTPUT_REJECTED:JUDGMENT_WITHOUT_PREMISES"
+  },
+  {
+   "id": "A13",
+   "claims": {
+    "a": {
+     "text": "The air force said 4 tanker aircraft arrived at Fort Aster.",
+     "exact": "4 tanker aircraft arrived at Fort Aster"
+    }
+   },
+   "statements": [
+    {
+     "local": "AS1",
+     "type": "KNOWN_FACT",
+     "text": "The air force reported that 4 tanker aircraft arrived at Fort Aster.",
+     "prov": "CASE_EVIDENCE",
+     "claims": [
+      "a"
+     ],
+     "contra": [],
+     "premises": [],
+     "evidence": null,
+     "attr": null,
+     "attr_text": "The air force reported"
+    },
+    {
+     "local": "AS3",
+     "type": "ANALYTIC_JUDGMENT",
+     "text": "Northland is probably expanding air-refuelling support at Fort Aster.",
+     "prov": "CASE_EVIDENCE",
+     "claims": [
+      "a"
+     ],
+     "contra": [],
+     "premises": [
+      "AS1"
+     ],
+     "evidence": true,
+     "attr": null,
+     "attr_text": null
+    }
+   ],
+   "confidence": "MODERATE",
+   "expect": "ASSESSMENT_RECORDED",
+   "review": "REJECT",
+   "challenge": [
+    {
+     "flag_type": "OVERCONFIDENCE",
+     "severity": "MAJOR",
+     "affected_statement_local_id": "AS3",
+     "affected_field": null,
+     "explanation": "One official claim does not support MODERATE confidence.",
+     "recommended_action": "LOWER_CONFIDENCE",
+     "evidence_claim_ids": []
+    }
+   ]
+  }
+ ],
+ "replay": {
+  "cutoff": "2026-03-01T00:00:00+00:00",
+  "pre": {
+   "text": "The air force said 2 tanker aircraft were based at Fort Aster.",
+   "exact": "2 tanker aircraft were based at Fort Aster",
+   "available_at": "2026-01-10T08:00:00+00:00"
+  },
+  "post": {
+   "text": "The air force said 8 tanker aircraft were based at Fort Aster.",
+   "exact": "8 tanker aircraft were based at Fort Aster",
+   "available_at": "2026-05-10T08:00:00+00:00"
+  }
+ }
+}
