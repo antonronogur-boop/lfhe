@@ -1,11 +1,11 @@
 # LFHÉ — CONTROL GATE 2 REPORT (Phase 2 — Claim Pipeline)
 
-**Dátum:** 2026-10-11 · **Alap:** Phase 2 Authoritative Baseline Addendum v1.0 (PO), Module Prompt Pack v1.2 (+v1.1/v1.2.1/v1.2.2 deltas az addendum szerint), jóváhagyott CG0-architektúra · **Repository:** `antonronogur-boop/lfhe` (privát) · **Kód-commit:** `1b31ed5` (CI PASS, run 38170860745)
+**Dátum:** 2026-10-11, frissítve 2026-10-19 (DEV + K-05 eredmények) · **Alap:** Phase 2 Authoritative Baseline Addendum v1.0 (PO), Module Prompt Pack v1.2 (+v1.1/v1.2.1/v1.2.2 deltas az addendum szerint), jóváhagyott CG0-architektúra · **Repository:** `antonronogur-boop/lfhe` (privát) · **Kód-commit:** `1b31ed5` (CI PASS, run 38170860745)
 
 ## PHASE / GATE
 
 Phase 2 — Claim Pipeline: **megvalósítva**. Control Gate 2: **evidence benyújtva, PO-döntésre vár.** Phase 3 nem kezdődött el.
-A végső CG2-jóváhagyás két, a PO gépén futtatandó lépésen múlik: **(1) DEV migráció + smoke** (Phase 2 ellenőrzésekkel), **(2) K-05 valós forrás validáció**. Egyik sem futtatható ebből a környezetből (nincs kimenő hozzáférés a forrásokhoz és nincs DEV-hitelesítő).
+A PO gépén futtatott két lépés **elkészült (2026-10-19)**: **(1) DEV migráció + smoke: 18/18 migráció, smoke 22/22 PASS**; **(2) K-05: lezárva — 6/8 PASS, 2 BLOCKED_BY_ROBOTS, a PO elfogadta kontrollált, szabályszerű elutasításként (A döntés)**. Nyitott PO-döntés: SD-01…SD-12 megerősítése.
 
 ## IMPLEMENTED
 
@@ -41,7 +41,7 @@ A végső CG2-jóváhagyás két, a PO gépén futtatandó lépésen múlik: **(
 | `…1600_claims_pipeline` | Enumok (claim_type 17, claim_status 7, source_statement_status 6, evidence_type, evidence_directness, entity_type, …); `taxonomy_items` (62, változtathatatlan); `claims` + `claim_grounding_problems` + BEFORE INSERT trigger; `claim_extraction_results/_rejections`; `claim_status_history`, `claim_status_auto_rules` (üres), `claim_high_impact`, `claim_revalidations(+_decisions)`; `claim_reviews` (FK claim_id+claim_hash); `entities`, `entity_aliases`, `entity_mentions`, `entity_links`, `entity_relationships`; `claim_classification_results`, `taxonomy_assignments`; nézetek `claim_state`, `claim_status_usability`, `entity_mention_resolution`, `claim_entities`; worker- és HUMAN_ONLY függvények; RLS (`CLAIM_READ`); új jogosultságok `CLAIM_READ`, `ENTITY_MANAGE`; audit eseménytípusok |
 | `…1700_claim_jobs` | job típusok EXTRACT_CLAIMS / CLASSIFY_CLAIMS; `enqueue_pending_claim_extractions` (idempotens: text representation + aktív promptverzió); review-flag lista bővítése `SOURCE_CONTAINS_INSTRUCTION_LIKE_TEXT`-tel |
 
-Minden migráció tranzakciós, append-only, checksummel (D-01). **DEV-en még nincs alkalmazva** (lásd OPEN ITEMS).
+Minden migráció tranzakciós, append-only, checksummel (D-01). **DEV-en alkalmazva 2026-10-19** (`applied` mindhárom; összesen 18 migráció).
 
 ## PROMPTS / SCHEMAS ADDED OR CHANGED
 
@@ -69,7 +69,9 @@ Minden migráció tranzakciós, append-only, checksummel (D-01). **DEV-en még n
 - Web: `tsc --noEmit`, vitest, `next build` (helyben és CI-ban).
 - gitleaks a teljes git-előzményen + `scripts/secret_scan.py`; prompt-lock ellenőrzés.
 - Elfogadási korpusz metrikák JSON-ba írva (`LFHE_ACCEPTANCE_REPORT`).
-- **Nem futott:** DEV Supabase migráció/smoke (PO), K-05 (PO), valós provider-hívás.
+- **DEV Supabase (PO gépéről, 2026-10-19):** migráció + `scripts/supabase_dev_smoke.py` → **22/22 PASS**, köztük 6 új Phase 2 ellenőrzés (taxonómia 62 elem; VIEWER olvas claimet; anon nem; VIEWER / ADMIN nem rögzíthet review-t: HTTP 403; ember nem hívhatja a worker ingest függvényt: HTTP 403). Audit hash-lánc ellenőrizve (26 bejegyzés, head `36b9a6a2…`); pg_cron ütemezés aktív. A VIEWER jogosultságai: `ARTICLE_READ, CLAIM_READ, SOURCE_READ`.
+- **K-05 (PO gépéről, 2026-10-19 11:24 UTC, kód-commit `613f61a`):** lásd K-05 STATUS; nyers eredmény: `docs/k05-report-20261019.json`.
+- **Nem futott:** valós provider-hívás (L-09).
 
 ## TEST RESULTS
 
@@ -95,10 +97,10 @@ Tesztelési hibák a fejlesztés során (transzparensen): a P2-01 commit egy egy
 | 6 | Non-human execution of human-only review transitions = 0 | **PASS — 0** (+ 9/9 nem-emberi kísérlet elutasítva) |
 | 7 | Forced resolution of ambiguous entity fixtures = 0 | **PASS — 0** |
 | 8 | Invented taxonomy IDs accepted = 0 | **PASS — 0** |
-| 9 | Minden Phase 2 migráció, unit, integration, security teszt átmegy | **PASS** (lokális DB + CI); DEV-alkalmazás: **PENDING (PO)** |
+| 9 | Minden Phase 2 migráció, unit, integration, security teszt átmegy | **PASS** (lokális DB + CI + DEV: 18/18 migráció, smoke 22/22) |
 | 10 | Prompt/model/run traceability teljes | **PASS** |
 | 11 | Phase 1 security/provenance csomag továbbra is átmegy | **PASS** |
-| 12 | K-05 valós forrás validáció a végső CG2-jóváhagyás előtt | **OPEN** — script + runbook kész, PO-futtatás szükséges |
+| 12 | K-05 valós forrás validáció a végső CG2-jóváhagyás előtt | **COMPLETED** — 6/8 PASS; K05-03, K05-04 BLOCKED_BY_ROBOTS, PO által elfogadott kontrollált elutasítás |
 
 ## UNSUPPORTED CLAIM COUNT
 
@@ -144,7 +146,25 @@ Tesztelési hibák a fejlesztés során (transzparensen): a P2-01 commit egy egy
 
 ## K-05 STATUS
 
-**OPEN.** A jóváhagyott forráskészlet (K05-01…08) validálásához elkészült: `scripts/k05_validate_sources.py`, `scripts/k05_sources.template.json`, `docs/runbooks/k05-real-source-validation.md`. A script feed/sitemap URL-t soha nem talál ki: csak a PO által megerősített hivatalos oldalról olvassa ki és ellenőrzi; nem egyértelmű/nem található → `SOURCE_CONFIGURATION_UNRESOLVED`; robots-tiltás, 401/403 → jelentve, nincs megkerülés; két job-alapú futás forrásonként, F3/F4/F5 + nyelv; a végén a K-05 források deaktiválódnak. A felfedező logika és a kétfutásos értékelés a helyi szintetikus oldalon tesztelt (4 teszt). Valós futás: PO gépén.
+**COMPLETED (2026-10-19) — PO-döntés: az eredmény elfogadva (A).** A script összesítése szabály szerint `NOT PASSED` (nem minden forrás PASS); a két nem-PASS forrás kontrollált, szabályszerű elutasítás, nem rendszerhiba.
+
+| ID | Forrás | Mód / végpont (a PO által megerősített oldalról) | F3 | F4 | F5 | Nyelv | Eredmény |
+|---|---|---|---|---|---|---|---|
+| K05-01 | UK MoD | RSS_ATOM — `gov.uk/…/ministry-of-defence.atom` (az oldal maga a feed) | PASS | PASS | PASS | en | **PASS** (5 új → 5 duplikátum) |
+| K05-02 | NATO News | **HTTP_FETCH** — `nato.int/en/news-and-events/articles/news` | PASS | PASS | PASS | en | **PASS** |
+| K05-03 | U.S. Air Force | RSS_ATOM — `af.mil/RSS/` | – | – | – | – | **BLOCKED_BY_ROBOTS** (robots.txt tiltja az RSS-listaoldalt) |
+| K05-04 | U.S. DoD | RSS_ATOM — `defense.gov/news/rss/` | – | – | – | – | **BLOCKED_BY_ROBOTS** (robots.txt tiltja az RSS-listaoldalt) |
+| K05-05 | Lengyel MoD | HTTP_FETCH — `gov.pl/web/obrona-narodowa/aktualnosci5` | PASS | PASS | PASS | pl | **PASS** |
+| K05-06 | Ukrán MoD | HTTP_FETCH — `mod.gov.ua/news` | PASS | PASS | PASS | uk | **PASS** |
+| K05-07 | Saab | STRUCTURED_FEED — `robots.txt` → egyetlen `sitemap.xml` | PASS | PASS | PASS | en | **PASS** (5 → 5 duplikátum) |
+| K05-08 | KONGSBERG | STRUCTURED_FEED — `kogmap.xml` (urlset) | PASS | PASS | PASS | en | **PASS** (5 → 5 duplikátum) |
+
+- **F3** (ütemezett COLLECT_SOURCE job gyűjt): 6/6 PASS. **F4** (teljes provenance, PERMITTED_EXCERPT, eredeti nyelvű szövegkivonat, végső URL a forrás domainjén): 6/6 PASS, 0 probléma. **F5** (második futás): 6/6 PASS — csak DUPLICATE, 0 új, 0 azonos-állapotú duplikált snapshot.
+- Nyelv: a lengyel és az ukrán forrás eredeti nyelven (`pl`, `uk`) került tárolásra.
+- robots.txt: két forrásnál a gyűjtő a tiltást betartotta, megkerülés nem történt (fail-closed, PO K-05 szabály).
+- Eltérés a jóváhagyott készlettől (PO-döntés): **K05-02** gyűjtési módja RSS helyett HTTP_FETCH (a hírek főoldala).
+- A futás végén mind a 8 K-05 forrás deaktiválva lett (újraaktiválás külön, auditált emberi döntés).
+- Eszközök: `scripts/k05_validate_sources.py`, `scripts/k05_sources.template.json`, `docs/runbooks/k05-real-source-validation.md`; nyers eredmény: `docs/k05-report-20261019.json`.
 
 ## KNOWN FAILURES
 
@@ -188,17 +208,17 @@ Nincs blokkoló ellentmondás, ezért formális CHANGE REQUEST nincs. Az SD-01�
 
 ## OPEN ITEMS
 
-1. **DEV Supabase:** `20261011001500/1600/1700` alkalmazása + smoke (új Phase 2 ellenőrzésekkel) — PO futtatja.
-2. **K-05** valós forrás validáció — PO futtatja (runbook).
-3. **Valós provider-próba (L-09):** egy DEV-szöveg M02/M03 feldolgozása valódi kulccsal — PO döntés és titokkezelés kell.
-4. Teljes v1.1 / v1.2.1 / v1.2.2 delta-szövegek tárolása a `docs/specs/` alatt (SD-12).
-5. High-impact szabályok (L-16), automatikus státuszszabályok (L-17) — Phase 3+.
-6. `/claims` UI végigkattintása DEV-en valós claimekkel (L-18).
+1. ~~DEV Supabase migráció + smoke~~ — **kész** (2026-10-19, 22/22 PASS).
+2. ~~K-05~~ — **lezárva** (6/8 PASS, 2 BLOCKED_BY_ROBOTS elfogadva). K05-03 / K05-04 későbbi bevonása csak a robots.txt által engedélyezett, a PO által a hivatalos oldalról kimásolt feed-címmel lehetséges (külön döntés).
+3. **SD-01…SD-12** PO-megerősítése.
+4. **Valós provider-próba (L-09):** egy DEV-szöveg M02/M03 feldolgozása valódi kulccsal — PO döntés és titokkezelés kell.
+5. Teljes v1.1 / v1.2.1 / v1.2.2 delta-szövegek tárolása a `docs/specs/` alatt (SD-12).
+6. High-impact szabályok (L-16), automatikus státuszszabályok (L-17) — Phase 3+.
+7. `/claims` UI végigkattintása DEV-en valós claimekkel (L-18).
 
 ## RECOMMENDED NEXT ACTION
 
-1. PO: DEV migráció + smoke, majd K-05 futtatás a runbook szerint; az eredmények visszaküldése.
-2. PO: SD-01…SD-12 megerősítése vagy módosítása.
-3. Ezek után CG2-döntés. Phase 3 csak kifejezett PO-jóváhagyással.
+1. PO: SD-01…SD-12 megerősítése vagy módosítása.
+2. Ezt követően CG2-döntés (a DEV és a K-05 feltétel teljesült). Phase 3 csak kifejezett PO-jóváhagyással.
 
 **STOP.**

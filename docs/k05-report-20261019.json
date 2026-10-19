@@ -1,0 +1,431 @@
+{
+  "k05_run": "20261019T112417Z",
+  "environment": "DEV",
+  "git_commit": "613f61ad8320d199f0de58e53f5f5133638d0c71",
+  "sources": [
+    {
+      "id": "K05-01",
+      "name": "UK Ministry of Defence",
+      "domain": "gov.uk",
+      "method": "RSS_ATOM",
+      "discovery_page": "https://www.gov.uk/government/organisations/ministry-of-defence.atom",
+      "expected_language": "en",
+      "resolution": {
+        "method": "DISCOVERY_PAGE_IS_FEED",
+        "candidates": [
+          "https://www.gov.uk/government/organisations/ministry-of-defence.atom"
+        ]
+      },
+      "resolved_endpoint": "https://www.gov.uk/government/organisations/ministry-of-defence.atom",
+      "source_id": "fbfa08e3-bb2c-4dd6-b352-ae24ac015506",
+      "passes": [
+        {
+          "label": "pass1",
+          "job_id": "f975c80d-7532-4e2d-a4fa-701cf48bdfe0",
+          "job_status": "SUCCESS",
+          "job_error": "",
+          "run_id": "5b28a017-ae2c-4195-96cf-03546f5b3be4",
+          "status": "SUCCESS",
+          "counts": {
+            "discovered": 5,
+            "new": 5,
+            "revised": 0,
+            "duplicate": 0,
+            "skipped": 0,
+            "failed": 0
+          },
+          "error_code": null,
+          "job_id_run": "f975c80d-7532-4e2d-a4fa-701cf48bdfe0"
+        },
+        {
+          "label": "pass2",
+          "job_id": "7c476f04-ee6f-4716-a5c7-2c986e37e4ff",
+          "job_status": "SUCCESS",
+          "job_error": "",
+          "run_id": "e0bcee15-79b1-4e01-86f5-68b240061cea",
+          "status": "SUCCESS",
+          "counts": {
+            "discovered": 5,
+            "new": 0,
+            "revised": 0,
+            "duplicate": 5,
+            "skipped": 0,
+            "failed": 0
+          },
+          "error_code": null,
+          "job_id_run": "7c476f04-ee6f-4716-a5c7-2c986e37e4ff"
+        }
+      ],
+      "F3_job_collection": "PASS",
+      "F4_provenance_complete": "PASS",
+      "F5_second_pass_no_uncontrolled_duplicates": "PASS",
+      "language_as_expected": true,
+      "snapshots": 5,
+      "text_languages": [
+        "en"
+      ],
+      "duplicate_state_groups": 0,
+      "f4_problems": [],
+      "f5_note": "pass 2: new=0 revised=0 duplicate=5 (new items published between passes are reported, not hidden)",
+      "status": "PASS"
+    },
+    {
+      "id": "K05-02",
+      "name": "NATO News",
+      "domain": "nato.int",
+      "method": "HTTP_FETCH",
+      "discovery_page": "https://www.nato.int/en/news-and-events/articles/news",
+      "expected_language": "en",
+      "resolution": {
+        "method": "DISCOVERY_PAGE_ITSELF"
+      },
+      "resolved_endpoint": "https://www.nato.int/en/news-and-events/articles/news",
+      "source_id": "b2127bb0-5225-4d7b-ab36-954f90f1e5f7",
+      "passes": [
+        {
+          "label": "pass1",
+          "job_id": "32f48323-99d6-448f-a6ca-7ca44900941a",
+          "job_status": "SUCCESS",
+          "job_error": "",
+          "run_id": "ba1076c0-d3ba-4ea2-b7df-a150d99d37e6",
+          "status": "SUCCESS",
+          "counts": {
+            "discovered": 1,
+            "new": 1,
+            "revised": 0,
+            "duplicate": 0,
+            "skipped": 0,
+            "failed": 0
+          },
+          "error_code": null,
+          "job_id_run": "32f48323-99d6-448f-a6ca-7ca44900941a"
+        },
+        {
+          "label": "pass2",
+          "job_id": "0b4ced67-072c-4233-9b36-1a5945538f4e",
+          "job_status": "SUCCESS",
+          "job_error": "",
+          "run_id": "62ea8392-41ce-4f72-90bb-16ce8d40c862",
+          "status": "SUCCESS",
+          "counts": {
+            "discovered": 1,
+            "new": 0,
+            "revised": 0,
+            "duplicate": 1,
+            "skipped": 0,
+            "failed": 0
+          },
+          "error_code": null,
+          "job_id_run": "0b4ced67-072c-4233-9b36-1a5945538f4e"
+        }
+      ],
+      "F3_job_collection": "PASS",
+      "F4_provenance_complete": "PASS",
+      "F5_second_pass_no_uncontrolled_duplicates": "PASS",
+      "language_as_expected": true,
+      "snapshots": 1,
+      "text_languages": [
+        "en"
+      ],
+      "duplicate_state_groups": 0,
+      "f4_problems": [],
+      "f5_note": "pass 2: new=0 revised=0 duplicate=1 (new items published between passes are reported, not hidden)",
+      "status": "PASS"
+    },
+    {
+      "id": "K05-03",
+      "name": "U.S. Air Force",
+      "domain": "af.mil",
+      "method": "RSS_ATOM",
+      "discovery_page": "https://www.af.mil/RSS/",
+      "expected_language": "en",
+      "status": "BLOCKED_BY_ROBOTS",
+      "reason": "robots.txt disallows https://www.af.mil/RSS/"
+    },
+    {
+      "id": "K05-04",
+      "name": "U.S. Department of Defense",
+      "domain": "defense.gov",
+      "method": "RSS_ATOM",
+      "discovery_page": "https://www.defense.gov/news/rss/",
+      "expected_language": "en",
+      "status": "BLOCKED_BY_ROBOTS",
+      "reason": "robots.txt disallows https://www.defense.gov/news/rss/"
+    },
+    {
+      "id": "K05-05",
+      "name": "Polish Ministry of National Defence",
+      "domain": "gov.pl",
+      "method": "HTTP_FETCH",
+      "discovery_page": "https://www.gov.pl/web/obrona-narodowa/aktualnosci5",
+      "expected_language": "pl",
+      "resolution": {
+        "method": "DISCOVERY_PAGE_ITSELF"
+      },
+      "resolved_endpoint": "https://www.gov.pl/web/obrona-narodowa/aktualnosci5",
+      "source_id": "77377ba0-e21a-4338-bb15-e7e6aa96fd7e",
+      "passes": [
+        {
+          "label": "pass1",
+          "job_id": "0ae6b29c-c1d8-4d3a-92f3-f4abc06a14ef",
+          "job_status": "SUCCESS",
+          "job_error": "",
+          "run_id": "8ba2359a-058f-4a06-9866-39221c7dc0a0",
+          "status": "SUCCESS",
+          "counts": {
+            "discovered": 1,
+            "new": 1,
+            "revised": 0,
+            "duplicate": 0,
+            "skipped": 0,
+            "failed": 0
+          },
+          "error_code": null,
+          "job_id_run": "0ae6b29c-c1d8-4d3a-92f3-f4abc06a14ef"
+        },
+        {
+          "label": "pass2",
+          "job_id": "76bc6eaa-d746-4023-9426-20faf2ce554d",
+          "job_status": "SUCCESS",
+          "job_error": "",
+          "run_id": "d5f56144-1540-44fd-b5bb-d7aebcf91e77",
+          "status": "SUCCESS",
+          "counts": {
+            "discovered": 1,
+            "new": 0,
+            "revised": 0,
+            "duplicate": 1,
+            "skipped": 0,
+            "failed": 0
+          },
+          "error_code": null,
+          "job_id_run": "76bc6eaa-d746-4023-9426-20faf2ce554d"
+        }
+      ],
+      "F3_job_collection": "PASS",
+      "F4_provenance_complete": "PASS",
+      "F5_second_pass_no_uncontrolled_duplicates": "PASS",
+      "language_as_expected": true,
+      "snapshots": 1,
+      "text_languages": [
+        "pl"
+      ],
+      "duplicate_state_groups": 0,
+      "f4_problems": [],
+      "f5_note": "pass 2: new=0 revised=0 duplicate=1 (new items published between passes are reported, not hidden)",
+      "status": "PASS"
+    },
+    {
+      "id": "K05-06",
+      "name": "Ministry of Defence of Ukraine",
+      "domain": "mod.gov.ua",
+      "method": "HTTP_FETCH",
+      "discovery_page": "https://mod.gov.ua/news",
+      "expected_language": "uk",
+      "resolution": {
+        "method": "DISCOVERY_PAGE_ITSELF"
+      },
+      "resolved_endpoint": "https://mod.gov.ua/news",
+      "source_id": "482e9b7a-6372-4a2a-85c1-824dbd59a6c0",
+      "passes": [
+        {
+          "label": "pass1",
+          "job_id": "9e3dab30-e3a5-4eea-8f8f-e53fb91ac0d2",
+          "job_status": "SUCCESS",
+          "job_error": "",
+          "run_id": "cc2626db-d74c-4491-8648-830294bc43dd",
+          "status": "SUCCESS",
+          "counts": {
+            "discovered": 1,
+            "new": 1,
+            "revised": 0,
+            "duplicate": 0,
+            "skipped": 0,
+            "failed": 0
+          },
+          "error_code": null,
+          "job_id_run": "9e3dab30-e3a5-4eea-8f8f-e53fb91ac0d2"
+        },
+        {
+          "label": "pass2",
+          "job_id": "e0cdedbc-9ee3-407b-91d7-d1ab3c7a1661",
+          "job_status": "SUCCESS",
+          "job_error": "",
+          "run_id": "ad74e67b-ab8d-491d-bef6-9237a9a61b1a",
+          "status": "SUCCESS",
+          "counts": {
+            "discovered": 1,
+            "new": 0,
+            "revised": 0,
+            "duplicate": 1,
+            "skipped": 0,
+            "failed": 0
+          },
+          "error_code": null,
+          "job_id_run": "e0cdedbc-9ee3-407b-91d7-d1ab3c7a1661"
+        }
+      ],
+      "F3_job_collection": "PASS",
+      "F4_provenance_complete": "PASS",
+      "F5_second_pass_no_uncontrolled_duplicates": "PASS",
+      "language_as_expected": true,
+      "snapshots": 1,
+      "text_languages": [
+        "uk"
+      ],
+      "duplicate_state_groups": 0,
+      "f4_problems": [],
+      "f5_note": "pass 2: new=0 revised=0 duplicate=1 (new items published between passes are reported, not hidden)",
+      "status": "PASS"
+    },
+    {
+      "id": "K05-07",
+      "name": "Saab",
+      "domain": "saab.com",
+      "method": "STRUCTURED_FEED",
+      "discovery_page": "https://www.saab.com/robots.txt",
+      "expected_language": "en",
+      "resolution": {
+        "method": "ROBOTS_OR_SITEMAP_INDEX",
+        "listed": [
+          "https://www.saab.com/sitemap.xml"
+        ],
+        "examined": [
+          "https://www.saab.com/sitemap.xml"
+        ],
+        "urlsets": [
+          "https://www.saab.com/sitemap.xml"
+        ]
+      },
+      "resolved_endpoint": "https://www.saab.com/sitemap.xml",
+      "source_id": "cfd6bd45-1ae7-4889-8a96-69ca2c434e9a",
+      "passes": [
+        {
+          "label": "pass1",
+          "job_id": "7ba341a4-63a9-459f-9eb8-2125d6dc1dcd",
+          "job_status": "SUCCESS",
+          "job_error": "",
+          "run_id": "b0da071b-a3f2-4ea2-aebc-45ab6aadc139",
+          "status": "SUCCESS",
+          "counts": {
+            "discovered": 5,
+            "new": 5,
+            "revised": 0,
+            "duplicate": 0,
+            "skipped": 0,
+            "failed": 0
+          },
+          "error_code": null,
+          "job_id_run": "7ba341a4-63a9-459f-9eb8-2125d6dc1dcd"
+        },
+        {
+          "label": "pass2",
+          "job_id": "37f8c029-044d-4588-bcc5-b9f9d5ed0c93",
+          "job_status": "SUCCESS",
+          "job_error": "",
+          "run_id": "a5bc7421-e0b8-4f29-a8db-86104e9d8151",
+          "status": "SUCCESS",
+          "counts": {
+            "discovered": 5,
+            "new": 0,
+            "revised": 0,
+            "duplicate": 5,
+            "skipped": 0,
+            "failed": 0
+          },
+          "error_code": null,
+          "job_id_run": "37f8c029-044d-4588-bcc5-b9f9d5ed0c93"
+        }
+      ],
+      "F3_job_collection": "PASS",
+      "F4_provenance_complete": "PASS",
+      "F5_second_pass_no_uncontrolled_duplicates": "PASS",
+      "language_as_expected": true,
+      "snapshots": 5,
+      "text_languages": [
+        "en"
+      ],
+      "duplicate_state_groups": 0,
+      "f4_problems": [],
+      "f5_note": "pass 2: new=0 revised=0 duplicate=5 (new items published between passes are reported, not hidden)",
+      "status": "PASS"
+    },
+    {
+      "id": "K05-08",
+      "name": "KONGSBERG",
+      "domain": "kongsberg.com",
+      "method": "STRUCTURED_FEED",
+      "discovery_page": "https://www.kongsberg.com/kogmap.xml",
+      "expected_language": "en",
+      "resolution": {
+        "method": "ROBOTS_OR_SITEMAP_INDEX",
+        "listed": [
+          "https://www.kongsberg.com/kogmap.xml"
+        ],
+        "examined": [
+          "https://www.kongsberg.com/kogmap.xml"
+        ],
+        "urlsets": [
+          "https://www.kongsberg.com/kogmap.xml"
+        ]
+      },
+      "resolved_endpoint": "https://www.kongsberg.com/kogmap.xml",
+      "source_id": "8c8a01c5-ab4c-4cb3-9dcf-01d7afe98701",
+      "passes": [
+        {
+          "label": "pass1",
+          "job_id": "6f24bd1b-79c8-4c3a-b0cc-dc78ba78d04f",
+          "job_status": "SUCCESS",
+          "job_error": "",
+          "run_id": "d0dba679-9707-44c9-8bd8-89a1b101d57f",
+          "status": "SUCCESS",
+          "counts": {
+            "discovered": 5,
+            "new": 5,
+            "revised": 0,
+            "duplicate": 0,
+            "skipped": 0,
+            "failed": 0
+          },
+          "error_code": null,
+          "job_id_run": "6f24bd1b-79c8-4c3a-b0cc-dc78ba78d04f"
+        },
+        {
+          "label": "pass2",
+          "job_id": "ab7b0e6a-af2b-4955-8e29-e6ec2e650c3d",
+          "job_status": "SUCCESS",
+          "job_error": "",
+          "run_id": "0e1a2887-0089-47d5-a861-704a48948934",
+          "status": "SUCCESS",
+          "counts": {
+            "discovered": 5,
+            "new": 0,
+            "revised": 0,
+            "duplicate": 5,
+            "skipped": 0,
+            "failed": 0
+          },
+          "error_code": null,
+          "job_id_run": "ab7b0e6a-af2b-4955-8e29-e6ec2e650c3d"
+        }
+      ],
+      "F3_job_collection": "PASS",
+      "F4_provenance_complete": "PASS",
+      "F5_second_pass_no_uncontrolled_duplicates": "PASS",
+      "language_as_expected": true,
+      "snapshots": 5,
+      "text_languages": [
+        "en"
+      ],
+      "duplicate_state_groups": 0,
+      "f4_problems": [],
+      "f5_note": "pass 2: new=0 revised=0 duplicate=5 (new items published between passes are reported, not hidden)",
+      "status": "PASS"
+    }
+  ],
+  "overall": "NOT PASSED",
+  "summary": {
+    "BLOCKED_BY_ROBOTS": 2,
+    "PASS": 6
+  }
+}

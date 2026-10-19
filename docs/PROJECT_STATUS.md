@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Current phase | Phase 2 — Claim Pipeline (implementation complete) |
-| Current gate | Control Gate 1 APPROVED (2026-10-11). Control Gate 2 evidence submitted (docs/control-gate-2-report.md); K-05 real-source validation OPEN (PO run, required before CG2 approval) |
+| Current gate | Control Gate 1 APPROVED (2026-10-11). Control Gate 2 evidence submitted (docs/control-gate-2-report.md); DEV 18/18 migrations + smoke 22/22 PASS and K-05 COMPLETED (6/8 PASS, 2 BLOCKED_BY_ROBOTS accepted by the PO) on 2026-10-19; awaiting SD-01…12 confirmation and the CG2 decision |
 | Next authorised action | **None.** Phase 3 must not start without explicit Product Owner approval |
 
 ## Phase 2 progress (Addendum v1.0)
@@ -63,7 +63,7 @@ testing); D-06 approved conditionally (CG1-06 verification since completed: CI +
 | K-02 | Scheduler | NON-BLOCKING | pg_cron enqueue-only, calling `lfhe.enqueue_due_collections()` |
 | K-03 | Queue | NON-BLOCKING | `processing_jobs` table + `SKIP LOCKED` |
 | K-04 | Per-source retention rights | NON-BLOCKING | `retention_mode` per source; METADATA_ONLY sources cannot ground material claims (QA-D18) |
-| **K-05** | **Real-source collection validation (approved set K05-01…08)** | **OPEN — PO run** | Source set approved by the PO; validation script + runbook delivered (docs/runbooks/k05-real-source-validation.md); required before CG2 approval |
+| K-05 | Real-source collection validation (approved set K05-01…08) | COMPLETED 2026-10-19 | 6/8 PASS (F3/F4/F5); K05-03 af.mil and K05-04 defense.gov BLOCKED_BY_ROBOTS — accepted by the PO as controlled fail-closed outcome; K05-02 collected via HTTP_FETCH (PO decision); docs/k05-report-20261019.json |
 | K-06 | Separation of duties | NON-BLOCKING | Configurable; one person may hold several roles in the prototype, logged |
 | K-07 | Region | NON-BLOCKING | EU region default |
 | K-08 | Canonical JSON | NON-BLOCKING | RFC 8785 JCS + SHA-256 (ADR-0003) |
