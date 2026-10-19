@@ -19,7 +19,8 @@
 | P3-05 Acceptance corpus + §16 metrics, GS isolation test; migration 2200 (external-origin reuse) | done |
 | P3-06 Docs, DEV smoke additions, CI, CG3 report | done |
 | CG3-C CG3 corrective pass: 2300 as-of context (CG3-01), 2400 terminal full split (CG3-02), 2500 no name-only origin collapse (CG3-03) | done |
-| CG3-F Final CG3 correction: 2600 knowledge-bound lineage retractions (replaces SD3-13) | done — DEV apply of 1800–2600 awaits the PO |
+| CG3-F Final CG3 correction: 2600 knowledge-bound lineage retractions (replaces SD3-13) | done |
+| DEV apply 1800–2600 + smoke (PO, 2026-10-19 19:05) | done — 27 migrations, smoke 32/32 PASS, audit chain ok (docs/dev-smoke-20261019-phase3.json) |
 
 ## Phase 2 progress (Addendum v1.0)
 

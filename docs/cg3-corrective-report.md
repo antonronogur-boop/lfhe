@@ -199,7 +199,7 @@ Korpusz R1 kiegészítés: egy cutoff előtti bizonyítékon validált lineage-e
 
 ## OPEN ITEMS
 
-- DEV-migráció (1800–2600) + smoke: még nem futott; a pontos parancsokat lásd lent.
+- DEV-migráció (1800–2600) + smoke: **kész** — 27 migráció, smoke 32/32 PASS, audit hash-lánc ok (`docs/dev-smoke-20261019-phase3.json`).
 - Korlátok:
   - L-25 (SD3-12, jóváhagyva);
   - L-26 (as-of számítás olvasáskor; méréssel materializálható);
@@ -239,8 +239,7 @@ Várt eredmény:
 
 ## RECOMMENDED NEXT ACTION
 
-1. A PO futtassa a DEV-migrációt és a smoke-ot (fent), és küldje el a kimenetet.
-2. A PO döntsön a CG3-ról.
+1. A PO döntsön a CG3-ról. (A DEV-migráció és a smoke kész: 27 migráció, 32/32 PASS.)
 
 **STOP.** Phase 4-et nem kezdtem el.
 

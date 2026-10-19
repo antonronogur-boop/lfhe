@@ -25,7 +25,7 @@
 | Javító kör dokumentációja | `2b40878` / `4ad7b02` |
 | Végső jelentés és dokumentáció | `8b7e6ed` (FINAL DOCUMENTATION COMMIT) |
 
-DEV Supabase: a Phase 3 migrációk (1800–2600) még nincsenek alkalmazva a DEV-en. A pontos parancsok: `docs/cg3-corrective-report.md` (DEV MIGRATION + SMOKE) és OPEN ITEMS.
+DEV Supabase (PO gépén, 2026-10-19 19:05): **27/27 migráció alkalmazva, smoke 32/32 PASS** (22 korábbi + 10 új Phase 3 ellenőrzés; service_role kulcs nélkül), audit hash-lánc ellenőrizve (108 bejegyzés, ok). Bizonyíték: `docs/dev-smoke-20261019-phase3.json` (SHA-256 `cc4a235b9b55f594025336352c2fa8cfbf66c615fbc7fa503eac45ec52af3be7`).
 
 ## IMPLEMENTED
 
@@ -294,9 +294,8 @@ Metrikák: `over_merge_in_validated_events = 0`, `unvalidated_ai_grouping_promot
 - `scripts/prompt_registry.py check-lock`, `scripts/secret_scan.py`, gitleaks git-mód a teljes előzményen (lokálisan és CI-ban).
 - GitHub CI: run 39274247863 (`d3e1302`), run 39275062633 (`4ad7b02`), és a végső kódcommit `128f1a7` futása (lásd TEST RESULTS).
 - Elfogadási korpusz metrikái: `docs/cg3-acceptance-metrics.json`.
-- Nem futott:
-  - DEV migráció és smoke (a PO javító döntése szerint egyelőre tilos);
-  - valódi provider (L-09).
+- DEV migráció + smoke a PO gépén: 27 migráció, **32/32 PASS** (`docs/dev-smoke-20261019-phase3.json`).
+- Nem futott: valódi provider (L-09, nem blokkoló).
 
 ## TEST RESULTS
 
@@ -404,15 +403,14 @@ Nincs. Magasabb rendű specifikációval ütköző anyagi konfliktust nem talál
 
 | ID | Tétel | Blokkoló? |
 |---|---|---|
-| OI3-01 | DEV Supabase: az 1800–2600 migráció alkalmazása + smoke (27 migráció; a 22 meglévő smoke-ellenőrzés mellé 10 új P3 ellenőrzés, service_role kulccsal 11). Pontos PowerShell-parancsok: `docs/cg3-corrective-report.md` → DEV MIGRATION + SMOKE | A PO futtatja |
+| OI3-01 | DEV Supabase: 1800–2600 alkalmazva (27 migráció), smoke 32/32 PASS (`docs/dev-smoke-20261019-phase3.json`) | **LEZÁRVA** |
 | OI3-02 | Valódi provider-futás M04/M05-tel, a klaszterezési minőség mérése (L-09, L-20) | Nem (baseline §13) |
 | OI3-03 | Phase 3 review UI (L-21) | Nem |
 | OI3-04 | Korábbról: L-09, L-18, Phase 3+ high-impact szabályok (CG2 nem blokkoló tételek) | Nem |
 
 ## RECOMMENDED NEXT ACTION
 
-1. A PO futtassa a DEV-migrációt (1800–2600) és a smoke-ot (OI3-01), és küldje el a kimenetet.
-2. A PO döntsön a CG3-ról.
+1. A PO döntsön a CG3-ról (a DEV-migráció és a smoke kész: 27 migráció, 32/32 PASS).
 3. A Phase 4 csak explicit PO-jóváhagyás után indulhat, a Phase 4 baseline `docs/specs/` alá verziózva (SD-12).
 
 **STOP.** Phase 4-et nem kezdtem el.
