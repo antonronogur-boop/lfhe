@@ -256,3 +256,21 @@ def test_worker_jobs_analyse_lineage_and_build_events_end_in_human_review(pg, p3
         queue.run_once(make_handlers(c, queue, FakeProvider(responder), m02_config=None, m03_config=None,
                                      worker_id="p3-worker"), limit=1)
         assert c.execute("SELECT status FROM lfhe.processing_jobs WHERE id=%s", (j,)).fetchone()["status"] == "FAILED"
+
+
+def test_m04_output_cannot_assert_independence(pg, p3):
+    """The M04 schema has no independence field; an output that asserts independence or
+    an extra relationship type fails validation (repair run included) and changes nothing."""
+    a = grounded_claim(pg, T1, "4 tanker aircraft arrived at Base North")
+    b = grounded_claim(pg, T2, "4 tanker aircraft arrived at Base North")
+    bad = json.loads(scripted_m04(a, b)(type("M", (), {"module_code": "M04_LINEAGE"}), {}))
+    bad["result"]["claim_relationships"][0]["relationship_type"] = "INDEPENDENT"
+    bad["result"]["independent_confirmation"] = True
+    with pg.worker() as c:
+        out = run_lineage(c, [a["claim_id"], b["claim_id"]], report_mode="LIVE", information_cutoff=NOW(),
+                          model_configuration_id=model_configuration(pg), provider=FakeProvider(lambda m, e: json.dumps(bad)),
+                          worker_id="p3-test")
+    assert out.outcome == "SCHEMA_VALIDATION_FAILED" and len(out.model_run_ids) == 2
+    with pg.admin() as x:
+        assert x.execute("SELECT count(*) n FROM lfhe.lineage_proposals WHERE child_claim_id = ANY(%s::uuid[])",
+                         ([a["claim_id"], b["claim_id"]],)).fetchone()["n"] == 0

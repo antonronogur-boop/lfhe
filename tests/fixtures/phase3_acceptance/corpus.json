@@ -1,0 +1,469 @@
+{
+ "format": "lfhe-phase3-acceptance-corpus/1",
+ "note": "Synthetic, invented OSINT-style content (fictional country 'Northland'). Not Gold Standard material. 'truth' blocks are this corpus's own labels; they are read only by the acceptance test, never by an input builder or prompt. 'model_output' blocks are scripted fake-model outputs replayed through the real pipeline; they include deliberately naive or over-eager outputs to exercise the deterministic guards.",
+ "lineage_scenarios": [
+  {
+   "id": "L1_REPUBLICATION_FOUR_OUTLETS",
+   "purpose": "one official statement republished by three outlets in three languages",
+   "claims": {
+    "orig": {
+     "language": "en",
+     "text": "The Northland Air Force said 4 tanker aircraft arrived at Base North on Monday.",
+     "exact": "4 tanker aircraft arrived at Base North"
+    },
+    "hu": {
+     "language": "hu",
+     "text": "A Northland légierő közlése szerint 4 tankerrepülőgép érkezett Base North bázisra hétfőn.",
+     "exact": "4 tankerrepülőgép érkezett Base North bázisra"
+    },
+    "de": {
+     "language": "de",
+     "text": "Laut der Luftwaffe von Northland sind 4 Tankflugzeuge in Base North eingetroffen.",
+     "exact": "4 Tankflugzeuge in Base North eingetroffen"
+    },
+    "agg": {
+     "language": "en",
+     "text": "Aggregator: citing the air force, 4 tanker aircraft arrived at Base North, a regional site reports.",
+     "exact": "4 tanker aircraft arrived at Base North"
+    }
+   },
+   "model_output": {
+    "claim_relationships": [
+     {
+      "child": "hu",
+      "type": "DERIVED_REPORTING",
+      "parent_claim": "orig"
+     },
+     {
+      "child": "de",
+      "type": "DERIVED_REPORTING",
+      "parent_claim": "orig"
+     },
+     {
+      "child": "agg",
+      "type": "DERIVED_REPORTING",
+      "parent_claim": "orig"
+     }
+    ],
+    "corroboration_recommendations": [
+     {
+      "claim": "orig",
+      "recommendation": "POTENTIAL_SOURCE_DEPENDENCE",
+      "recommended_status": null,
+      "supporting": [
+       "hu",
+       "de",
+       "agg"
+      ]
+     }
+    ]
+   },
+   "human": {
+    "accept_lineage": true
+   },
+   "truth": {
+    "origin_groups": [
+     [
+      "orig",
+      "hu",
+      "de",
+      "agg"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "L2_REPUBLICATION_NAIVE_MODEL",
+   "purpose": "the same republication pattern, but the model misses the lineage and recommends corroboration",
+   "claims": {
+    "orig": {
+     "language": "en",
+     "text": "Northland's air force announced that 2 airborne early warning aircraft were delivered to Base East.",
+     "exact": "2 airborne early warning aircraft were delivered to Base East"
+    },
+    "pl": {
+     "language": "pl",
+     "text": "Według komunikatu lotnictwa Northland do Base East dostarczono 2 samoloty wczesnego ostrzegania.",
+     "exact": "do Base East dostarczono 2 samoloty wczesnego ostrzegania"
+    },
+    "en2": {
+     "language": "en",
+     "text": "A defence blog repeats that 2 airborne early warning aircraft were delivered to Base East.",
+     "exact": "2 airborne early warning aircraft were delivered to Base East"
+    }
+   },
+   "model_output": {
+    "claim_relationships": [],
+    "corroboration_recommendations": [
+     {
+      "claim": "orig",
+      "recommendation": "POTENTIAL_CORROBORATION",
+      "recommended_status": "CORROBORATED",
+      "supporting": [
+       "pl",
+       "en2"
+      ]
+     }
+    ]
+   },
+   "human": {
+    "accept_lineage": false
+   },
+   "truth": {
+    "origin_groups": [
+     [
+      "orig",
+      "pl",
+      "en2"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "L3_COMMON_EXTERNAL_ORIGIN",
+   "purpose": "two outlets independently citing the same named external origin",
+   "claims": {
+    "a": {
+     "language": "en",
+     "text": "According to the Northland Ministry of Defence, 6 radars were installed near Eastport.",
+     "exact": "the Northland Ministry of Defence, 6 radars were installed near Eastport"
+    },
+    "b": {
+     "language": "hu",
+     "text": "A Northland Ministry of Defence szerint 6 radart telepítettek Eastport közelében.",
+     "exact": "A Northland Ministry of Defence szerint 6 radart telepítettek Eastport közelében"
+    }
+   },
+   "model_output": {
+    "claim_relationships": [
+     {
+      "child": "a",
+      "type": "COMMON_ORIGINAL_SOURCE",
+      "external_origin_name": "Northland Ministry of Defence"
+     },
+     {
+      "child": "b",
+      "type": "COMMON_ORIGINAL_SOURCE",
+      "external_origin_name": "Northland Ministry of Defence"
+     }
+    ],
+    "corroboration_recommendations": []
+   },
+   "human": {
+    "accept_lineage": true
+   },
+   "truth": {
+    "origin_groups": [
+     [
+      "a",
+      "b"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "L4_SURFACE_DIFFERENCES_ONLY",
+   "purpose": "different publisher, language and wording; no lineage evidence either way",
+   "claims": {
+    "x": {
+     "language": "en",
+     "text": "Residents reported that 3 helicopters landed at Base West late on Friday.",
+     "exact": "3 helicopters landed at Base West"
+    },
+    "y": {
+     "language": "de",
+     "text": "Ein Lokalblatt schreibt, dass 3 Hubschrauber in Base West gelandet sind.",
+     "exact": "3 Hubschrauber in Base West gelandet"
+    },
+    "z": {
+     "language": "uk",
+     "text": "Місцеве видання пише, що 3 гелікоптери приземлилися на Base West.",
+     "exact": "3 гелікоптери приземлилися на Base West"
+    }
+   },
+   "model_output": {
+    "claim_relationships": [],
+    "corroboration_recommendations": []
+   },
+   "human": {
+    "accept_lineage": false
+   },
+   "truth": {
+    "origin_groups": "UNKNOWN"
+   }
+  },
+  {
+   "id": "L5_HIGH_IMPACT",
+   "purpose": "high-impact claim; the model recommends a status change",
+   "claims": {
+    "h": {
+     "language": "en",
+     "text": "The ministry said a new long-range air defence system became operational at Base North.",
+     "exact": "a new long-range air defence system became operational at Base North"
+    }
+   },
+   "high_impact": [
+    "h"
+   ],
+   "model_output": {
+    "claim_relationships": [],
+    "corroboration_recommendations": [
+     {
+      "claim": "h",
+      "recommendation": "POTENTIAL_PARTIAL_CORROBORATION",
+      "recommended_status": "PARTIALLY_CORROBORATED",
+      "supporting": []
+     }
+    ]
+   },
+   "human": {
+    "accept_lineage": false,
+    "decide_recommendation": {
+     "claim": "h",
+     "new_status": "PARTIALLY_CORROBORATED"
+    }
+   },
+   "truth": {
+    "origin_groups": [
+     [
+      "h"
+     ]
+    ]
+   }
+  }
+ ],
+ "event_scenarios": [
+  {
+   "id": "E1_WEAKLY_RELATED_SAME_COUNTRY_WEEK",
+   "purpose": "same country, same week, related systems, different developments",
+   "claims": {
+    "tank": {
+     "language": "en",
+     "claim_type": "DELIVERY",
+     "text": "Northland received 2 tanker aircraft at Base North this week.",
+     "exact": "Northland received 2 tanker aircraft at Base North",
+     "locations": [
+      "Base North"
+     ]
+    },
+    "radar": {
+     "language": "en",
+     "claim_type": "TEST",
+     "text": "Northland tested a new radar near Eastport this week.",
+     "exact": "Northland tested a new radar near Eastport"
+    },
+    "drill": {
+     "language": "en",
+     "claim_type": "TRAINING",
+     "text": "Northland fighter pilots held an air refuelling drill this week.",
+     "exact": "Northland fighter pilots held an air refuelling drill"
+    }
+   },
+   "model_output": [
+    {
+     "proposal": "CREATE_NEW_EVENT",
+     "claims": {
+      "tank": "SUPPORTS"
+     },
+     "title": "Tanker delivery at Base North",
+     "event_type": "DELIVERY",
+     "locations": [
+      "Base North"
+     ]
+    },
+    {
+     "proposal": "CREATE_NEW_EVENT",
+     "claims": {
+      "radar": "SUPPORTS"
+     },
+     "title": "Radar test near Eastport",
+     "event_type": "TEST"
+    },
+    {
+     "proposal": "CREATE_NEW_EVENT",
+     "claims": {
+      "drill": "SUPPORTS"
+     },
+     "title": "Air refuelling drill",
+     "event_type": "TRAINING"
+    }
+   ],
+   "truth": {
+    "event_clusters": [
+     [
+      "tank"
+     ],
+     [
+      "radar"
+     ],
+     [
+      "drill"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "E2_OVER_EAGER_MODEL_UPDATE",
+   "purpose": "the model attaches a weakly related claim (same country/system/week) to an existing event",
+   "existing_event_from": {
+    "scenario": "E1_WEAKLY_RELATED_SAME_COUNTRY_WEEK",
+    "claim": "tank"
+   },
+   "claims": {
+    "tank2": {
+     "language": "en",
+     "claim_type": "DELIVERY",
+     "text": "Northland expects 2 more tanker aircraft at Base South next year.",
+     "exact": "Northland expects 2 more tanker aircraft at Base South next year"
+    }
+   },
+   "model_output": [
+    {
+     "proposal": "UPDATE_EXISTING_EVENT",
+     "claims": {
+      "tank2": "UPDATES"
+     },
+     "title": "Tanker deliveries",
+     "event_type": "DELIVERY",
+     "target": "existing_event_from",
+     "locations": [
+      "Base North"
+     ]
+    }
+   ],
+   "human": {
+    "review": "REJECT",
+    "correct_by_update_removing": [
+     "tank2"
+    ]
+   },
+   "truth": {
+    "event_clusters": [
+     [
+      "tank"
+     ],
+     [
+      "tank2"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "E3_OLD_EVENT_NEW_REPORTING",
+   "purpose": "later reporting about an existing event updates it",
+   "existing_event_from": {
+    "scenario": "E1_WEAKLY_RELATED_SAME_COUNTRY_WEEK",
+    "claim": "radar"
+   },
+   "claims": {
+    "radar2": {
+     "language": "en",
+     "claim_type": "TEST",
+     "text": "Officials confirmed that Northland tested a new radar near Eastport last week.",
+     "exact": "Northland tested a new radar near Eastport"
+    }
+   },
+   "model_output": [
+    {
+     "proposal": "UPDATE_EXISTING_EVENT",
+     "claims": {
+      "radar2": "SUPPORTS"
+     },
+     "title": "Radar test near Eastport",
+     "event_type": "TEST",
+     "target": "existing_event_from"
+    }
+   ],
+   "truth": {
+    "event_clusters": [
+     [
+      "radar",
+      "radar2"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "E4_AI_STRUCTURAL_SUGGESTIONS",
+   "purpose": "the model suggests merge / split / supersede; nothing structural may happen",
+   "existing_event_from": {
+    "scenario": "E1_WEAKLY_RELATED_SAME_COUNTRY_WEEK",
+    "claim": "drill"
+   },
+   "claims": {
+    "drill2": {
+     "language": "en",
+     "claim_type": "TRAINING",
+     "locations": [
+      "Base North"
+     ],
+     "text": "Northland fighter pilots practised air refuelling over Base North.",
+     "exact": "Northland fighter pilots practised air refuelling over Base North"
+    }
+   },
+   "model_output": [
+    {
+     "proposal": "SUGGEST_MERGE",
+     "related": "related_event_from",
+     "target": "existing_event_from"
+    },
+    {
+     "proposal": "SUGGEST_SPLIT",
+     "target": "existing_event_from"
+    },
+    {
+     "proposal": "SUGGEST_SUPERSEDE",
+     "related": "related_event_from",
+     "target": "existing_event_from"
+    },
+    {
+     "proposal": "KEEP_SEPARATE",
+     "related": "related_event_from"
+    }
+   ],
+   "truth": {
+    "event_clusters": "NOT_EVALUATED"
+   },
+   "related_event_from": {
+    "scenario": "E1_WEAKLY_RELATED_SAME_COUNTRY_WEEK",
+    "claim": "tank"
+   }
+  }
+ ],
+ "structural_scenario": {
+  "id": "S1_HUMAN_MERGE_SPLIT_SUPERSEDE",
+  "purpose": "human-only structural chain: merge two duplicates, split a mixed event, supersede with a consolidated event",
+  "claims": {
+   "m1": {
+    "language": "en",
+    "claim_type": "DEPLOYMENT",
+    "text": "Northland deployed 4 fighter jets to Base South.",
+    "exact": "Northland deployed 4 fighter jets to Base South"
+   },
+   "m2": {
+    "language": "hu",
+    "claim_type": "DEPLOYMENT",
+    "text": "Northland 4 vadászgépet telepített Base South bázisra.",
+    "exact": "Northland 4 vadászgépet telepített Base South bázisra"
+   },
+   "s1": {
+    "language": "en",
+    "claim_type": "DEPLOYMENT",
+    "text": "Northland moved 2 transport aircraft to Base East.",
+    "exact": "Northland moved 2 transport aircraft to Base East"
+   },
+   "s2": {
+    "language": "en",
+    "claim_type": "TEST",
+    "text": "Northland tested a new drone at Base East.",
+    "exact": "Northland tested a new drone at Base East"
+   },
+   "d1": {
+    "language": "en",
+    "claim_type": "DEPLOYMENT",
+    "text": "Officials denied that fighter jets were deployed to Base South.",
+    "exact": "denied that fighter jets were deployed to Base South"
+   }
+  }
+ }
+}

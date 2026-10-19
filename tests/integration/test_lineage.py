@@ -209,3 +209,23 @@ def test_non_humans_cannot_finalise_lineage_or_status(pg, make_user):
     with pg.admin() as x:
         assert x.execute("SELECT count(*) n FROM lfhe.claim_lineage WHERE child_claim_id=%s", (b["claim_id"],)).fetchone()["n"] == 0
         assert x.execute("SELECT claim_status FROM lfhe.claim_state WHERE claim_id=%s", (a["claim_id"],)).fetchone()["claim_status"] == "UNVERIFIED"
+
+
+def test_same_named_external_origin_collapses_into_one_group(pg, analyst):
+    """Migration 2200 (found by the acceptance corpus): two accepted proposals naming the same
+    evidenced external origin share one origin row → one independence group."""
+    a = grounded_claim(pg, "According to the Southland Ministry of Defence, 5 jets landed.",
+                       "the Southland Ministry of Defence, 5 jets landed")
+    b = grounded_claim(pg, "A southland ministry of defence  közlése: 5 vadászgép landolt.",
+                       "A southland ministry of defence  közlése: 5 vadászgép landolt", language="hu")
+    run = lineage_run(pg, [a, b])
+    ingest_lineage(pg, run, [rel(a, origin="Southland Ministry of Defence"),
+                             rel(b, origin="southland ministry of defence")])
+    for p in proposals(pg, run):
+        accept(pg, analyst, p["id"])
+    with pg.admin() as x:
+        origins = {r["external_origin_id"] for r in x.execute(
+            "SELECT external_origin_id FROM lfhe.claim_lineage WHERE child_claim_id = ANY(%s::uuid[])",
+            ([a["claim_id"], b["claim_id"]],))}
+    assert len(origins) == 1
+    assert summary(pg, [a, b])["distinct_groups_upper_bound"] == 1
