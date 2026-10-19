@@ -20,7 +20,7 @@
 |---|---|---|
 | Kiindulópont (átadott CG3-archívum) | `7197389` | run 39267955183 ✔ |
 | Javító kód + migrációk + tesztek | `d3e1302` | **run 39274247863: secret-scan ✔, python-tests ✔, web ✔** |
-| Dokumentáció (ez a jelentés, frissített CG3-jelentés, metrikák, traceability, PROJECT_STATUS) | lásd FINAL DOCUMENTATION COMMIT | lásd ott |
+| Dokumentáció (ez a jelentés, frissített CG3-jelentés, metrikák, traceability, PROJECT_STATUS) | `2b40878` | lásd lent |
 
 ## CG3-01 — REPLAY / CUTOFF AS-OF CONTEXT LEAKAGE — RESOLVED
 
@@ -162,4 +162,4 @@ A PO döntsön a CG3-ról és az SD3-12 / SD3-13 pontokról. A DEV-migráció cs
 
 ## FINAL DOCUMENTATION COMMIT
 
-A commit után kerül ide.
+`2b40878` — a javító jelentés, a frissített CG3-jelentés és a dokumentáció commitja (kód és migrációk azonosak a CI-tesztelt `d3e1302`-vel). Ezt a sort a következő commit rögzíti.

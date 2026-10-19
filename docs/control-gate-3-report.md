@@ -16,7 +16,7 @@
 | Phase 3 implementáció + dokumentáció, CI-tesztelt (CI run 39267104102: secret-scan, python-tests, web — mind success) | `2f0b50b` |
 | Az első CG3-jelentés (átadott archívum `7197389`) | `6092849` / `7197389` |
 | CG3 javító kör: 2300–2500 migráció + tesztek, CI-tesztelt (CI run 39274247863: secret-scan, python-tests, web — mind success) | `d3e1302` |
-| Ez a frissített jelentés + javító jelentés | lásd FINAL DOCUMENTATION COMMIT |
+| Ez a frissített jelentés + javító jelentés | `2b40878` (FINAL DOCUMENTATION COMMIT) |
 
 DEV Supabase: a Phase 3 migrációk (1800–2500) **szándékosan nincsenek alkalmazva** a DEV-en; a PO javító döntése a DEV-migrációt egyelőre tiltja (lásd OPEN ITEMS).
 
@@ -404,4 +404,4 @@ Nincs. Magasabb rendű specifikációval ütköző anyagi konfliktust nem talál
 
 ## FINAL DOCUMENTATION COMMIT
 
-Az első jelentés: `6092849`. A frissített jelentés commitja a commit után kerül ide.
+Az első jelentés: `6092849`. A frissített jelentés: `2b40878` (kód és migrációk azonosak a CI-tesztelt `d3e1302`-vel). Ezt a sort a következő commit rögzíti.
