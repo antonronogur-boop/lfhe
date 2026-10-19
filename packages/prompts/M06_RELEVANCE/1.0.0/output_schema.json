@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "lfhe:M06_RELEVANCE:1.0.0:output",
+  "title": "M06_RELEVANCE output (global output envelope)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "module",
+    "status",
+    "result",
+    "warnings",
+    "human_review_required"
+  ],
+  "properties": {
+    "module": {
+      "const": "M06_RELEVANCE"
+    },
+    "status": {
+      "enum": [
+        "SUCCESS",
+        "SUCCESS_WITH_WARNINGS",
+        "INSUFFICIENT_INFORMATION",
+        "AMBIGUOUS",
+        "FAILED",
+        "HUMAN_REVIEW_REQUIRED"
+      ]
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "applicable_pir_ids",
+        "automatic_assessment_recommended",
+        "baseline_version_id",
+        "event_id",
+        "event_version_id",
+        "executive_relevance",
+        "hu_nato_dimensions",
+        "hu_nato_evidence_claim_ids",
+        "hu_nato_relevance_rationale",
+        "hu_nato_relevance_score",
+        "military_significance",
+        "novelty_change",
+        "previous_assessment_version_id",
+        "reasoning_summary",
+        "recommendation",
+        "relevance_uncertainty",
+        "retain_for_manual_review",
+        "strategic_relevance",
+        "time_sensitivity"
+      ],
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "event_version_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "baseline_version_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "previous_assessment_version_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "military_significance": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "novelty_change": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "hu_nato_relevance_score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "strategic_relevance": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "time_sensitivity": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "applicable_pir_ids": {
+          "type": "array",
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^PIR_0[1-8]$"
+          }
+        },
+        "recommendation": {
+          "enum": [
+            "BACKGROUND_ONLY",
+            "EXCLUDE_FROM_AUTOMATIC_ASSESSMENT",
+            null
+          ]
+        },
+        "automatic_assessment_recommended": {
+          "type": "boolean"
+        },
+        "retain_for_manual_review": {
+          "type": "boolean"
+        },
+        "hu_nato_dimensions": {
+          "type": "array",
+          "maxItems": 13,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "CAPABILITY",
+              "READINESS",
+              "FORCE_PROTECTION",
+              "AIR_DEFENCE",
+              "DETERRENCE",
+              "INTEROPERABILITY",
+              "PROCUREMENT_CAPABILITY_DEVELOPMENT",
+              "DOCTRINE_ADAPTATION",
+              "INDUSTRIAL_CAPACITY",
+              "SENSOR_TO_DECISION",
+              "UAS_C_UAS",
+              "EASTERN_FLANK_POSTURE",
+              "WARNING_MONITORING"
+            ]
+          }
+        },
+        "hu_nato_evidence_claim_ids": {
+          "type": "array",
+          "maxItems": 50,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+          }
+        },
+        "hu_nato_relevance_rationale": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "executive_relevance": {
+          "type": "string",
+          "maxLength": 2000
+        },
+        "reasoning_summary": {
+          "type": "string",
+          "maxLength": 3000
+        },
+        "relevance_uncertainty": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 2000
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "string",
+        "maxLength": 500
+      }
+    },
+    "human_review_required": {
+      "type": "boolean"
+    }
+  }
+}

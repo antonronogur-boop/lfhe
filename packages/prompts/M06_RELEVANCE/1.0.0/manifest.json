@@ -1,0 +1,8 @@
+{
+  "format": "lfhe-prompt-manifest/1",
+  "module_code": "M06_RELEVANCE",
+  "semver": "1.0.0",
+  "module_version": "MPP-1.2.2+P4-ADDENDUM-1.0",
+  "test_fixture": false,
+  "description": "PIR-based relevance triage of one exact event version (Phase 4). Prioritises; never hides, deletes or publishes."
+}
