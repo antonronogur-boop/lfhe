@@ -194,3 +194,37 @@ def build_m07_inputs(conn, event_version_id: str, event_version_hash: str, *, re
             "statement_types": list(STATEMENT_TYPES), "provenance_classes": list(PROVENANCE_CLASSES)}
     context = ([bl] if bl else []) + rcs + ([prev] if prev else []) + lineage
     return AnalysisInputs(task, [ev], context)
+
+
+def build_m08_inputs(conn, assessment_version_id: str, assessment_version_hash: str) -> AnalysisInputs:
+    """M08 challenges with the knowledge bound of the draft itself (its report_mode / cutoff)."""
+    v = conn.execute("SELECT * FROM lfhe.assessment_versions WHERE id = %s", (str(assessment_version_id),)).fetchone()
+    if v is None:
+        raise InputBuildError("ASSESSMENT_VERSION_NOT_FOUND", str(assessment_version_id))
+    if v["content_hash"] != assessment_version_hash:
+        raise InputBuildError("ASSESSMENT_VERSION_HASH_MISMATCH", str(assessment_version_id))
+    mode, cutoff = v["report_mode"], v["information_cutoff"]
+    ev, claims = event_version_item(conn, str(v["event_version_id"]), v["event_version_hash"], mode, cutoff)
+    content = v["content"]
+    item = EnvelopeItem("assessment_version", str(v["id"]), {
+        "assessment_version_id": str(v["id"]), "content_hash": v["content_hash"], "event_version_id": str(v["event_version_id"]),
+        "baseline_version_id": content.get("baseline_version_id"), "statements": content["statements"],
+        "derived_summary": content.get("derived_summary"), "indicators_to_watch": content.get("indicators_to_watch") or [],
+        "ai_recommended_confidence": content.get("ai_recommended_confidence"),
+        "ai_confidence_rationale": content.get("ai_confidence_rationale")})
+    context = [ev]
+    if v["baseline_version_id"]:
+        row = conn.execute("SELECT * FROM lfhe.baseline_versions WHERE id = %s", (v["baseline_version_id"],)).fetchone()
+        context.append(EnvelopeItem("baseline_version", str(row["id"]), {
+            "baseline_version_id": str(row["id"]), "content_hash": row["content_hash"],
+            "knowledge_as_of": _iso(row["knowledge_as_of"]), "components": row["content"]["components"]}))
+    for r in conn.execute(
+            """SELECT v.* FROM lfhe.assessment_reference_contexts a JOIN lfhe.reference_context_versions v
+               ON v.id = a.reference_context_version_id WHERE a.assessment_version_id = %s ORDER BY v.id""", (str(v["id"]),)):
+        context.append(EnvelopeItem("reference_context_version", str(r["id"]), {
+            "reference_context_version_id": str(r["id"]), "content_hash": r["content_hash"],
+            "knowledge_as_of": _iso(r["knowledge_as_of"]), "title": r["content"]["title"], "text": r["content"]["text"]}))
+    context += _lineage_context(conn, [c["claim_id"] for c in claims], mode, cutoff)
+    task = {"report_mode": mode, "information_cutoff": cutoff.isoformat(),
+            "assessment_version_id": str(v["id"]), "assessment_version_hash": v["content_hash"]}
+    return AnalysisInputs(task, [item], context)

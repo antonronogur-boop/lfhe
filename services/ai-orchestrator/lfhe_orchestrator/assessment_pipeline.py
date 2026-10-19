@@ -12,7 +12,8 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from .assessment_inputs import M06_MODULE, M07_MODULE, build_m06_inputs, build_m07_inputs
+from .assessment_inputs import (M06_MODULE, M07_MODULE, M08_MODULE, build_m06_inputs, build_m07_inputs,
+                                build_m08_inputs)
 from .claim_pipeline import StageOutcome, _run_with_repair
 from .event_pipeline import _ingest
 from .providers import Provider
@@ -48,4 +49,11 @@ def run_assessment(conn, event_version_id: str, event_version_hash: str, *, repo
                           reference_context_codes=reference_context_codes,
                           previous_assessment_version_id=previous_assessment_version_id)
     return _run(conn, M07_MODULE, ai, "ingest_assessment", lambda parsed: {"result": (parsed or {}).get("result")},
+                model_configuration_id=model_configuration_id, provider=provider, worker_id=worker_id, job_id=job_id)
+
+
+def run_challenge(conn, assessment_version_id: str, assessment_version_hash: str, *, model_configuration_id: str,
+                  provider: Provider, worker_id: str, job_id: str | None = None) -> StageOutcome:
+    ai = build_m08_inputs(conn, assessment_version_id, assessment_version_hash)
+    return _run(conn, M08_MODULE, ai, "ingest_challenge", lambda parsed: {"result": (parsed or {}).get("result")},
                 model_configuration_id=model_configuration_id, provider=provider, worker_id=worker_id, job_id=job_id)

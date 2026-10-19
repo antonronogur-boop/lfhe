@@ -1,0 +1,8 @@
+{
+  "format": "lfhe-prompt-manifest/1",
+  "module_code": "M08_CHALLENGER",
+  "semver": "1.0.0",
+  "module_version": "MPP-1.2.2+P4-ADDENDUM-1.0",
+  "test_fixture": false,
+  "description": "Independent challenge of one exact M07 assessment version (Phase 4). Flags only; never rewrites, never decides."
+}

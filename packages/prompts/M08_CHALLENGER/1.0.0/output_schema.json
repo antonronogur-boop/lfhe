@@ -1,0 +1,191 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "lfhe:M08_CHALLENGER:1.0.0:output",
+  "title": "M08_CHALLENGER output (global output envelope)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "module",
+    "status",
+    "result",
+    "warnings",
+    "human_review_required"
+  ],
+  "properties": {
+    "module": {
+      "const": "M08_CHALLENGER"
+    },
+    "status": {
+      "enum": [
+        "SUCCESS",
+        "SUCCESS_WITH_WARNINGS",
+        "INSUFFICIENT_INFORMATION",
+        "AMBIGUOUS",
+        "FAILED",
+        "HUMAN_REVIEW_REQUIRED"
+      ]
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assessment_version_hash",
+        "assessment_version_id",
+        "challenge_result",
+        "confidence_challenge",
+        "flags",
+        "recommended_overall_action",
+        "strongest_counterargument"
+      ],
+      "properties": {
+        "assessment_version_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "assessment_version_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "challenge_result": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "flags": {
+          "type": "array",
+          "maxItems": 60,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "affected_field",
+              "affected_statement_local_id",
+              "evidence_claim_ids",
+              "explanation",
+              "flag_type",
+              "recommended_action",
+              "severity"
+            ],
+            "properties": {
+              "flag_type": {
+                "enum": [
+                  "CONFIRMATION_BIAS",
+                  "ANCHORING",
+                  "MIRROR_IMAGING",
+                  "PREMATURE_CLOSURE",
+                  "CIRCULAR_REPORTING",
+                  "SOURCE_DEPENDENCE",
+                  "UNSUPPORTED_CAUSALITY",
+                  "OVERCONFIDENCE",
+                  "MISSING_ALTERNATIVE",
+                  "CONTRADICTORY_EVIDENCE",
+                  "DATE_ERROR",
+                  "BASELINE_ERROR",
+                  "SCOPE_ERROR",
+                  "HINDSIGHT_CONTAMINATION",
+                  "UNSUPPORTED_STATEMENT",
+                  "EPISTEMIC_STRENGTH_MISMATCH"
+                ]
+              },
+              "severity": {
+                "enum": [
+                  "INFO",
+                  "WARNING",
+                  "MAJOR",
+                  "CRITICAL"
+                ]
+              },
+              "affected_statement_local_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^AS[0-9]{1,3}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "affected_field": {
+                "enum": [
+                  "AI_RECOMMENDED_CONFIDENCE",
+                  "AI_CONFIDENCE_RATIONALE",
+                  "DERIVED_SUMMARY",
+                  "INDICATORS_TO_WATCH",
+                  "BASELINE",
+                  "REFERENCE_CONTEXT",
+                  "STATEMENT_SET",
+                  null
+                ]
+              },
+              "explanation": {
+                "type": "string",
+                "minLength": 10,
+                "maxLength": 3000
+              },
+              "evidence_claim_ids": {
+                "type": "array",
+                "maxItems": 50,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+                }
+              },
+              "recommended_action": {
+                "enum": [
+                  "NO_ACTION",
+                  "ANALYST_REVIEW",
+                  "REVISE_STATEMENT",
+                  "ADD_CAVEAT",
+                  "LOWER_CONFIDENCE",
+                  "RECHECK_LINEAGE",
+                  "RECHECK_DATE",
+                  "RECHECK_BASELINE",
+                  "REQUEST_MORE_EVIDENCE",
+                  "REMOVE_UNSUPPORTED_STATEMENT",
+                  "REPROCESS"
+                ]
+              }
+            }
+          }
+        },
+        "strongest_counterargument": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 3000
+        },
+        "confidence_challenge": {
+          "type": "string",
+          "maxLength": 2000
+        },
+        "recommended_overall_action": {
+          "enum": [
+            "NO_ACTION",
+            "ANALYST_REVIEW",
+            "REVISE_STATEMENT",
+            "ADD_CAVEAT",
+            "LOWER_CONFIDENCE",
+            "RECHECK_LINEAGE",
+            "RECHECK_DATE",
+            "RECHECK_BASELINE",
+            "REQUEST_MORE_EVIDENCE",
+            "REMOVE_UNSUPPORTED_STATEMENT",
+            "REPROCESS"
+          ]
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "string",
+        "maxLength": 500
+      }
+    },
+    "human_review_required": {
+      "type": "boolean"
+    }
+  }
+}

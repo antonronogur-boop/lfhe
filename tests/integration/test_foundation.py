@@ -43,14 +43,21 @@ def test_canonical_decision_enums_match_addendum_a3(pg):
             assert required in basis
 
 
-def test_no_analytic_confidence_column_exists_in_phase1(pg):
-    """PROJECT_STATUS DC-01 / PO guardrail 4: no competing final-confidence store."""
+def test_final_analytic_confidence_has_exactly_one_canonical_owner(pg):
+    """PROJECT_STATUS DC-01 / PO guardrail 4: no competing final-confidence store. Phases 1–3
+    had none; Phase 4 (§13) adds exactly one owner — the immutable human approval row
+    lfhe.analytical_approvals — plus its read-only projection in the security-invoker view
+    assessment_version_states. No column may be named plain 'confidence'."""
     with pg.admin() as c:
         cols = c.execute(
             "SELECT table_name, column_name FROM information_schema.columns "
             "WHERE table_schema='lfhe' AND column_name ILIKE '%%confidence%%'").fetchall()
+        views = {r["table_name"] for r in c.execute(
+            "SELECT table_name FROM information_schema.views WHERE table_schema='lfhe'")}
     offending = [r for r in cols if "analytic" in r["column_name"] or r["column_name"] == "confidence"]
-    assert offending == []
+    owners = sorted((r["table_name"], r["column_name"]) for r in offending if r["table_name"] not in views)
+    assert owners == [("analytical_approvals", "final_analytic_confidence")]
+    assert {r["table_name"] for r in offending} - {"analytical_approvals"} <= {"assessment_version_states"}
 
 
 def test_audit_catalogue_contains_spec_events(pg):
