@@ -20,6 +20,7 @@ from datetime import datetime
 from lfhe_shared.envelopes import EnvelopeItem
 
 from .claim_inputs import InputBuildError
+from .event_inputs import _lineage_context
 
 M06_MODULE = "M06_RELEVANCE"
 M07_MODULE = "M07_INTELLIGENCE_ASSESSOR"
@@ -136,3 +137,60 @@ def build_m06_inputs(conn, event_version_id: str, event_version_hash: str, *, re
             "previous_assessment_version_id": None,
             "pir_definitions": pir_definitions(conn), "hu_nato_dimensions": list(HU_NATO_DIMENSIONS)}
     return AnalysisInputs(task, [ev], [bl] if bl else [])
+
+
+STATEMENT_TYPES = ("KNOWN_FACT", "ASSUMPTION", "CHANGE_FROM_BASELINE", "ANALYTIC_JUDGMENT", "IMPLICATION",
+                   "ALTERNATIVE_EXPLANATION", "INFORMATION_GAP", "INDICATOR_SUPPORT", "INDICATOR_WEAKEN", "HU_NATO_RELEVANCE")
+PROVENANCE_CLASSES = ("CASE_EVIDENCE", "APPROVED_REFERENCE_CONTEXT", "MIXED", "NONE_REQUIRED")
+
+
+def previous_assessment_item(conn, version_id: str | None, mode: str, cutoff: datetime) -> EnvelopeItem | None:
+    """A previous assessment version enters only if eligible for the cutoff and approved (§3, §19)."""
+    if not version_id:
+        return None
+    row = conn.execute(
+        """SELECT v.*, lfhe.assessment_version_eligible(v.id, %s, %s) AS eligible,
+                  lfhe.assessment_version_approved_asof(v.id, %s, %s) AS approved
+           FROM lfhe.assessment_versions v WHERE v.id = %s""", (mode, cutoff, mode, cutoff, str(version_id))).fetchone()
+    if row is None or not row["eligible"] or not row["approved"]:
+        raise InputBuildError("PREVIOUS_ASSESSMENT_INELIGIBLE", str(version_id))
+    stmts = conn.execute(
+        """SELECT statement_local_id, statement_type::text AS statement_type, statement_text, epistemic_category::text AS cat
+           FROM lfhe.assessment_statements WHERE assessment_version_id = %s ORDER BY statement_local_id""",
+        (str(version_id),)).fetchall()
+    return EnvelopeItem("assessment_version", str(row["id"]), {
+        "assessment_version_id": str(row["id"]), "content_hash": row["content_hash"],
+        "event_version_id": str(row["event_version_id"]),
+        "statements": [{"statement_local_id": s["statement_local_id"], "statement_type": s["statement_type"],
+                        "epistemic_category": s["cat"], "statement_text": s["statement_text"]} for s in stmts]})
+
+
+def build_m07_inputs(conn, event_version_id: str, event_version_hash: str, *, report_mode: str,
+                     information_cutoff: datetime, baseline_code: str | None = None,
+                     reference_context_codes=(), previous_assessment_version_id: str | None = None) -> AnalysisInputs:
+    check_cutoff(report_mode, information_cutoff)
+    ev, claims = event_version_item(conn, event_version_id, event_version_hash, report_mode, information_cutoff)
+    for c in claims:      # deterministic attribution expectation per claim (Addendum §10)
+        c["attribution_required_if_cited"] = conn.execute(
+            "SELECT lfhe.p4_attribution_required('KNOWN_FACT', ARRAY[%s]::uuid[], '{}', %s, %s) AS r",
+            (c["claim_id"], report_mode, information_cutoff)).fetchone()["r"]
+    ev = EnvelopeItem(ev.object_type, ev.object_id, {**ev.content, "claims": claims})
+    bl = baseline_item(conn, baseline_code, report_mode, information_cutoff)
+    rcs = reference_context_items(conn, reference_context_codes, report_mode, information_cutoff)
+    prev = previous_assessment_item(conn, previous_assessment_version_id, report_mode, information_cutoff)
+    claim_ids = [c["claim_id"] for c in claims]
+    lineage = _lineage_context(conn, claim_ids, report_mode, information_cutoff)
+    summary = conn.execute("SELECT lfhe.independence_summary_asof(%s::uuid[], %s, %s) AS s",
+                           (claim_ids, report_mode, information_cutoff)).fetchone()["s"]
+    terms = [r["code"] for r in conn.execute("SELECT code FROM lfhe.likelihood_terms ORDER BY rank")]
+    task = {"report_mode": report_mode, "information_cutoff": information_cutoff.isoformat(),
+            "event_id": ev.content["event_id"], "event_version_id": str(event_version_id),
+            "event_version_hash": event_version_hash,
+            "baseline_version_id": bl.object_id if bl else None,
+            "baseline_status": "BASELINE_AVAILABLE" if bl else "BASELINE_UNAVAILABLE",
+            "previous_assessment_version_id": prev.object_id if prev else None,
+            "reference_context_version_ids": sorted(i.object_id for i in rcs),
+            "likelihood_terms": terms, "independence_summary": summary,
+            "statement_types": list(STATEMENT_TYPES), "provenance_classes": list(PROVENANCE_CLASSES)}
+    context = ([bl] if bl else []) + rcs + ([prev] if prev else []) + lineage
+    return AnalysisInputs(task, [ev], context)
