@@ -243,6 +243,6 @@ Control Gate 2 jóváhagyva, Phase 2 lezárva. Következő lépés csak PO-dönt
 
 ## FINAL DOCUMENTATION COMMIT
 
-A végleges jelentés tartalmát rögzítő commit hash-ét a véglegesítés után közvetlenül következő, csak ezt a sort érintő commit írja be ide: **PENDING**
+A végleges jelentés tartalmát rögzítő commit hash-ét a véglegesítés után közvetlenül következő, csak ezt a sort érintő commit írja be ide: **`40c00ff`** (`40c00ff404451cc4f59144761b422736807d91e8`)
 
 **STOP.**

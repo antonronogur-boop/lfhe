@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Current phase | Phase 2 — Claim Pipeline: ACCEPTED AND CLOSED (2026-10-19) |
-| Current gate | **Control Gate 2 APPROVED** by the PO on 2026-10-19 (docs/control-gate-2-report.md): DEV 18/18 migrations + smoke 22/22 PASS, K-05 CLOSED and ACCEPTED (6/8 PASS; K05-03, K05-04 BLOCKED_BY_ROBOTS accepted), SD-01…SD-12 approved. Commits: implementation/CI baseline `1b31ed5`; K-05 run on `613f61a`; final documentation commit recorded in the CG2 report |
+| Current gate | **Control Gate 2 APPROVED** by the PO on 2026-10-19 (docs/control-gate-2-report.md): DEV 18/18 migrations + smoke 22/22 PASS, K-05 CLOSED and ACCEPTED (6/8 PASS; K05-03, K05-04 BLOCKED_BY_ROBOTS accepted), SD-01…SD-12 approved. Commits: implementation/CI baseline `1b31ed5`; K-05 run on `613f61a`; final documentation commit `40c00ff` |
 | Next authorised action | **None.** Phase 3 must not start without explicit Product Owner approval; before any later phase its authoritative baseline must be versioned under docs/specs/ (SD-12) |
 
 ## Phase 2 progress (Addendum v1.0)
