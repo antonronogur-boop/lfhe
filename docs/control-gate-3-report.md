@@ -11,7 +11,7 @@
 | CG2 végső dokumentációs állapot (kiindulópont) | `8ff862f` |
 | Phase 3 baseline verbatim tárolása (P3-00) | `8e8d5b0` |
 | Phase 3 implementáció + dokumentáció, CI-tesztelt (CI run 39267104102: secret-scan, python-tests, web — mind success) | `2f0b50b` |
-| Ez a jelentés | lásd a fájl végén (FINAL DOCUMENTATION COMMIT) |
+| Ez a jelentés | `6092849` (FINAL DOCUMENTATION COMMIT) |
 
 DEV Supabase: a Phase 3 migrációk (1800–2200) **még nincsenek alkalmazva** a DEV-en (ehhez a PO gépe kell, lásd OPEN ITEMS). A baseline szerint ez és a valódi provider-futás sem blokkolja a CG3-at, de a DEV-állapotot külön rögzíteni kell.
 
@@ -327,4 +327,4 @@ Nincs. Magasabb rendű specifikációval ütköző anyagi konfliktust nem talál
 
 ## FINAL DOCUMENTATION COMMIT
 
-A jelentést tartalmazó commit hash-e a commit után kerül ide.
+`6092849` — a CG3-jelentés és a metrikák commitja (kód és migrációk azonosak a CI-tesztelt `2f0b50b`-vel). Ezt a sort a következő commit rögzíti.
