@@ -1,6 +1,6 @@
 # LFHÉ — CONTROL GATE 3 REPORT (Phase 3 — Lineage & Events)
 
-**Dátum:** 2026-10-19 (frissítve a CG3 célzott javító kör után) · **Alap:** Phase 3 Authoritative Baseline Addendum v1.0 (`docs/specs/LFHE_Phase3_Authoritative_Baseline_Addendum_v1.0.md`), PO-döntés „AUTHORISE PHASE 3” (`docs/specs/PO_Decision_2026-10-19_Authorise_Phase3.md`), valamint a jóváhagyott Phase 1/2 állapot (CG2 APPROVED) · **Repository:** `antonronogur-boop/lfhe` (privát)
+**Dátum:** 2026-10-19 (frissítve a CG3 célzott javító kör és a végső javítás után) · **Alap:** Phase 3 Authoritative Baseline Addendum v1.0 (`docs/specs/LFHE_Phase3_Authoritative_Baseline_Addendum_v1.0.md`), PO-döntés „AUTHORISE PHASE 3” (`docs/specs/PO_Decision_2026-10-19_Authorise_Phase3.md`), valamint a jóváhagyott Phase 1/2 állapot (CG2 APPROVED) · **Repository:** `antonronogur-boop/lfhe` (privát)
 
 ## PHASE / GATE
 
@@ -8,6 +8,11 @@
 
 - A PO 2026-10-19-én az SD3-01…SD3-11 pontokat **APPROVED** minősítéssel fogadta el. A CG3-at nem hagyta jóvá három implementációs hiba miatt (`docs/specs/PO_Decision_2026-10-19_CG3_Targeted_Corrective_Pass.md`).
 - **CG3-01 RESOLVED, CG3-02 RESOLVED, CG3-03 RESOLVED.** Részletek: `docs/cg3-corrective-report.md`.
+- A PO végső döntése (2026-10-19, `docs/specs/PO_Decision_2026-10-19_CG3_Final_Correction.md`):
+  - CG3-02 és CG3-03: **RESOLVED / ACCEPTED**;
+  - SD3-12: **APPROVED**;
+  - CG3-01: elfogadva, kivéve az SD3-13-at.
+- Az SD3-13-at a végső javítás (2600-as migráció) a jóváhagyott szemantikával váltja fel: *„Lineage retractions are themselves knowledge-bound. A retraction affects a historical run only when its supporting evidence is eligible for that run's cutoff.”* **A végső javítás RESOLVED.**
 
 | Szerep | Commit |
 |---|---|
@@ -16,9 +21,11 @@
 | Phase 3 implementáció + dokumentáció, CI-tesztelt (CI run 39267104102: secret-scan, python-tests, web — mind success) | `2f0b50b` |
 | Az első CG3-jelentés (átadott archívum `7197389`) | `6092849` / `7197389` |
 | CG3 javító kör: 2300–2500 migráció + tesztek, CI-tesztelt (CI run 39274247863: secret-scan, python-tests, web — mind success) | `d3e1302` |
-| Ez a frissített jelentés + javító jelentés | `2b40878` (FINAL DOCUMENTATION COMMIT) |
+| Végső javítás: 2600 migráció + tesztek, CI-tesztelt (CI run 39279160435: mind success) | `128f1a7` |
+| Javító kör dokumentációja | `2b40878` / `4ad7b02` |
+| Végső jelentés és dokumentáció | lásd FINAL DOCUMENTATION COMMIT |
 
-DEV Supabase: a Phase 3 migrációk (1800–2500) **szándékosan nincsenek alkalmazva** a DEV-en; a PO javító döntése a DEV-migrációt egyelőre tiltja (lásd OPEN ITEMS).
+DEV Supabase: a Phase 3 migrációk (1800–2600) még nincsenek alkalmazva a DEV-en. A pontos parancsok: `docs/cg3-corrective-report.md` (DEV MIGRATION + SMOKE) és OPEN ITEMS.
 
 ## IMPLEMENTED
 
@@ -69,7 +76,13 @@ A `8ff862f..2f0b50b` tartományban 28 kód/teszt/migrációs fájl (4642 sor hoz
   - nincs név alapú újrahasznosítás;
   - azonosság csak explicit emberi választással (`decide_lineage_proposal` 4. argumentum / `external_origin_id`, bizonyíték- és URL-ütközés-ellenőrzéssel), vagy azonos kanonikus URL + név alapján, egyértelmű találat esetén |
 
-Minden javítás új migráció; a már commitolt 1800–2200 migrációkat nem írtam át (D-01: fix-forward). Összesen 26 migráció. A 2200-as név alapú újrahasznosítást a 2500 felülírja.
+| `20261011002600_cg3_knowledge_bound_retractions.sql` | **Végső javítás (SD3-13 helyett):**
+  - append-only `claim_lineage_retraction_evidence`;
+  - `lineage_retraction_usable`: a visszavonás csak akkor hat, ha bizonyítékalapja a futás cutoffjára jogosult; alap nélkül REPLAY-t nem módosít;
+  - `lineage_usable` ezt értékeli;
+  - `retract_claim_lineage(id, reason, p_evidence_basis DEFAULT NULL)` |
+
+Minden javítás új migráció; a már commitolt migrációkat nem írtam át (D-01: fix-forward). Összesen 27 migráció. A 2200-as név alapú újrahasznosítást a 2500 felülírja.
 
 ## PROMPTS / SCHEMAS
 
@@ -234,7 +247,7 @@ Metrikák: `over_merge_in_validated_events = 0`, `unvalidated_ai_grouping_promot
   - a VIEWER és az ADMIN a `require_human_permission` miatt bukik el.
 - Explicit negatív teszt öt szereplővel (**worker, service_role, anon, VIEWER, ADMIN** → `InsufficientPrivilege`): `decide_lineage_proposal`, `record_claim_lineage`, `decide_corroboration_recommendation`, `merge_events`, `split_event`, `supersede_event`, `reject_event`. A worker `set_event_state`-je külön tesztelve.
 - Ember nem hívhatja a worker ingestion-függvényeket.
-- `tests/security/test_security_definer_hardening.py`: minden SECURITY DEFINER rögzített `search_path`-szal fut, a HUMAN_ONLY függvények csak `authenticated` számára futtathatók. Lokálisan 109 definer, 0 rögzítetlen; 29 HUMAN_ONLY függvény.
+- `tests/security/test_security_definer_hardening.py`: minden SECURITY DEFINER rögzített `search_path`-szal fut, a HUMAN_ONLY függvények csak `authenticated` számára futtathatók. Lokálisan 110 definer, 0 rögzítetlen; 29 HUMAN_ONLY függvény.
 - A javító kör új definer-függvényei (as-of ellenőrzések) csak a `lfhe_worker` számára futtathatók. A `decide_lineage_proposal` 4 argumentumos alakja HUMAN_ONLY, csak `authenticated`.
 - DEV smoke P3 ellenőrzések (a PO futtatja):
   - táblák + RLS;
@@ -274,12 +287,12 @@ Metrikák: `over_merge_in_validated_events = 0`, `unvalidated_ai_grouping_promot
 
 ## TESTS ACTUALLY RUN
 
-- Teljes Python-csomag lokálisan (PostgreSQL 16 + Supabase-shim, Python 3.13 locked venv, `-W error::DeprecationWarning`): **429 teszt**.
-  - Phase 3: 60 (lineage 18, events 22, pipeline 9, as-of 6, acceptance 1, GS 4);
+- Teljes Python-csomag lokálisan (PostgreSQL 16 + Supabase-shim, Python 3.13 locked venv, `-W error::DeprecationWarning`): **432 teszt**.
+  - Phase 3: 63 (lineage 18, events 22, pipeline 9, as-of 9, acceptance 1, GS 4);
   - Phase 1+2: 369.
 - `apps/web`: 21 teszt.
 - `scripts/prompt_registry.py check-lock`, `scripts/secret_scan.py`, gitleaks git-mód a teljes előzményen (lokálisan és CI-ban).
-- GitHub CI run 39274247863 a `d3e1302` commiton: secret-scan, python-tests, web.
+- GitHub CI: run 39274247863 (`d3e1302`), run 39275062633 (`4ad7b02`), és a végső kódcommit `128f1a7` futása (lásd TEST RESULTS).
 - Elfogadási korpusz metrikái: `docs/cg3-acceptance-metrics.json`.
 - Nem futott:
   - DEV migráció és smoke (a PO javító döntése szerint egyelőre tilos);
@@ -289,12 +302,13 @@ Metrikák: `over_merge_in_validated_events = 0`, `unvalidated_ai_grouping_promot
 
 | Csomag | Eredmény |
 |---|---|
-| Python (lokális) | **429 passed**, 0 failed |
+| Python (lokális) | **432 passed**, 0 failed |
 | Web | **21 passed** |
 | CI run 39274247863 (`d3e1302`) | secret-scan ✔, python-tests ✔, web ✔ |
+| CI a végső kódcommiton (`128f1a7`) | run 39279160435: secret-scan ✔, python-tests ✔, web ✔ |
 | PROMPT-LOCK / SECRET-SCAN / gitleaks | ok / clean / no leaks |
 | §15 kötelező tesztek 1–31 | mind PASS |
-| CG3-01 (7 kötelező viselkedés), CG3-02 (5), CG3-03 (5) | mind PASS |
+| CG3-01 (7 kötelező viselkedés), CG3-02 (5), CG3-03 (5), végső javítás A–E | mind PASS |
 
 Leképezés: `docs/phase3-test-traceability.md`.
 
@@ -312,7 +326,7 @@ Leképezés: `docs/phase3-test-traceability.md`.
 | 8 | Merge/split/supersede megőrzi az eseményfelmenőket és a történeti ID-kat | **PASS** | `ancestry_breaks = 0`, tesztek 20–22 |
 | 9 | Strukturális művelettől egy claim sem tűnik el csendben | **PASS** | `claims_lost_in_structural_ops = 0`, SPLIT-őrök, 2100-as migráció; teljes splitnél a régi tagság nem aktuális (CG3-02) |
 | 10 | A konzervatív klaszterezés nem vonja össze a gyengén kapcsolódó claimeket | **PASS** (determinisztikus őrökre és szkriptelt kimenetekre) | `over_merge_in_validated_events = 0`, `unvalidated_ai_grouping_promoted = 0`; korlát: valódi modell nem mérve (L-20) |
-| 11 | Minden Phase 3 teszt átmegy | **PASS** | 60/60 |
+| 11 | Minden Phase 3 teszt átmegy | **PASS** | 63/63 |
 | 12 | Phase 1 és Phase 2 regresszió PASS | **PASS** | 369/369 + web 21/21, CI zöld |
 | 13 | A model-run provenance teljes | **PASS** | `model_runs_incomplete_provenance = 0`, teszt 29 |
 | 14 | GS answer-key szivárgás = 0 | **PASS** | `gs_leakage = 0` (minden envelope és renderelt üzenet), `test_gs_isolation.py` 4/4 |
@@ -357,6 +371,7 @@ Javított hibák az eredeti fejlesztés közben:
 - As-of tudás (CG3-01): származtatott, hiteles objektum csak a tudáskorlátja alapján kerülhet futásba. A korlátot változtathatatlan, tárolt bizonyítékból számolom, reprodukálhatóan.
   - A feldolgozás vagy emberi döntés a cutoff után is megengedett, ha a bizonyíték maga jogosult.
   - A `created_at ≤ cutoff` soha nem egyedüli szabály.
+  - A lineage-visszavonás maga is tudáskorlátos: csak akkor hat egy történeti futásra, ha az alátámasztó bizonyítéka jogosult az adott cutoffra. Egy később tudott visszavonás így nem teremt hamis történeti függetlenséget (`retraction_hindsight_leakage = 0`).
 - Az AI-frissítés csak bővíthet. Claimet csak ember vehet ki, és az `removed_claim_ids`-ként rögzül.
 - Külső forrás azonossága nem következtethető névből (CG3-03). Bizonytalan azonosság esetén a különbség megmarad, és az ember explicit választással állapíthatja meg a közös forrást.
 - `final_analytic_confidence`: nincs `confidence` nevű oszlop (DC-01 / guardrail 4). A javaslatoknál `proposal_confidence` szerepel.
@@ -376,10 +391,10 @@ Javított hibák az eredeti fejlesztés közben:
 | SD3-09 | AI-frissítésnél a meglévő claimek automatikusan átkerülnek (2100) | A modell a cutoff miatt nem látja az összes claimet; így „nem tűnhet el csendben claim” teljesül |
 | SD3-10 | A PO a „docs/specs/SPEC_INDEX” helyet írta; a tényleges index a `docs/SPEC_INDEX.md` | A meglévő struktúra; ott kapta meg a 11. sort |
 | SD3-11 | Nincs Phase 3 UI | A Phase 3 baseline nem írja elő; a döntések HUMAN_ONLY RPC-n keresztül mennek (L-21) |
-| SD3-12 *(új)* | Az emberi eseményverzió és állapotváltás tudáskorlátja a bizonyítékhalmaza (tag-claimek + elfogyasztott verziók). A szabad szöveges mezőket (cím, leírás) az elemző e bizonyíték összefoglalójaként rögzíti; gépileg nem bizonyítható, hogy nincs bennük későbbi tudás (L-25) | A tudáskorlát reprodukálható és tárolt adatból számolható. Ennél erősebb bizonyítást csak egy elemzői nyilatkozat vagy a szöveg tiltása adna, ezek már új hatókört jelentenének |
-| SD3-13 *(új)* | A visszavont lineage soha nem használható, a REPLAY-ben sem (akkor sem, ha a visszavonás a cutoff után történt) | A visszavonás egy állított függőséget vesz el, és hibát javít. A felső korlát ettől nőhet, de `independence_established` mindig false marad |
+| SD3-12 — **APPROVED** | Az emberi eseményverzió és állapotváltás tudáskorlátja a bizonyítékhalmaza (tag-claimek + elfogyasztott verziók). A szabad szöveges mezőket (cím, leírás) az elemző e bizonyíték összefoglalójaként rögzíti; gépileg nem bizonyítható, hogy nincs bennük későbbi tudás (L-25) | A tudáskorlát reprodukálható és tárolt adatból számolható. Ennél erősebb bizonyítást csak egy elemzői nyilatkozat vagy a szöveg tiltása adna, ezek már új hatókört jelentenének |
+| SD3-13 — **NOT APPROVED → REPLACED** | Eredetileg: a visszavont lineage feltétel nélkül használhatatlan. Helyette: „Lineage retractions are themselves knowledge-bound. A retraction affects a historical run only when its supporting evidence is eligible for that run's cutoff.” | A PO döntése; 2600-as migráció, tesztek A–E |
 
-Az SD3-01…SD3-11 pontokat a PO 2026-10-19-én **APPROVED** minősítéssel fogadta el. **Az új SD3-12 és SD3-13 pontokra kérem a PO döntését.** Magasabb rendű specifikációval egyik sem ütközik.
+SD3-01…SD3-12: **APPROVED** (PO, 2026-10-19). SD3-13: a jóváhagyott szemantikával felváltva. Nyitott eltérés nincs; további PO-tervezési döntést nem kérek.
 
 ## CHANGE REQUESTS
 
@@ -389,19 +404,19 @@ Nincs. Magasabb rendű specifikációval ütköző anyagi konfliktust nem talál
 
 | ID | Tétel | Blokkoló? |
 |---|---|---|
-| OI3-01 | DEV Supabase: az 1800–2500 migráció alkalmazása + smoke (várhatóan 26 migráció; a 22 meglévő smoke-ellenőrzés mellé 10 új P3 ellenőrzés, service_role kulccsal 11). **A PO javító döntése szerint egyelőre nem futtatható**, csak külön PO-utasításra | A PO dönt |
+| OI3-01 | DEV Supabase: az 1800–2600 migráció alkalmazása + smoke (27 migráció; a 22 meglévő smoke-ellenőrzés mellé 10 új P3 ellenőrzés, service_role kulccsal 11). Pontos PowerShell-parancsok: `docs/cg3-corrective-report.md` → DEV MIGRATION + SMOKE | A PO futtatja |
 | OI3-02 | Valódi provider-futás M04/M05-tel, a klaszterezési minőség mérése (L-09, L-20) | Nem (baseline §13) |
 | OI3-03 | Phase 3 review UI (L-21) | Nem |
 | OI3-04 | Korábbról: L-09, L-18, Phase 3+ high-impact szabályok (CG2 nem blokkoló tételek) | Nem |
 
 ## RECOMMENDED NEXT ACTION
 
-1. A PO vizsgálja át a javító jelentést (`docs/cg3-corrective-report.md`), és döntsön a CG3-ról, valamint az SD3-12 és SD3-13 pontokról.
-2. Ha a PO engedélyezi: DEV-migráció (1800–2500) + smoke (OI3-01).
+1. A PO futtassa a DEV-migrációt (1800–2600) és a smoke-ot (OI3-01), és küldje el a kimenetet.
+2. A PO döntsön a CG3-ról.
 3. A Phase 4 csak explicit PO-jóváhagyás után indulhat, a Phase 4 baseline `docs/specs/` alá verziózva (SD-12).
 
 **STOP.** Phase 4-et nem kezdtem el.
 
 ## FINAL DOCUMENTATION COMMIT
 
-Az első jelentés: `6092849`. A frissített jelentés: `2b40878` (kód és migrációk azonosak a CI-tesztelt `d3e1302`-vel). Ezt a sort a következő commit rögzíti.
+Az első jelentés: `6092849`. A javító kör jelentése: `2b40878` / `4ad7b02`. A végső jelentés commitja a commit után kerül ide.

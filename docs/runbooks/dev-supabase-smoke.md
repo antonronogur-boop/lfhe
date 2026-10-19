@@ -51,3 +51,14 @@ operator/Product Owner; record the JSON output of step 6 in PROJECT_STATUS.
   call the worker ingestion function. The expected viewer permissions are now
   `SOURCE_READ, ARTICLE_READ, CLAIM_READ`. The smoke test creates no claims.
 * K-05 real-source validation: `docs/runbooks/k05-real-source-validation.md`.
+
+## Phase 3 additions (incl. CG3 corrective pass and final correction)
+
+* Migrations `20261011001800` … `20261011002600` (9 files: lineage, events, phase3 jobs, 2100, 2200,
+  2300 as-of context, 2400 full-split terminal, 2500 origin identity, 2600 knowledge-bound
+  retractions) are applied with the same `scripts/apply_migrations.py` command (27 migrations in
+  total). Already applied files are skipped by checksum; a changed applied file is refused.
+* The smoke script adds 10 Phase 3 checks (11 with `LFHE_SMOKE_SERVICE_ROLE_KEY`): Phase 3 tables
+  present with RLS, `claim_status_auto_rules` empty, every SECURITY DEFINER pins `search_path`,
+  viewer can read events / anon cannot, viewer and ADMIN cannot MERGE or validate lineage,
+  service_role cannot MERGE, humans cannot call the M04/M05 ingestion functions.

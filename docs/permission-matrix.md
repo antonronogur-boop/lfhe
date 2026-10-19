@@ -54,6 +54,9 @@ Claim, entity and taxonomy tables are readable by humans holding `CLAIM_READ` (R
 
 CG3 corrective pass (migrations 2300–2500): `decide_lineage_proposal` takes an optional 4th
 argument `p_external_origin_id` (explicit human identity decision; same permission);
+`retract_claim_lineage` takes an optional 3rd argument `p_evidence_basis` (migration 2600; same
+permission; `lfhe.lineage_retraction_usable` is worker-only; `claim_lineage_retraction_evidence`
+is immutable and readable with `CLAIM_READ`);
 `lfhe.lineage_usable`, `lfhe.event_version_eligible`, `lfhe.run_evidence_eligible`,
 `lfhe.event_asof`, `lfhe.claim_independence_group_asof`, `lfhe.independence_summary_asof` are
 SECURITY DEFINER, executable by `lfhe_worker` only (envelope building);

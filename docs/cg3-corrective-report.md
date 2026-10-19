@@ -1,7 +1,8 @@
-# LFHÉ — TARGETED CG3 CORRECTIVE REPORT (CG3-01, CG3-02, CG3-03)
+# LFHÉ — TARGETED CG3 CORRECTIVE REPORT (CG3-01, CG3-02, CG3-03 + final correction)
 
 **Dátum:** 2026-10-19 · **Alap:**
 - PO-döntés „CONTROL GATE 3 — TARGETED CORRECTIVE PASS” (`docs/specs/PO_Decision_2026-10-19_CG3_Targeted_Corrective_Pass.md`, SPEC_INDEX 12. sor);
+- PO-döntés „FINAL CG3 CORRECTION” (`docs/specs/PO_Decision_2026-10-19_CG3_Final_Correction.md`, SPEC_INDEX 13. sor);
 - Phase 3 Authoritative Baseline Addendum v1.0.
 
 **Hatókör:** kizárólag a három hiba. Nem végeztem új architektúra-felülvizsgálatot, a CG2-t nem nyitottam újra, a Phase 4 nem kezdődött el, és a DEV-migrációt nem futtattam. Az 1800–2200 migrációkat nem módosítottam; minden javítás új, forward-only migráció.
@@ -11,8 +12,16 @@
 | Hiba | Állapot | Migráció |
 |---|---|---|
 | CG3-01 REPLAY / cutoff as-of kontextus-szivárgás | **RESOLVED** | `20261011002300_cg3_01_asof_context.sql` |
-| CG3-02 teljes split után nyitva maradó szülő | **RESOLVED** | `20261011002400_cg3_02_full_split_terminal.sql` |
-| CG3-03 külső forrás név alapú automatikus összevonása | **RESOLVED** | `20261011002500_cg3_03_external_origin_identity.sql` |
+| CG3-02 teljes split után nyitva maradó szülő | **RESOLVED / ACCEPTED** (PO) | `20261011002400_cg3_02_full_split_terminal.sql` |
+| CG3-03 külső forrás név alapú automatikus összevonása | **RESOLVED / ACCEPTED** (PO) | `20261011002500_cg3_03_external_origin_identity.sql` |
+| CG3-01 maradék: visszavonás as-of kezelése (SD3-13 helyett) | **RESOLVED** | `20261011002600_cg3_knowledge_bound_retractions.sql` |
+
+A PO 2026-10-19-i végső döntése:
+- **CG3-02 és CG3-03:** RESOLVED / ACCEPTED.
+- **SD3-12:** APPROVED.
+- **CG3-01:** elfogadva, kivéve az SD3-13 szerinti visszavonás-kezelést. Ezt a végső javítás pótolja; az SD3-13-at az alábbi, jóváhagyott szemantika váltja fel:
+
+> „Lineage retractions are themselves knowledge-bound. A retraction affects a historical run only when its supporting evidence is eligible for that run's cutoff.”
 
 ## COMMITS AND CI
 
@@ -20,7 +29,9 @@
 |---|---|---|
 | Kiindulópont (átadott CG3-archívum) | `7197389` | run 39267955183 ✔ |
 | Javító kód + migrációk + tesztek | `d3e1302` | **run 39274247863: secret-scan ✔, python-tests ✔, web ✔** |
-| Dokumentáció (ez a jelentés, frissített CG3-jelentés, metrikák, traceability, PROJECT_STATUS) | `2b40878` | lásd lent |
+| Dokumentáció (javító kör) | `2b40878` / `4ad7b02` | run 39275062633 ✔ |
+| **Végső javítás:** 2600 migráció + tesztek | `128f1a7` | **run 39279160435: secret-scan ✔, python-tests ✔, web ✔** |
+| Végső dokumentáció | lásd FINAL DOCUMENTATION COMMIT | |
 
 ## CG3-01 — REPLAY / CUTOFF AS-OF CONTEXT LEAKAGE — RESOLVED
 
@@ -113,6 +124,43 @@ Minden más esetben (csak a név egyezik, eltérő URL, nincs URL, több jelölt
 
 A korpusz új L6 esete (azonos nevű, különböző URL-ű forrás) 2 csoport marad: `false_dependence_collapse = 0`.
 
+## FINAL CORRECTION — KNOWLEDGE-BOUND LINEAGE RETRACTIONS — RESOLVED
+
+**Hiba (a PO szerint):** a 2300-as `lineage_usable` minden futásban használhatatlannak tekintette a lineage-et, ha létezett visszavonása (`EXISTS(retraction)`). Egy T utáni bizonyítékon alapuló visszavonás így megváltoztatta, mi volt tudható T-kor: eltávolított egy függőséget, és ezzel növelhette a látszólag független csoportok számát.
+
+**Javítás (egy forward-only migráció, `20261011002600_cg3_knowledge_bound_retractions.sql`; 1800–2500 változatlan):**
+- **Bizonyítékalap:** új, append-only `claim_lineage_retraction_evidence` tábla a visszavonás claim- és cikk-bizonyítékaival. A `retract_claim_lineage(id, reason, p_evidence_basis DEFAULT NULL)` rögzíti; érvénytelen elem esetén `EVIDENCE_BASIS_INVALID`, és semmi nem rögzül.
+- **`lfhe.lineage_retraction_usable(lineage, mode, cutoff)`:** a visszavonás akkor és csak akkor számít, ha van bizonyítékalapja, és annak minden eleme jogosult a futás cutoffjára — függetlenül attól, mikor rögzítették.
+  - Alap nélkül REPLAY-t soha nem módosít; LIVE-ban akkor érvényes, ha a rögzítés ≤ cutoff (jelenlegi tudás).
+  - A `created_at` önmagában soha nem történeti kritérium.
+- **`lfhe.lineage_usable`:** a lineage T-kor használható, ha a saját korlátja jogosult T-re, és nincs T-re jogosult visszavonása.
+- **Kontextus:** az M04/M05 lineage-kontextus a teljes `claim_lineage` táblát olvassa, és `lineage_usable`-lel szűr (nem az aktuális állapotú nézetet).
+  - A függetlenségi csoport (`claim_independence_group_asof`) ugyanezt a szabályt követi.
+  - Az aktuális állapotú `active_claim_lineage` nézet a mai emberi munkához változatlan.
+
+**Kötelező szabályok → megvalósítás:**
+
+| PO-szabály | Megvalósítás |
+|---|---|
+| 1. lineage T-kor használható, ha az alapja jogosult, hacsak nincs T-re jogosult visszavonás | `lineage_usable` → `lineage_retraction_usable` |
+| 2. visszavonás csak T-re jogosult alap esetén hat | bizonyítékalap-ellenőrzés `claim_cutoff_eligible` / `article_cutoff_eligible` szerint |
+| 3. T után rögzített, de csak T-kor jogosult bizonyítékon alapuló visszavonás hat REPLAY(T)-re | a rögzítés ideje nem számít, csak a bizonyíték |
+| 4. T utáni bizonyítékon alapuló visszavonás nem hat REPLAY(T)-re | ugyanaz az ellenőrzés |
+| 5. bizonyítékalap nélküli emberi visszavonás nem módosítja visszamenőleg a REPLAY-t | REPLAY → false; LIVE → rögzítés ≤ cutoff |
+| 6. a `created_at` nem egyedüli kritérium | REPLAY-ben nem használt; LIVE-ban csak alap nélküli visszavonásnál, jelenlegi tudásként |
+
+**Regressziós tesztek** (`tests/integration/test_asof_context.py`, +3), mind PASS:
+
+| PO-teszt | Teszt | Eredmény |
+|---|---|---|
+| A | `test_retraction_on_post_cutoff_evidence_does_not_alter_the_earlier_replay` | REPLAY(CUT): a lineage használható, 1 csoport, a lineage az M04-kontextusban |
+| B | ugyanott, későbbi cutoffal (`2026-06-01`) | a visszavonás hat: nem használható, 2 csoport; LIVE: nem használható |
+| C | `test_retraction_recorded_after_the_cutoff_on_eligible_evidence_applies` | ma rögzítve, cutoff előtti bizonyítékon: REPLAY(CUT)-ban hat, 2 csoport |
+| D | `test_retraction_without_evidence_basis_does_not_rewrite_replay` | REPLAY(CUT): használható, 1 csoport; LIVE: nem használható; érvénytelen alap elutasítva, nyom nélkül |
+| E | csoport-állítások mindhárom tesztben + korpusz R1 | későbbi visszavonásból nincs hamis történeti függetlenség |
+
+Korpusz R1 kiegészítés: egy cutoff előtti bizonyítékon validált lineage-et T utáni bizonyítékkal visszavontam. REPLAY(T): 1 csoport, a lineage a kontextusban marad. `retraction_hindsight_leakage = 0`, `replay_context_leakage = 0`.
+
 ## FILES CHANGED (`7197389..d3e1302` + dokumentáció)
 
 - **Migrációk:** `20261011002300_cg3_01_asof_context.sql`, `20261011002400_cg3_02_full_split_terminal.sql`, `20261011002500_cg3_03_external_origin_identity.sql`.
@@ -131,35 +179,71 @@ A korpusz új L6 esete (azonos nevű, különböző URL-ű forrás) 2 csoport ma
 
 | Ellenőrzés | Eredmény |
 |---|---|
-| Teljes Python-csomag (`-W error::DeprecationWarning`) | **429 passed**, 0 failed (Phase 3: 60; Phase 1+2: 369) |
+| Teljes Python-csomag (`-W error::DeprecationWarning`) | **432 passed**, 0 failed (Phase 3: 63; Phase 1+2: 369) — a végső javítás után (a javító körben 429) |
 | Web (`apps/web`) | **21 passed** |
 | Phase 1 + Phase 2 regresszió | **369/369 PASS** |
 | PROMPT-LOCK | ok |
 | `scripts/secret_scan.py` | clean |
 | gitleaks (git-mód, teljes előzmény) | no leaks |
 | CI run 39274247863 (`d3e1302`) | secret-scan ✔, python-tests ✔, web ✔ |
-| Korpusz §16 + új metrikák (`docs/cg3-acceptance-metrics.json`) | mind 0: `replay_context_leakage`, `false_dependence_collapse`, `republication_inflation`, `claims_lost_in_structural_ops`, `ancestry_breaks`, `gs_leakage`, `model_runs_incomplete_provenance` stb. |
-| SECURITY DEFINER | 109 definer, 0 rögzítetlen `search_path`; 29 HUMAN_ONLY függvény, csak `authenticated` |
+| CI a végső kódcommiton (`128f1a7`) | run 39279160435: secret-scan ✔, python-tests ✔, web ✔ |
+| Korpusz §16 + új metrikák (`docs/cg3-acceptance-metrics.json`) | mind 0: `replay_context_leakage`, `retraction_hindsight_leakage`, `false_dependence_collapse`, `republication_inflation`, `claims_lost_in_structural_ops`, `ancestry_breaks`, `gs_leakage`, `model_runs_incomplete_provenance` stb. |
+| SECURITY DEFINER | 110 definer, 0 rögzítetlen `search_path`; 29 HUMAN_ONLY függvény, csak `authenticated` |
 
-## NEW SPECIFICATION DEVIATIONS (PO-döntést kérek)
+## SPECIFICATION DEVIATIONS — STATUS
 
-| ID | Tartalom |
-|---|---|
-| SD3-12 | Az emberi eseményverzió és állapotváltás tudáskorlátja a bizonyítékhalmaza (tag-claimek + elfogyasztott verziók). A szabad szöveges mezők (cím, leírás) az elemző összefoglalói; gépileg nem bizonyítható, hogy nincs bennük későbbi tudás (L-25) |
-| SD3-13 | A visszavont lineage REPLAY-ben sem használható, akkor sem, ha a visszavonás a cutoff után történt. Ez a hibajavítás iránya; a felső korlát nőhet, de a függetlenség nem állapítható meg |
+| ID | Állapot | Tartalom |
+|---|---|---|
+| SD3-12 | **APPROVED** (PO, 2026-10-19) | Az emberi eseményverzió és állapotváltás tudáskorlátja a bizonyítékhalmaza (tag-claimek + elfogyasztott verziók). A szabad szöveges mezők (cím, leírás) az elemző összefoglalói; gépileg nem bizonyítható, hogy nincs bennük későbbi tudás (L-25) |
+| SD3-13 | **NOT APPROVED → REPLACED** | Helyette a jóváhagyott szemantika: „Lineage retractions are themselves knowledge-bound. A retraction affects a historical run only when its supporting evidence is eligible for that run's cutoff.” (2600-as migráció) |
 
 ## OPEN ITEMS
 
-- DEV-migráció (1800–2500) + smoke: a PO döntése szerint **nem futtattam**; külön utasításra.
-- Új korlátok: L-25 (SD3-12), L-26 (as-of számítás olvasáskor; méréssel materializálható), L-27 (emberi lineage alap nélkül REPLAY-ben nem használható).
+- DEV-migráció (1800–2600) + smoke: még nem futott; a pontos parancsokat lásd lent.
+- Korlátok:
+  - L-25 (SD3-12, jóváhagyva);
+  - L-26 (as-of számítás olvasáskor; méréssel materializálható);
+  - L-27 (emberi lineage alap nélkül REPLAY-ben nem használható);
+  - L-28 (bizonyítékalap nélküli visszavonás REPLAY-t nem módosít).
 - Változatlanok: valódi provider (L-09, L-20), Phase 3 UI (L-21).
+
+## DEV MIGRATION + SMOKE — EXACT COMMANDS (a PO gépén, PowerShell)
+
+A jelszót és a kulcsokat a saját titoktárolódból add meg; a chatbe ne másold. A kimenetet küldd el.
+
+```powershell
+cd <a lfhe repository mappája>
+git pull
+git log -1 --oneline        # a FINAL DOCUMENTATION COMMIT hash-ét kell mutatnia
+
+# 1) migrációk (az eddigi 18 mellé 9 új: 1800 … 2600 → összesen 27)
+$env:LFHE_DEV_DB_URL = "postgresql://postgres.ylkubhuxvcsshfkbvski:<DB-jelszó>@aws-0-eu-north-1.pooler.supabase.com:5432/postgres"
+python scripts/apply_migrations.py $env:LFHE_DEV_DB_URL
+
+# 2) smoke (22 meglévő + 10 új Phase 3 ellenőrzés; service_role kulccsal +1)
+$env:LFHE_SMOKE_SUPABASE_URL = "https://ylkubhuxvcsshfkbvski.supabase.co"
+$env:LFHE_SMOKE_ANON_KEY = "<DEV anon kulcs>"
+$env:LFHE_SMOKE_DB_URL = $env:LFHE_DEV_DB_URL
+$env:LFHE_SMOKE_ADMIN_EMAIL = "<DEV admin e-mail>";   $env:LFHE_SMOKE_ADMIN_PASSWORD = "<jelszó>"
+$env:LFHE_SMOKE_VIEWER_EMAIL = "<DEV viewer e-mail>"; $env:LFHE_SMOKE_VIEWER_PASSWORD = "<jelszó>"
+# opcionális: $env:LFHE_SMOKE_SERVICE_ROLE_KEY = "<DEV service_role kulcs>"
+python scripts/supabase_dev_smoke.py
+
+# 3) takarítás
+Remove-Item Env:LFHE_DEV_DB_URL, Env:LFHE_SMOKE_DB_URL, Env:LFHE_SMOKE_ANON_KEY, Env:LFHE_SMOKE_ADMIN_PASSWORD, Env:LFHE_SMOKE_VIEWER_PASSWORD -ErrorAction SilentlyContinue
+```
+
+Várt eredmény:
+- az `apply_migrations` kilenc „applied 2026101100…” sort ír ki;
+- a smoke JSON-ban minden ellenőrzés PASS, és a migrációszám 27.
 
 ## RECOMMENDED NEXT ACTION
 
-A PO döntsön a CG3-ról és az SD3-12 / SD3-13 pontokról. A DEV-migráció csak külön PO-utasításra futhat.
+1. A PO futtassa a DEV-migrációt és a smoke-ot (fent), és küldje el a kimenetet.
+2. A PO döntsön a CG3-ról.
 
 **STOP.** Phase 4-et nem kezdtem el.
 
 ## FINAL DOCUMENTATION COMMIT
 
-`2b40878` — a javító jelentés, a frissített CG3-jelentés és a dokumentáció commitja (kód és migrációk azonosak a CI-tesztelt `d3e1302`-vel). Ezt a sort a következő commit rögzíti.
+Javító kör: `2b40878` / `4ad7b02`. Végső javítás dokumentációja: a commit után kerül ide.

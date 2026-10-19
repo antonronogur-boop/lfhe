@@ -7,7 +7,9 @@ Migrations: `20261011001800_lineage.sql`, `20261011001900_events.sql`,
 `20261011002200_external_origin_reuse.sql`; CG3 corrective pass (PO decision
 `docs/specs/PO_Decision_2026-10-19_CG3_Targeted_Corrective_Pass.md`):
 `20261011002300_cg3_01_asof_context.sql`, `20261011002400_cg3_02_full_split_terminal.sql`,
-`20261011002500_cg3_03_external_origin_identity.sql`.
+`20261011002500_cg3_03_external_origin_identity.sql`; final CG3 correction
+(`docs/specs/PO_Decision_2026-10-19_CG3_Final_Correction.md`):
+`20261011002600_cg3_knowledge_bound_retractions.sql`.
 
 ## 1. Principle
 
@@ -39,7 +41,8 @@ triggers, CHECK constraints), not only in Python.
    both `human_review_required = true`.
 5. A human with `CLAIM_REVIEW` decides:
    `decide_lineage_proposal(id, accept, reason [, external_origin_id])`,
-   `record_claim_lineage` (optional `evidence_basis`, see §4), `retract_claim_lineage`,
+   `record_claim_lineage` (optional `evidence_basis`, see §4),
+   `retract_claim_lineage(id, reason [, evidence_basis])` (see §4),
    `decide_corroboration_recommendation` (STATUS_STALE-checked; writes a
    `HUMAN_DECISION` status-history row that names the recommending model run).
 
@@ -182,6 +185,7 @@ evidence itself is eligible; `created_at ≤ cutoff` is never the rule on its ow
 | Object | Knowledge bound | Function |
 | --- | --- | --- |
 | validated lineage | child claim, parent claim / article, origin evidence claim; + `PROPOSAL_ACCEPTED`: every input/context object of the proposing M04 run (context lineage recursively); + `HUMAN_RECORDED`: the declared `evidence_basis` (`claim_lineage_evidence`). No declared basis → no provable bound: never in REPLAY, LIVE only if recorded ≤ cutoff | `lfhe.lineage_usable` |
+| lineage retraction | the declared `evidence_basis` of the retraction (`claim_lineage_retraction_evidence`). A retraction affects a run only when that basis is entirely eligible for the run's cutoff — whenever it was recorded. Without a basis it never alters REPLAY (LIVE: applies when recorded ≤ cutoff) | `lfhe.lineage_retraction_usable` (inside `lfhe.lineage_usable`) |
 | independence group | connected components over usable lineage only | `lfhe.claim_independence_group_asof`, `lfhe.independence_summary_asof` |
 | event version | member claims, every previous version, the AI run's inputs/context (incl. event versions shown), consumed versions (MERGED_INTO sources, SPLIT_INTO parent) | `lfhe.event_version_eligible` |
 | event state | the head version current when the state row was written (`event_state_version_bindings`, trigger); unbound rows fail closed | in `lfhe.event_asof` |
@@ -189,7 +193,11 @@ evidence itself is eligible; `created_at ≤ cutoff` is never the rule on its ow
 
 `lfhe.event_asof(event, mode, cutoff)` returns the latest eligible version, the
 latest usable state, the usable structural outcome and `is_open`; nothing when no
-version is provable. Retracted lineage is never used. The bound of a human event
+version is provable. Lineage retractions are themselves knowledge-bound: a
+retraction affects a historical run only when its supporting evidence is eligible
+for that run's cutoff (replaces the earlier unconditional rule). The current-state
+view `active_claim_lineage` still excludes every retracted row for present-day
+human work. The bound of a human event
 version is its evidence set (member claims and consumed versions); its free text
 is the analyst's summary of that evidence (SD3-12).
 

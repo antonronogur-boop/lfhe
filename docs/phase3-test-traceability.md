@@ -60,6 +60,11 @@ review binding — E `test_human_review_of_ai_version_is_hash_bound`.
 | CG3-01 ingestion: only the as-of version is accepted; no update on a later head | R `test_replay_ingestion_accepts_only_the_asof_version_and_never_materialises_on_a_later_head` |
 | CG3-02 full split parent not an M05 candidate; update / state change / re-split refused; history and SPLIT_INTO intact; no claim lost; no old membership as current | E `test_full_split_parent_is_no_longer_open_or_current` |
 | CG3-02 retained split parent current only with the retained claims | E `test_split_with_retained_parent_stays_current_only_with_the_retained_claims` |
+| Final correction A: lineage on eligible evidence, retraction on post-cutoff evidence → lineage still usable in the earlier REPLAY | R `test_retraction_on_post_cutoff_evidence_does_not_alter_the_earlier_replay`; A R1 (`retraction_hindsight_leakage`) |
+| Final correction B: once that evidence is eligible (later cutoff) → retraction applies | R `test_retraction_on_post_cutoff_evidence_does_not_alter_the_earlier_replay` |
+| Final correction C: retraction recorded after the cutoff on eligible evidence → applies to that REPLAY | R `test_retraction_recorded_after_the_cutoff_on_eligible_evidence_applies` |
+| Final correction D: retraction without evidence basis → does not alter REPLAY | R `test_retraction_without_evidence_basis_does_not_rewrite_replay` |
+| Final correction E: independence groups follow the same as-of behaviour (no false historical independence) | R (group assertions in the three tests above); A R1 |
 | CG3-03.1 same name + explicit human selection → one group | L `test_same_name_with_explicit_human_selection_is_one_group` |
 | CG3-03.2 same name + different URLs → distinct (same URL + name → reused) | L `test_same_name_different_urls_remain_distinct_same_url_is_reused`; A scenario L6 |
 | CG3-03.3 same name, no URL, no explicit reuse → no collapse | L `test_same_name_without_explicit_reuse_does_not_collapse` |
@@ -76,4 +81,5 @@ review binding — E `test_human_review_of_ai_version_is_hash_bound`.
 `unvalidated_ai_grouping_promoted`, `over_merge_in_validated_events`,
 `claims_lost_in_structural_ops`, `ancestry_breaks`, `gs_leakage`,
 `model_runs_incomplete_provenance`, and since the CG3 corrective pass
-`false_dependence_collapse` (L6) and `replay_context_leakage` (R1).
+`false_dependence_collapse` (L6) and `replay_context_leakage` (R1), and since the final
+CG3 correction `retraction_hindsight_leakage` (R1).
