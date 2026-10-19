@@ -239,7 +239,7 @@ Várt eredmény:
 
 ## RECOMMENDED NEXT ACTION
 
-1. A PO döntsön a CG3-ról. (A DEV-migráció és a smoke kész: 27 migráció, 32/32 PASS.)
+1. **CONTROL GATE 3 APPROVED** (PO, 2026-10-19, `docs/specs/PO_Decision_2026-10-19_Control_Gate_3.md`). Phase 3 ACCEPTED AND CLOSED. Phase 4 nincs engedélyezve.
 
 **STOP.** Phase 4-et nem kezdtem el.
 

@@ -4,7 +4,18 @@
 
 ## PHASE / GATE
 
-**Phase 3 — Lineage & Events (M04 Lineage + M05 Event Builder): IMPLEMENTÁCIÓ KÉSZ, a CG3 célzott javító kör (CG3-01, CG3-02, CG3-03) lezárva. CONTROL GATE 3: a PO döntésére vár.** A Phase 4 nem kezdődött el.
+**CONTROL GATE 3: APPROVED (PO, 2026-10-19). PHASE 3 — Lineage & Events: ACCEPTED AND CLOSED.** (`docs/specs/PO_Decision_2026-10-19_Control_Gate_3.md`)
+
+A PO által elfogadott végállapot:
+- CG3-01 RESOLVED; CG3-02 és CG3-03 RESOLVED / ACCEPTED; a tudáskorlátos visszavonás-javítás RESOLVED.
+- SD3-01…SD3-12 APPROVED. Az SD3-13 eredeti formájában nem lett jóváhagyva; helyette a 2600-as migrációban megvalósított, jóváhagyott tudáskorlátos visszavonás-szemantika érvényes.
+- Elfogadási feltételek 14/14 PASS; Phase 3 tesztek 63/63; Phase 1+2 regresszió 369/369; web 21/21.
+- DEV: 27/27 migráció, smoke 32/32 PASS, audit hash-lánc ellenőrizve (108 bejegyzés).
+- Nincs blokkoló nyitott CG3-tétel. A kimaradt opcionális service_role smoke-ellenőrzés NEM BLOKKOLÓ.
+
+**A Phase 4 nincs engedélyezve.** Az SD-12 szerint csak azután indulhat, hogy a Phase 4 hiteles baseline-ja a `docs/specs/` alá verziózva bekerült, és a PO kifejezetten engedélyezte.
+
+Előzmények:
 
 - A PO 2026-10-19-én az SD3-01…SD3-11 pontokat **APPROVED** minősítéssel fogadta el. A CG3-at nem hagyta jóvá három implementációs hiba miatt (`docs/specs/PO_Decision_2026-10-19_CG3_Targeted_Corrective_Pass.md`).
 - **CG3-01 RESOLVED, CG3-02 RESOLVED, CG3-03 RESOLVED.** Részletek: `docs/cg3-corrective-report.md`.
@@ -410,8 +421,8 @@ Nincs. Magasabb rendű specifikációval ütköző anyagi konfliktust nem talál
 
 ## RECOMMENDED NEXT ACTION
 
-1. A PO döntsön a CG3-ról (a DEV-migráció és a smoke kész: 27 migráció, 32/32 PASS).
-3. A Phase 4 csak explicit PO-jóváhagyás után indulhat, a Phase 4 baseline `docs/specs/` alá verziózva (SD-12).
+1. CG3 APPROVED — nincs további Phase 3 teendő.
+2. A Phase 4 csak explicit PO-jóváhagyás után indulhat, a Phase 4 baseline `docs/specs/` alá verziózva (SD-12).
 
 **STOP.** Phase 4-et nem kezdtem el.
 

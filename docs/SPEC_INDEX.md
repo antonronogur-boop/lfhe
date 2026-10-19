@@ -22,6 +22,7 @@ separation — such a change is a REQUIREMENT CHANGE.
 | 11 | Phase 3 Authoritative Baseline Addendum (Lineage & Events) | v1.0 (2026-10-19) | PO baseline for Phase 3 — M04 Lineage + M05 Event Builder (`docs/specs/LFHE_Phase3_Authoritative_Baseline_Addendum_v1.0.md`); stored before Phase 3 implementation per SD-12; does not supersede 2–9 or closed Phase 1/2 invariants |
 | 12 | PO Decision — Control Gate 3 Targeted Corrective Pass (CG3-01…03) | 2026-10-19 | Approves SD3-01…SD3-11; requires as-of lineage/event context, terminal full split, no name-only external-origin collapse (`docs/specs/PO_Decision_2026-10-19_CG3_Targeted_Corrective_Pass.md`); forward-only migrations; DEV apply deferred |
 | 13 | PO Decision — Final CG3 Correction (SD3-12 approved; SD3-13 replaced by knowledge-bound retractions) | 2026-10-19 | CG3-02, CG3-03 accepted; lineage retractions must be as-of aware (`docs/specs/PO_Decision_2026-10-19_CG3_Final_Correction.md`); one forward-only migration |
+| 14 | PO Decision — Control Gate 3 | 2026-10-19 | **CG3 APPROVED; Phase 3 ACCEPTED AND CLOSED**; Phase 4 not authorised (SD-12) (`docs/specs/PO_Decision_2026-10-19_Control_Gate_3.md`) |
 
 ## Recorded normalisations (Product Owner, 2026-10-08)
 

@@ -2,10 +2,10 @@
 
 | Field | Value |
 | --- | --- |
-| Current phase | Phase 3 — Lineage & Events (M04 + M05): implementation complete, **awaiting Control Gate 3** (docs/control-gate-3-report.md). Phase 2 ACCEPTED AND CLOSED (2026-10-19) |
-| Previous gate | **Control Gate 2 APPROVED** by the PO on 2026-10-19 (docs/control-gate-2-report.md): DEV 18/18 migrations + smoke 22/22 PASS, K-05 CLOSED and ACCEPTED (6/8 PASS; K05-03, K05-04 BLOCKED_BY_ROBOTS accepted), SD-01…SD-12 approved. Commits: implementation/CI baseline `1b31ed5`; K-05 run on `613f61a`; final documentation commit `40c00ff` |
-| Current gate | **Control Gate 3 — final correction completed, PO decision pending.** PO 2026-10-19: SD3-01…SD3-12 APPROVED; CG3-02, CG3-03 RESOLVED / ACCEPTED; CG3-01 accepted except SD3-13, now replaced by knowledge-bound retractions (migration 2600; docs/cg3-corrective-report.md). Phase 3 authorised by the PO on 2026-10-19 (docs/specs/PO_Decision_2026-10-19_Authorise_Phase3.md; baseline docs/specs/LFHE_Phase3_Authoritative_Baseline_Addendum_v1.0.md) |
-| Next authorised action | **None.** Phase 4 must not start without explicit Product Owner approval; its authoritative baseline must first be versioned under docs/specs/ (SD-12) |
+| Current phase | **PHASE 3 — Lineage & Events: ACCEPTED AND CLOSED (2026-10-19).** Phase 1 and Phase 2 closed. Phase 4 NOT authorised |
+| Earlier gate | **Control Gate 2 APPROVED** by the PO on 2026-10-19 (docs/control-gate-2-report.md): DEV 18/18 migrations + smoke 22/22 PASS, K-05 CLOSED and ACCEPTED (6/8 PASS; K05-03, K05-04 BLOCKED_BY_ROBOTS accepted), SD-01…SD-12 approved. Commits: implementation/CI baseline `1b31ed5`; K-05 run on `613f61a`; final documentation commit `40c00ff` |
+| Current gate | **CONTROL GATE 3 — APPROVED** by the PO on 2026-10-19 (docs/specs/PO_Decision_2026-10-19_Control_Gate_3.md): CG3-01 RESOLVED; CG3-02, CG3-03 RESOLVED / ACCEPTED; knowledge-bound retraction correction RESOLVED; SD3-01…SD3-12 APPROVED; SD3-13 replaced by the approved knowledge-bound retraction semantics (migration 2600); acceptance criteria 14/14, Phase 3 tests 63/63, Phase 1+2 regression 369/369, web 21/21; DEV 27/27 migrations, smoke 32/32 PASS, audit chain verified (108 entries). Optional service_role smoke check not run — NON-BLOCKING. Final code commit `128f1a7`; DEV evidence commit `106ecd9` |
+| Next authorised action | **None.** Phase 4 is NOT authorised. Under SD-12 Phase 4 may begin only after its authoritative phase-specific baseline is versioned under docs/specs/ and explicitly authorised by the Product Owner |
 
 ## Phase 3 progress (Addendum v1.0)
 
