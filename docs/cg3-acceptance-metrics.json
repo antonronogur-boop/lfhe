@@ -190,16 +190,28 @@
   "replay_independence": {
    "basis": "VALIDATED_LINEAGE_DEPENDENCE_ONLY",
    "claims": 2,
-   "claims_with_unknown_lineage": 2,
-   "claims_with_validated_lineage": 0,
+   "claims_with_unknown_lineage": 1,
+   "claims_with_validated_lineage": 1,
    "distinct_groups_upper_bound": 2,
    "independence_established": false,
    "information_cutoff": "2026-03-01T01:00:00+01:00",
    "report_mode": "REPLAY"
-  }
+  },
+  "replay_retracted_pair": {
+   "basis": "VALIDATED_LINEAGE_DEPENDENCE_ONLY",
+   "claims": 2,
+   "claims_with_unknown_lineage": 0,
+   "claims_with_validated_lineage": 2,
+   "distinct_groups_upper_bound": 1,
+   "independence_established": false,
+   "information_cutoff": "2026-03-01T01:00:00+01:00",
+   "report_mode": "REPLAY"
+  },
+  "retraction_hindsight_leakage": 0
  },
  "replay_context_leakage": 0,
  "republication_inflation": 0,
+ "retraction_hindsight_leakage": 0,
  "silent_status_finalisation": 0,
  "surface_difference_independence": 0,
  "unvalidated_ai_grouping_promoted": 0

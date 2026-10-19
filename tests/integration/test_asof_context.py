@@ -216,3 +216,71 @@ def test_replay_ingestion_accepts_only_the_asof_version_and_never_materialises_o
                                                event_candidate=candidate_event([n], event_type="DEPLOYMENT"))])
     assert "UPDATE_TARGET_VERSION_NOT_SUPPLIED" in upd["rejection_reasons"]
     assert set(version_claims(pg, head(pg, event)["head_version_id"])) == {a["claim_id"], b["claim_id"]}
+
+
+# --- final CG3 correction: lineage retractions are knowledge-bound (migration 2600) --------
+LATER_CUT = "2026-06-01T00:00:00+00:00"          # after POST: the post-cutoff evidence is eligible here
+
+
+def validated_pair(pg, analyst, n):
+    """Q derived from P, human-recorded on pre-cutoff evidence only (usable at CUT)."""
+    p = claim(pg, f"The air staff said {n} radars were installed.", f"{n} radars were installed", PRE)
+    q = claim(pg, f"Citing the air staff, a site says {n} radars were installed.", f"{n} radars were installed", PRE)
+    with pg.as_user(analyst) as h:
+        lid = h.execute("SELECT lfhe.record_claim_lineage(%s::jsonb, 'analyst read both texts') AS id", (json.dumps({
+            "child_claim_id": q["claim_id"], "relationship_type": "DERIVED_REPORTING", "parent_claim_id": p["claim_id"],
+            "evidence_basis": [{"object_type": "claim", "object_id": p["claim_id"]},
+                               {"object_type": "claim", "object_id": q["claim_id"]}]}),)).fetchone()["id"]
+    return str(lid), p, q
+
+
+def retract(pg, analyst, lid, basis):
+    with pg.as_user(analyst) as h:
+        h.execute("SELECT lfhe.retract_claim_lineage(%s, 'analyst retracts the dependence', %s::jsonb)",
+                  (lid, json.dumps(basis) if basis is not None else None))
+
+
+def usable(pg, lid, mode, cutoff):
+    with pg.worker() as c:
+        return c.execute("SELECT lfhe.lineage_usable(%s, %s, %s) r", (lid, mode, cutoff)).fetchone()["r"]
+
+
+def groups(pg, claims, mode, cutoff):
+    with pg.worker() as c:
+        return c.execute("SELECT lfhe.independence_summary_asof(%s::uuid[], %s, %s) s",
+                         ([x["claim_id"] for x in claims], mode, cutoff)).fetchone()["s"]["distinct_groups_upper_bound"]
+
+
+def test_retraction_on_post_cutoff_evidence_does_not_alter_the_earlier_replay(pg, analyst):
+    lid, p, q = validated_pair(pg, analyst, 11)
+    later = claim(pg, "A later correction says the site reported independently.", "the site reported independently", POST)
+    retract(pg, analyst, lid, [{"object_type": "claim", "object_id": later["claim_id"]}])
+    assert usable(pg, lid, "REPLAY", CUT) is True                         # A: lineage still usable at CUT
+    assert groups(pg, [p, q], "REPLAY", CUT) == 1                         # E: no false historical independence
+    with pg.worker() as c:
+        ctx = build_m04_inputs(c, [p["claim_id"], q["claim_id"]], report_mode="REPLAY", information_cutoff=CUT_DT).context
+    assert [i.object_id for i in ctx if i.object_type == "claim_lineage"] == [lid]
+    assert usable(pg, lid, "REPLAY", LATER_CUT) is False                  # B: evidence eligible → retraction applies
+    assert groups(pg, [p, q], "REPLAY", LATER_CUT) == 2
+    assert usable(pg, lid, "LIVE", "2100-01-01") is False
+
+
+def test_retraction_recorded_after_the_cutoff_on_eligible_evidence_applies(pg, analyst):
+    lid, p, q = validated_pair(pg, analyst, 12)
+    early = claim(pg, "An early correction says the site reported independently.", "the site reported independently", PRE)
+    retract(pg, analyst, lid, [{"object_type": "claim", "object_id": early["claim_id"]}])   # recorded now, after CUT
+    assert usable(pg, lid, "REPLAY", CUT) is False                        # C
+    assert groups(pg, [p, q], "REPLAY", CUT) == 2
+
+
+def test_retraction_without_evidence_basis_does_not_rewrite_replay(pg, analyst):
+    lid, p, q = validated_pair(pg, analyst, 13)
+    retract(pg, analyst, lid, None)
+    assert usable(pg, lid, "REPLAY", CUT) is True                         # D
+    assert groups(pg, [p, q], "REPLAY", CUT) == 1                         # E
+    assert usable(pg, lid, "LIVE", "2100-01-01") is False                 # current knowledge still honours it
+    lid2, _, _ = validated_pair(pg, analyst, 14)
+    with pg.as_user(analyst) as h, pytest.raises(psycopg.errors.CheckViolation, match="EVIDENCE_BASIS_INVALID"):
+        h.execute("SELECT lfhe.retract_claim_lineage(%s, 'bad basis given', %s::jsonb)",
+                  (lid2, json.dumps([{"object_type": "event", "object_id": lid2}])))
+    assert usable(pg, lid2, "REPLAY", CUT) is True                        # the failed retraction left nothing behind

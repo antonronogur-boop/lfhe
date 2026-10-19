@@ -515,7 +515,7 @@
  },
  "replay_scenario": {
   "id": "R1_REPLAY_AS_OF",
-  "purpose": "historical REPLAY between v1 (pre-cutoff evidence) and v2 (post-cutoff evidence): no later lineage, field, membership, state or structural outcome may leak (CG3-01)",
+  "purpose": "historical REPLAY between v1 (pre-cutoff evidence) and v2 (post-cutoff evidence): no later lineage, field, membership, state or structural outcome may leak (CG3-01; knowledge-bound retractions)",
   "information_cutoff": "2026-03-01T00:00:00+00:00",
   "claims": {
    "pre": {
@@ -564,6 +564,23 @@
     ],
     "text": "Northland jets were seen at Fort Aster.",
     "exact": "Northland jets were seen at Fort Aster"
+   },
+   "copy2": {
+    "language": "en",
+    "claim_type": "DEPLOYMENT",
+    "available_at": "2026-01-13T08:00:00+00:00",
+    "locations": [
+     "Fort Aster"
+    ],
+    "text": "A forum post repeats: Northland deployed 4 jets to Fort Aster.",
+    "exact": "Northland deployed 4 jets to Fort Aster"
+   },
+   "correction": {
+    "language": "en",
+    "claim_type": "OTHER",
+    "available_at": "2026-05-12T08:00:00+00:00",
+    "text": "A later correction says the forum post was written from an independent sighting.",
+    "exact": "the forum post was written from an independent sighting"
    }
   },
   "v1": {
@@ -600,6 +617,18 @@
   "later_only_markers": [
    "LATER",
    "Port Brill"
-  ]
+  ],
+  "retracted_lineage": {
+   "child": "copy2",
+   "parent": "pre",
+   "lineage_evidence": [
+    "pre",
+    "copy2"
+   ],
+   "retraction_evidence": [
+    "correction"
+   ],
+   "purpose": "lineage validated on pre-cutoff evidence, retracted later on post-cutoff evidence: REPLAY(T) must keep the dependence (final CG3 correction)"
+  }
  }
 }

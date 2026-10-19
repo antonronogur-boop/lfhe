@@ -109,7 +109,7 @@ def test_phase3_acceptance_corpus(pg, make_user):
          "high_impact_changes_without_human": 0, "ai_structural_actions": 0, "unvalidated_ai_grouping_promoted": 0,
          "over_merge_in_validated_events": 0, "claims_lost_in_structural_ops": 0, "ancestry_breaks": 0,
          "gs_leakage": 0, "model_runs": 0, "model_runs_incomplete_provenance": 0,
-         "false_dependence_collapse": 0, "replay_context_leakage": 0}
+         "false_dependence_collapse": 0, "replay_context_leakage": 0, "retraction_hindsight_leakage": 0}
     all_claims, all_runs, envelopes = set(), [], []
 
     # ---------------- M04 lineage scenarios ----------------
@@ -304,6 +304,7 @@ def test_phase3_acceptance_corpus(pg, make_user):
         # ---------------- REPLAY as-of discipline (CG3-01) ----------------
         m["replay"] = replay_scenario(pg, analyst, mc, all_runs, envelopes)
         m["replay_context_leakage"] = m["replay"]["leaks"]
+        m["retraction_hindsight_leakage"] = m["replay"]["retraction_hindsight_leakage"]
 
         # ---------------- provenance + GS isolation ----------------
         runs = x.execute("SELECT * FROM lfhe.model_runs WHERE id = ANY(%s::uuid[])", (all_runs,)).fetchall()
@@ -331,7 +332,7 @@ def test_phase3_acceptance_corpus(pg, make_user):
                 "silent_status_finalisation", "high_impact_changes_without_human", "ai_structural_actions",
                 "unvalidated_ai_grouping_promoted", "over_merge_in_validated_events", "claims_lost_in_structural_ops",
                 "ancestry_breaks", "gs_leakage", "model_runs_incomplete_provenance", "false_dependence_collapse",
-                "replay_context_leakage"):
+                "replay_context_leakage", "retraction_hindsight_leakage"):
         assert m[key] == 0, (key, m)
     assert m["model_runs"] >= len(CORPUS["lineage_scenarios"]) + len(CORPUS["event_scenarios"])
 
@@ -368,8 +369,18 @@ def replay_scenario(pg, analyst, mc, all_runs, envelopes) -> dict:
     all_runs.append(run)
     with pg.as_user(analyst) as u:
         p = u.execute("SELECT id FROM lfhe.lineage_proposals WHERE model_run_id=%s", (run,)).fetchone()["id"]
-        u.execute("SELECT lfhe.decide_lineage_proposal(%s, true, 'corpus: traced by the later audit')", (p,))
+        later_lid = str(u.execute("SELECT lfhe.decide_lineage_proposal(%s, true, 'corpus: traced by the later audit') AS id",
+                                  (p,)).fetchone()["id"])
+    rl = sc["retracted_lineage"]                       # validated on pre-cutoff evidence, retracted on later evidence
+    with pg.as_user(analyst) as u:
+        lid = u.execute("SELECT lfhe.record_claim_lineage(%s::jsonb, 'corpus: analyst read both texts') AS id", (json.dumps({
+            "child_claim_id": ids[rl["child"]], "relationship_type": "DERIVED_REPORTING", "parent_claim_id": ids[rl["parent"]],
+            "evidence_basis": [{"object_type": "claim", "object_id": ids[k]} for k in rl["lineage_evidence"]]}),)).fetchone()["id"]
+        u.execute("SELECT lfhe.retract_claim_lineage(%s, 'corpus: later correction', %s::jsonb)",
+                  (lid, json.dumps([{"object_type": "claim", "object_id": ids[k]} for k in rl["retraction_evidence"]])))
     with pg.worker() as c:
+        retracted = c.execute("SELECT lfhe.independence_summary_asof(%s::uuid[], 'REPLAY', %s) s",
+                              ([ids[rl["child"]], ids[rl["parent"]]], cut)).fetchone()["s"]
         m05 = build_m05_inputs(c, [ids["probe"], ids["copy"]], report_mode="REPLAY", information_cutoff=cut)
         m04 = build_m04_inputs(c, [ids["pre"], ids["copy"]], report_mode="REPLAY", information_cutoff=cut)
         groups = c.execute("SELECT lfhe.independence_summary_asof(%s::uuid[], 'REPLAY', %s) s",
@@ -379,8 +390,11 @@ def replay_scenario(pg, analyst, mc, all_runs, envelopes) -> dict:
     leaks = sum(blob.count(x) for x in sc["later_only_markers"]) + blob.count(ids["post"])
     leaks += int(ev not in events or events[ev].object_id != v1)                       # must see exactly v1
     leaks += int(ev in events and events[ev].content["state"] != "ACTIVE")             # later CONFIRMED must not leak
-    leaks += sum(1 for i in m04.context + m05.context if i.object_type == "claim_lineage")
+    leaks += sum(1 for i in m04.context + m05.context if i.object_type == "claim_lineage" and i.object_id == later_lid)
+    retraction_kept = any(i.object_type == "claim_lineage" and i.object_id == str(lid) for i in m04.context)
     leaks += int(groups["distinct_groups_upper_bound"] != 2)                           # later lineage must not collapse
+    retraction_leaks = int(retracted["distinct_groups_upper_bound"] != 1) + int(not retraction_kept)  # later retraction must not split
     envelopes.append(blob)
-    return {"leaks": leaks, "event_version_seen": "v1" if ev in events and events[ev].object_id == v1 else "other",
+    return {"leaks": leaks, "retraction_hindsight_leakage": retraction_leaks, "replay_retracted_pair": retracted,
+            "event_version_seen": "v1" if ev in events and events[ev].object_id == v1 else "other",
             "replay_independence": groups}

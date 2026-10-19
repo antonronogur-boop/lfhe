@@ -82,8 +82,9 @@ def _lineage_context(conn, claim_ids, report_mode, cutoff) -> list[EnvelopeItem]
     rows = conn.execute(
         """SELECT l.id, l.child_claim_id, l.relationship_type::text AS relationship_type, l.parent_claim_id,
                   l.parent_article_id, o.name AS external_origin_name
-           FROM lfhe.active_claim_lineage l LEFT JOIN lfhe.external_origins o ON o.id = l.external_origin_id
+           FROM lfhe.claim_lineage l LEFT JOIN lfhe.external_origins o ON o.id = l.external_origin_id
            WHERE (l.child_claim_id = ANY(%(ids)s::uuid[]) OR l.parent_claim_id = ANY(%(ids)s::uuid[]))
+             -- not the current-state view: a retraction counts only if it is knowledge-bound to the cutoff
              AND lfhe.lineage_usable(l.id, %(mode)s, %(cutoff)s)
            ORDER BY l.id""",
         {"ids": [str(i) for i in claim_ids], "mode": report_mode, "cutoff": cutoff}).fetchall()
