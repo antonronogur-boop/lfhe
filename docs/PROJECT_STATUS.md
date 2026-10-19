@@ -20,7 +20,7 @@
 | P4-06 Human analytical review, final analytic confidence (DC-01), MODIFY_AND_APPROVE (3100) | done |
 | P4-07 Trends (human/manual path) and indicators (3200) | done |
 | P4-08 Jobs/worker (3300), security/reproducibility tests, RBAC sweep, acceptance corpus | done |
-| P4-09 DEV smoke P4 checks, docs, CG4 report | done — DEV apply/smoke pending (PO) |
+| P4-09 DEV smoke P4 checks, docs, CG4 report (docs/control-gate-4-report.md); CI run 39308694707 success on `9d29ae8` | done — DEV apply/smoke pending (PO) |
 
 ## Phase 3 progress (Addendum v1.0)
 
