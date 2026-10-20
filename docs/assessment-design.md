@@ -2,7 +2,8 @@
 
 Baseline: `docs/specs/LFHE_Phase4_Authoritative_Baseline_Addendum_v1.0.md` (SPEC_INDEX row 15),
 PO authorisation `docs/specs/PO_Decision_2026-10-19_Authorise_Phase4.md` (row 16), Module Prompt
-Pack v1.2(.2). Migrations `20261011002700` … `20261011003300`.
+Pack v1.2(.2), PO decision 2026-10-20 (`docs/specs/PO_Decision_2026-10-20_CG4_PreClosure_CR4-01.md`, SPEC_INDEX row 17).
+Migrations `20261011002700` … `20261011003400`.
 
 Phase 4 does **not** implement M09, report selection/composition, report_versions, rendering,
 M10, content approval, security review or release (Phase 5/6).
@@ -79,9 +80,12 @@ reference_context_version) and `assessment_statement_premises`.
   (`ATTRIBUTION_CONTRADICTS_WORKFLOW_STATE`) and the persisted value is the deterministic one.
 * likelihood ≠ confidence: likelihood is per statement and allowed only on the prospective
   analytic types ANALYTIC_JUDGMENT / IMPLICATION (`LIKELIHOOD_NOT_APPLICABLE` otherwise), needs a
-  rationale and must use an approved term; the vocabulary
-  table `likelihood_terms` is deliberately **empty** (CR4-01), so in production any likelihood
-  is rejected until the PO supplies the vocabulary.
+  rationale (≥ 10 chars, `LIKELIHOOD_RATIONALE_REQUIRED`) and must use a canonical term
+  (`LIKELIHOOD_TERM_UNKNOWN` otherwise). The vocabulary (`likelihood_terms`, migration 3400,
+  CR4-01 resolved) is the PO-defined closed ordered set REMOTE_CHANCE (1), HIGHLY_UNLIKELY (2),
+  UNLIKELY (3), ROUGHLY_EVEN_CHANCE (4), LIKELY (5), HIGHLY_LIKELY (6), ALMOST_CERTAIN (7) — no
+  numeric bands, no UNKNOWN term. Likelihood is optional and stays null when not justified; M07
+  receives the terms in rank order as `task.likelihood_terms`.
 * `ai_recommended_confidence` + rationale (≥ 20 chars) only. M07 output containing
   `final_analytic_confidence` is rejected by the schema and by ingestion
   (`FINAL_CONFIDENCE_IS_HUMAN_ONLY`); HIGH on a single evidentiary lineage is rejected
@@ -135,7 +139,10 @@ No AI trend-creation action exists in the cumulative prompt baseline (M07 receiv
   `trend_events` (exact `event_version_id` + hash, ≥ 2 distinct events —
   `TREND_REQUIRES_MULTIPLE_EVENTS`) / `trend_version_assessments` (approved as of the
   knowledge bound). Direction and velocity are separate fields; uncertainty is mandatory. No
-  normative direction/velocity vocabulary exists → human free text (CR4-02).
+  normative direction/velocity vocabulary exists → human free text (CR4-02, APPROVED / CLOSED
+  2026-10-20). Before any AI-generated or automatic authoritative trend state, or any machine logic
+  that compares, sorts, filters, aggregates or decides on direction/velocity, a controlled
+  vocabulary must first be explicitly approved and versioned.
 * `indicators` (`IND-…`) / `indicator_versions` / `indicator_claims`: created only by a human,
   only from an APPROVED assessment version (optionally from one of its M07 proposals), bound to
   version + hash, to statements of that version and to claims of its event version (or of the

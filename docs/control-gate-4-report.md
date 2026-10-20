@@ -3,7 +3,7 @@
 ## PHASE / GATE
 
 - Fázis: **Phase 4 — Relevance, Assessment & Challenge** (M06, M07, M08, baseline, reference context, emberi analitikai review, trend, indikátor).
-- Kapu: **Control Gate 4** — PO döntésre vár.
+- Kapu: **Control Gate 4** — a PO 2026-10-20-i döntése (SPEC_INDEX 17) szerint a CG4 lezárás előtti utolsó lépés elkészült (CR4-01 feloldva, CR4-02 lezárva); a végső CG4 lezárás PO döntésre vár.
 - Alap: `docs/specs/LFHE_Phase4_Authoritative_Baseline_Addendum_v1.0.md` (SPEC_INDEX 15), PO felhatalmazás `docs/specs/PO_Decision_2026-10-19_Authorise_Phase4.md` (SPEC_INDEX 16).
 - Végrehajtás: P4-00 … P4-09 a megadott sorrendben, köztes engedélykérés nélkül. CG1, CG2, CG3 nem lett újranyitva; általános architektúra-audit nem történt.
 - Commitok: P4-00 `a8f1db3`, P4-01 `737e6f1`, P4-02 `317597f`, P4-03/04 `05a397c`, P4-05/06 `d019b39`, P4-07 `f644683`, P4-08 `b066e96`, P4-09 `9d29ae8` (+ ez a jelentés).
@@ -19,6 +19,7 @@
 - **P4-07** — perzisztens trendek (csak emberi/manuális út) és indikátorok (csak jóváhagyott értékelésből, emberi korrekcióval a homályos javaslatoknál).
 - **P4-08** — Phase 4 job-típusok és worker (M07 → M08 determinisztikus láncolás), séma-/provider-hiba, repair, provenance, prompt injection, GS-szivárgás tesztek, Phase 4 RBAC-söprés, elfogadási korpusz a §24 metrikákkal.
 - **P4-09** — DEV smoke Phase 4 ellenőrzések, dokumentáció, CG4 metrikák, ez a jelentés.
+- **CG4 pre-closure (PO döntés 2026-10-20)** — CR4-01: a PO által definiált kanonikus likelihood-szókincs (7 rendezett szó) a `20261011003400_p4_likelihood_vocabulary.sql` migrációval; a tesztek a valódi szókincset használják; DEV smoke vocabulary-ellenőrzés cserélve.
 
 Nem implementált (tiltás szerint): M09, report-kiválasztás/összeállítás, report_versions, renderelés, M10, tartalmi jóváhagyás, security review, release, Phase 5/6.
 
@@ -44,8 +45,9 @@ Nem implementált (tiltás szerint): M09, report-kiválasztás/összeállítás,
 | `20261011003100_p4_analytical_review.sql` | `analytical_approvals` (DC-01), `review_assessment`, `modify_and_approve_assessment`, `assessment_version_approved_asof`, nézet bővítése |
 | `20261011003200_p4_trends_indicators.sql` | trends / trend_versions / trend_events / trend_version_assessments, indicators / indicator_versions / indicator_claims, `p4_indicator_problems`, `create_trend_version`, `create_indicator_version` |
 | `20261011003300_p4_jobs.sql` | job-típusok: ASSESS_RELEVANCE, ASSESS_EVENT, CHALLENGE_ASSESSMENT |
+| `20261011003400_p4_likelihood_vocabulary.sql` | CR4-01: `likelihood_terms` feltöltése a PO által definiált 7 kanonikus szóval (rang 1–7, leírás, `spec_source` = PO döntés 2026-10-20); nincs numerikus sáv, nincs UNKNOWN |
 
-Összesen 34 migráció. Mind előrefelé (forward-only); Phase 1–3 objektum szemantikája nem változott. Egyetlen kompatibilitási érintés: a `relevance_results.previous_assessment_version_id` FK (2900, Phase 4 saját táblája). DEV alkalmazás: a PO elvégezte 2026-10-20-án — 34 migráció (lásd TEST RESULTS).
+Összesen 35 migráció (2700–3300 + 3400; a 2700–3300 nem módosult). Mind előrefelé (forward-only); Phase 1–3 objektum szemantikája nem változott. Egyetlen kompatibilitási érintés: a `relevance_results.previous_assessment_version_id` FK (2900, Phase 4 saját táblája). DEV alkalmazás: a 2700–3300-at a PO elvégezte 2026-10-20-án (34 migráció, a PO által érvényes bizonyítékként elfogadva); a 3400 DEV-futtatása a PO-ra vár (várható: 35 migráció, 42/42 PASS).
 
 ## PROMPTS / SCHEMAS
 
@@ -133,7 +135,8 @@ Nem implementált (tiltás szerint): M09, report-kiválasztás/összeállítás,
 ## LIKELIHOOD VS ANALYTIC CONFIDENCE RESULTS
 
 - A likelihood állításonként, csak ANALYTIC_JUDGMENT / IMPLICATION típuson, indoklással, jóváhagyott szóval; az analytic confidence külön mező.
-- A jóváhagyott likelihood-szókincs magasabb rendű dokumentumban nem létezik → a `likelihood_terms` tábla üres (CR4-01); a tesztek szintetikus szót vetnek be, majd eltávolítják.
+- **CR4-01 FELOLDVA (migráció 3400):** a PO által definiált zárt, rendezett szókincs — REMOTE_CHANCE (1), HIGHLY_UNLIKELY (2), UNLIKELY (3), ROUGHLY_EVEN_CHANCE (4), LIKELY (5), HIGHLY_LIKELY (6), ALMOST_CERTAIN (7); explicit PO döntés, nem korábbi specifikációból visszanyerve; nincs numerikus sáv, nincs UNKNOWN. A likelihood opcionális (indokolatlan esetben null). A szintetikus `TEST_PROBABLE` szót egyetlen teszt sem használja többé.
+- Bizonyítva: pontosan 7 szó, rang 1–7; kanonikus szó elfogadva ANALYTIC_JUDGMENT-en és IMPLICATION-ön; ismeretlen szó → LIKELIHOOD_TERM_UNKNOWN; nem engedett típus → LIKELIHOOD_NOT_APPLICABLE; indoklás nélkül → séma-hiba / LIKELIHOOD_RATIONALE_REQUIRED; M07 bemenete pontosan a 7 szót kapja rangsorrendben; a likelihood és a confidence külön marad; M07 továbbra sem állíthat `final_analytic_confidence`-t.
 - M07 csak `ai_recommended_confidence`-t + kötelező indoklást (≥ 20 karakter) adhat. `final_analytic_confidence` M07 kimenetben → séma-hiba és FINAL_CONFIDENCE_IS_HUMAN_ONLY (A10): `m07_final_confidence_set = 0`.
 - Egyetlen bizonyítéki lineage (több outlet) HIGH-dal → CONFIDENCE_INFLATION_SINGLE_LINEAGE (A08): `republication_inflation = 0`.
 
@@ -169,7 +172,7 @@ Nem implementált (tiltás szerint): M09, report-kiválasztás/összeállítás,
 
 - `trends` (`TR-…`) / `trend_versions` (immutábilis, hash, knowledge_as_of) / `trend_events` (pontos event_version_id + hash) / `trend_version_assessments` (as-of jóváhagyott értékelések).
 - A trend és az esemény külön objektum; legalább két különböző esemény kell (TREND_REQUIRES_MULTIPLE_EVENTS — ugyanaz az esemény kétszer sem elég).
-- Irány és sebesség külön mező; a bizonytalanság kötelező. Normatív szókincs hiányában szabad emberi szöveg (CR4-02).
+- Irány és sebesség külön mező; a bizonytalanság kötelező. Szabad emberi szöveg — CR4-02 a PO által JÓVÁHAGYVA / LEZÁRVA; bármely AI-generált vagy automatikus autoritatív trendállapot, illetve az irányt/sebességet összehasonlító, rendező, szűrő, aggregáló vagy döntéshozó gépi logika előtt kontrollált, verziózott szókincset kell jóváhagyni.
 - Csak emberi/manuális létrehozás (a prompt-baseline nem definiál AI trend-létrehozást). Verziótörténet megmarad; as-of használat tudáskorlátos.
 
 ## INDICATOR MODEL
@@ -202,6 +205,7 @@ Lokális PostgreSQL 16 tesztkörnyezet (Supabase shim), Python 3.13:
 - `apps/web`: `vitest run`.
 - `python scripts/prompt_registry.py check-lock`.
 - `python scripts/secret_scan.py`; `gitleaks detect --source .`.
+- CR4-01 korrekció után ismét: teljes pytest, web, prompt lock, secret scan, gitleaks, CI.
 - Phase 4 elfogadási korpusz `LFHE_P4_METRICS_OUT=docs/cg4-acceptance-metrics.json`-nal.
 - GitHub CI a `9d29ae8` commiton (lásd TEST RESULTS).
 - DEV Supabase: a PO alkalmazta a 2700–3300 migrációkat és lefuttatta a `scripts/supabase_dev_smoke.py`-t (2026-10-20); eredmény: `docs/dev-smoke-20261020-phase4.json`.
@@ -210,14 +214,15 @@ Lokális PostgreSQL 16 tesztkörnyezet (Supabase shim), Python 3.13:
 
 | Készlet | Eredmény |
 | --- | --- |
-| Teljes pytest | **499 passed, 0 failed** (2 min 16 s) |
-| ebből Phase 4 | **67 passed** (R 13, B 7, AS 13, CR 8, TI 4, P 9, RB 12, A 1) |
+| Teljes pytest (CR4-01 után) | **500 passed, 0 failed** (2 min 15 s) |
+| ebből Phase 4 | **68 passed** (R 13, B 7, AS 14, CR 8, TI 4, P 9, RB 12, A 1) |
 | ebből Phase 1–3 regresszió | **432 passed** (Phase 1+2 369, Phase 3 63) |
 | Web (vitest) | **21/21 passed** |
 | Prompt lock | `PROMPT-LOCK: ok` |
 | Secret scan / gitleaks | `SECRET-SCAN: clean` / `no leaks found` |
-| §24 korpusz-metrikák | mind **0** (`docs/cg4-acceptance-metrics.json`) |
+| §24 korpusz-metrikák | mind **0** (`docs/cg4-acceptance-metrics.json`; a CR4-01 nem érint metrikát) |
 | GitHub CI (`9d29ae8`) | **run 39308694707 — success** (secret-scan, python-tests, web) |
+| GitHub CI (CR4-01) | CI4_PLACEHOLDER |
 | DEV Supabase (PO, 2026-10-20) | **34 migráció, smoke 42/42 PASS** (ebből 10 Phase 4 ellenőrzés), audit hash-lánc ellenőrizve (120 bejegyzés), pg_cron ütemezve; az opcionális service-role ellenőrzés nem futott — NEM BLOKKOLÓ (`docs/dev-smoke-20261020-phase4.json`) |
 
 ## PHASE 4 ACCEPTANCE CRITERIA
@@ -241,7 +246,7 @@ Lokális PostgreSQL 16 tesztkörnyezet (Supabase shim), Python 3.13:
 | 15 | Értékelési verzió mutációja = 0 | **PASS** |
 | 16 | GS answer-key szivárgás = 0 | **PASS** |
 | 17 | Phase 1–3 regressziós készletek zöldek | **PASS** (432/432) |
-| 18 | Minden Phase 4 unit/integration/security/acceptance teszt PASS | **PASS** (67/67) |
+| 18 | Minden Phase 4 unit/integration/security/acceptance teszt PASS | **PASS** (68/68) |
 | 19 | Model-run nyomonkövethetőség teljes | **PASS** (`traceability_gaps = 0`) |
 | 20 | Phase 5 implementáció nem kezdődött | **PASS** |
 
@@ -274,6 +279,8 @@ Nincs ismert hibás teszt. Ismert korlátok: `docs/PROJECT_STATUS.md` L-29 … L
 
 ## SPECIFICATION DEVIATIONS
 
+**SD4-01 … SD4-18: a PO 2026-10-20-án JÓVÁHAGYTA** (további SD4 implementációs változtatás nem kért).
+
 | ID | Eltérés / operacionalizálás | Indoklás |
 | --- | --- | --- |
 | SD4-01 | Modulkód `M06_RELEVANCE` (Prompt Pack név: M06_RELEVANCE_ANALYST) | A baseline §20 ezt a kódot írja elő |
@@ -299,15 +306,16 @@ Nincs ismert hibás teszt. Ismert korlátok: `docs/PROJECT_STATUS.md` L-29 … L
 
 | ID | Tárgy | Állapot |
 | --- | --- | --- |
-| CR4-01 | Jóváhagyott likelihood-szókincs hiányzik magasabb rendű dokumentumból; a `likelihood_terms` tábla üres, ezért éles környezetben minden likelihood elutasításra kerül | PO döntésre vár — csak az érintett részfunkció (likelihood) van szüneteltetve; minden más Phase 4 munka elkészült |
-| CR4-02 | Trend irány/sebesség normatív szókincse hiányzik; jelenleg szabad emberi szöveg | PO döntésre vár (nem blokkoló) |
+| CR4-01 | Likelihood-szókincs | **FELOLDVA** — migráció 3400 (PO döntés 2026-10-20, SPEC_INDEX 17) |
+| CR4-02 | Trend irány/sebesség szókincs | **JÓVÁHAGYVA / LEZÁRVA** a jelenlegi implementáció szerint (szabad emberi szöveg, két külön mező, csak HUMAN_ONLY létrehozás); gépi felhasználás előtt kontrollált, verziózott szókincs kell |
 
 Valódi, magasabb rendű specifikációval való anyagi ellentmondás nem merült fel.
 
 ## OPEN ITEMS
 
 1. ~~DEV migráció + smoke~~ — **LEZÁRVA** 2026-10-20: 34 migráció, 42/42 PASS (`docs/dev-smoke-20261020-phase4.json`).
-2. CR4-01 és CR4-02 PO döntés.
+2. ~~CR4-01 / CR4-02~~ — CR4-01 FELOLDVA (3400), CR4-02 LEZÁRVA.
+6. DEV: a 3400 alkalmazása és a smoke újrafuttatása a PO által (várható: 35 migráció, 42/42 PASS).
 3. K-11 (GS-001 Patriot-trap tesztcsatorna) továbbra is DEFER: Phase 4 nem materializált nyers GS bemenetet.
 4. Valós provideres próba (L-09 / L-33) — nem blokkoló.
 5. Phase 4 review UI nincs (L-32) — nem része a baseline-nak.
@@ -315,7 +323,8 @@ Valódi, magasabb rendű specifikációval való anyagi ellentmondás nem merül
 ## RECOMMENDED NEXT ACTION
 
 1. ~~DEV migráció és smoke~~ — kész (42/42 PASS).
-2. A PO hozzon döntést a Control Gate 4-ről, valamint a CR4-01 / CR4-02 tételekről.
-3. Phase 5 csak külön PO-felhatalmazással indulhat.
+2. A PO futtassa DEV-en: `python scripts/apply_migrations.py` és `python scripts/supabase_dev_smoke.py` (várható: 35 migráció, 42/42 PASS).
+3. Utána egyetlen hátralévő lépés: a PO CG4-lezáró döntése.
+4. Phase 5 csak külön PO-felhatalmazással indulhat.
 
 **STOP — az implementáció itt megáll. Phase 5 NEM engedélyezett.**

@@ -210,8 +210,11 @@ def main() -> int:
         "WHERE c.table_schema = 'lfhe' AND (c.column_name ILIKE '%%analytic%%' OR c.column_name = 'confidence')")]
     check("P4: final_analytic_confidence has exactly one owner (DC-01)",
           owners == ["analytical_approvals.final_analytic_confidence"], ", ".join(owners))
-    terms = db.execute("SELECT count(*) AS n FROM lfhe.likelihood_terms").fetchone()["n"]
-    check("P4: likelihood vocabulary empty pending CR4-01", terms == 0, f"{terms} term(s)")
+    canonical = ["REMOTE_CHANCE", "HIGHLY_UNLIKELY", "UNLIKELY", "ROUGHLY_EVEN_CHANCE", "LIKELY",
+                 "HIGHLY_LIKELY", "ALMOST_CERTAIN"]                      # PO decision 2026-10-20 (CR4-01)
+    terms = [(r["code"], r["rank"]) for r in db.execute("SELECT code, rank FROM lfhe.likelihood_terms ORDER BY rank, code")]
+    check("P4: likelihood vocabulary is exactly the canonical CR4-01 set in rank order",
+          terms == [(c, i) for i, c in enumerate(canonical, 1)], ", ".join(f"{r}:{c}" for c, r in terms))
     r = rest.select("assessment_versions", viewer)
     check("P4: viewer can read assessment versions (CLAIM_READ)", r.status_code == 200, f"HTTP {r.status_code}")
     r = rest.select("assessment_versions", None)

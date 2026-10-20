@@ -228,32 +228,68 @@ def test_unsupported_causality_and_negative_evidence_are_rejected_as_fact(pg, m0
     assert assess(pg, vid, vh, lambda m, env: out(env, judged)).outcome == "ASSESSMENT_RECORDED"   # judgment, not fact
 
 
-# --- 28, 29: likelihood vs confidence ----------------------------------------------------
+# --- 28, 29: likelihood vs confidence (CR4-01: canonical PO vocabulary, migration 3400) ----
+CANONICAL_LIKELIHOOD = ["REMOTE_CHANCE", "HIGHLY_UNLIKELY", "UNLIKELY", "ROUGHLY_EVEN_CHANCE", "LIKELY",
+                        "HIGHLY_LIKELY", "ALMOST_CERTAIN"]
+LK_RATIONALE = "Pattern of rotations in the cited reports."
+
+
+def test_canonical_likelihood_vocabulary_is_exactly_the_po_set_in_rank_order(pg):
+    with pg.admin() as x:
+        rows = x.execute("SELECT code, rank, description, spec_source FROM lfhe.likelihood_terms ORDER BY rank").fetchall()
+        assert [r["code"] for r in rows] == CANONICAL_LIKELIHOOD                       # exactly seven, no UNKNOWN
+        assert [r["rank"] for r in rows] == list(range(1, 8))
+        assert all(r["description"].strip() and "CR4-01" in r["spec_source"] for r in rows)
+        assert not any(ch.isdigit() or ch == "%" for r in rows for ch in r["description"])   # no numeric bands
+        with pytest.raises(psycopg.Error):                                            # immutable
+            x.execute("UPDATE lfhe.likelihood_terms SET rank = 99 WHERE code = 'LIKELY'")
+    with pg.worker() as w, pytest.raises(psycopg.Error):
+        w.execute("INSERT INTO lfhe.likelihood_terms (code, rank, description, spec_source) VALUES ('UNKNOWN', 8, 'x', 'x')")
+
+
 def test_likelihood_only_on_prospective_statements_and_distinct_from_confidence(pg, m07, analyst):
     e, vid, vh, claims = setup_event(pg, analyst)
-    base = default_statements(claims)
-    lk = {"term": "TEST_PROBABLE", "rationale": "Pattern of rotations in the cited reports."}
-    on_fact = [dict(base[0], likelihood=lk)] + base[1:]
-    assert rejected(assess(pg, vid, vh, lambda m, env: out(env, on_fact)), "LIKELIHOOD_NOT_APPLICABLE")
-    judged = base[:2] + [dict(base[2], likelihood=lk)] + base[3:]
-    assert rejected(assess(pg, vid, vh, lambda m, env: out(env, judged)), "LIKELIHOOD_TERM_UNKNOWN")   # vocabulary empty (CR4-01)
+    base = default_statements(claims)                    # AS3 = ANALYTIC_JUDGMENT
+    seen = {}
+
+    def with_lk(lk, idx=2, **kw):
+        stmts = json.loads(json.dumps(base))
+        stmts[idx]["likelihood"] = lk
+
+        def responder(m, env):
+            seen["terms"] = env["task"]["likelihood_terms"]
+            return out(env, stmts, **kw)
+        return assess(pg, vid, vh, responder)
+    # 3: canonical term accepted on an eligible prospective ANALYTIC_JUDGMENT (and on IMPLICATION)
+    r = with_lk({"term": "LIKELY", "rationale": LK_RATIONALE}, conf="LOW")
+    assert r.outcome == "ASSESSMENT_RECORDED", r
+    assert seen["terms"] == CANONICAL_LIKELIHOOD                                      # 7: M07 input, rank order
+    v = version_of(pg, r.final_run_id)
+    s = statements_of(pg, v["id"])
+    assert s["AS3"]["likelihood_term"] == "LIKELY" and s["AS1"]["likelihood_term"] is None
+    assert v["ai_recommended_confidence"] == "LOW"                                    # 8: separate dimension / column
     with pg.admin() as x:
-        assert x.execute("SELECT count(*) n FROM lfhe.likelihood_terms").fetchone()["n"] == 0
-        x.execute("INSERT INTO lfhe.likelihood_terms (code, rank, description, spec_source) VALUES "
-                  "('TEST_PROBABLE', 1, 'synthetic test term', 'test only')")
-    try:
-        r = assess(pg, vid, vh, lambda m, env: out(env, json.loads(json.dumps(judged)), conf="LOW"))
-        assert r.outcome == "ASSESSMENT_RECORDED"
-        v = version_of(pg, r.final_run_id)
-        s = statements_of(pg, v["id"])
-        assert s["AS3"]["likelihood_term"] == "TEST_PROBABLE" and s["AS1"]["likelihood_term"] is None
-        assert v["ai_recommended_confidence"] == "LOW"            # separate dimension, separate column
-    finally:
-        with pg.admin() as x:
-            x.execute("ALTER TABLE lfhe.likelihood_terms DISABLE TRIGGER likelihood_terms_immutable")
-            x.execute("DELETE FROM lfhe.likelihood_terms WHERE code='TEST_PROBABLE' AND NOT EXISTS "
-                      "(SELECT 1 FROM lfhe.assessment_statements WHERE likelihood_term='TEST_PROBABLE')")
-            x.execute("ALTER TABLE lfhe.likelihood_terms ENABLE TRIGGER likelihood_terms_immutable")
+        cols = {c["column_name"] for c in x.execute("SELECT column_name FROM information_schema.columns WHERE "
+                                                    "table_schema='lfhe' AND table_name='assessment_statements'")}
+    assert "likelihood_term" in cols and not any("confidence" in c for c in cols)
+    impl = base + [st("AS9", "IMPLICATION", "Further tanker deployments to Fort Aster may follow.", claims=[claims[0]],
+                      premises=["AS1"], likelihood={"term": "ROUGHLY_EVEN_CHANCE", "rationale": LK_RATIONALE})]
+    assert assess(pg, vid, vh, lambda m, env: out(env, json.loads(json.dumps(impl)))).outcome == "ASSESSMENT_RECORDED"
+    # likelihood stays optional: none at all is valid
+    assert assess(pg, vid, vh, lambda m, env: out(env, json.loads(json.dumps(base)))).outcome == "ASSESSMENT_RECORDED"
+    # 4: unknown term (incl. a lower-case / UNKNOWN / numeric-band style term)
+    for term in ("PROBABLE", "UNKNOWN", "LIKELY_70_PERCENT"):
+        assert rejected(with_lk({"term": term, "rationale": LK_RATIONALE}), "LIKELIHOOD_TERM_UNKNOWN"), term
+    # 5: non-permitted statement types
+    assert rejected(with_lk({"term": "LIKELY", "rationale": LK_RATIONALE}, idx=0), "LIKELIHOOD_NOT_APPLICABLE")   # KNOWN_FACT
+    assert rejected(with_lk({"term": "LIKELY", "rationale": LK_RATIONALE}, idx=3), "LIKELIHOOD_NOT_APPLICABLE")   # INFORMATION_GAP
+    # 6: rationale mandatory (schema for empty, database for a token rationale)
+    assert with_lk({"term": "LIKELY", "rationale": ""}).outcome == "SCHEMA_VALIDATION_FAILED"
+    assert with_lk({"term": "LIKELY"}).outcome == "SCHEMA_VALIDATION_FAILED"
+    assert rejected(with_lk({"term": "LIKELY", "rationale": "short"}), "LIKELIHOOD_RATIONALE_REQUIRED")
+    # 9: a likelihood never opens a path to final_analytic_confidence
+    assert with_lk({"term": "LIKELY", "rationale": LK_RATIONALE}, final_analytic_confidence="HIGH").outcome \
+        == "SCHEMA_VALIDATION_FAILED"
 
 
 # --- 30, 31: confidence ---------------------------------------------------------------------

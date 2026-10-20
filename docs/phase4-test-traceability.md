@@ -38,7 +38,7 @@ Files: `tests/integration/test_p4_relevance.py` (R), `tests/integration/test_p4_
 | 25 | source opinion not converted into independent confirmation | AS `test_source_opinion_keeps_attribution_even_when_corroborated`; A A09 |
 | 26 | unsupported causal statement is rejected/flagged | AS `test_unsupported_causality_and_negative_evidence_are_rejected_as_fact`; CR (UNSUPPORTED_STATEMENT flag); A A05, metric `unsupported_causal_accepted_as_fact` |
 | 27 | negative evidence is not invented from silence | AS `test_unsupported_causality_and_negative_evidence_are_rejected_as_fact`; A A06 |
-| 28 | likelihood only on prospective uncertain outcome | AS `test_likelihood_only_on_prospective_statements_and_distinct_from_confidence` |
+| 28 | likelihood only on prospective uncertain outcome | AS `test_likelihood_only_on_prospective_statements_and_distinct_from_confidence` (canonical vocabulary, CR4-01) |
 | 29 | likelihood and analytic confidence are distinct | AS `test_likelihood_only_on_prospective_statements_and_distinct_from_confidence` |
 | 30 | M07 sets ai_recommended_confidence, cannot set final_analytic_confidence | AS `test_m07_cannot_set_final_confidence_and_rationale_is_mandatory`; P `test_phase4_bundles_are_locked_and_schemas_match_database`; A A10, metric `m07_final_confidence_set` |
 | 31 | confidence rationale is mandatory | AS `test_m07_cannot_set_final_confidence_and_rationale_is_mandatory` |
@@ -81,6 +81,22 @@ Files: `tests/integration/test_p4_relevance.py` (R), `tests/integration/test_p4_
 | 68 | Phase 3 regressions PASS | full `pytest` run |
 | 69 | web/security tests PASS | `apps/web` vitest 21/21; `tests/security/*`; `scripts/secret_scan.py`; gitleaks |
 | 70 | all human-only Phase 4 functions reject non-human roles | RB (11 functions × worker, service_role, anon, VIEWER, ADMIN, SECURITY_REVIEWER, RELEASE_AUTHORITY, no-role user); SD `test_human_only_functions_are_closed_to_non_human_roles` |
+
+CR4-01 (PO decision 2026-10-20, migration 3400) — required proofs:
+
+| # | Requirement | Tests |
+|---|---|---|
+| 1 | exactly seven canonical terms exist | AS `test_canonical_likelihood_vocabulary_is_exactly_the_po_set_in_rank_order`; DEV smoke vocabulary check |
+| 2 | rank order exactly 1–7 as specified | AS `test_canonical_likelihood_vocabulary_is_exactly_the_po_set_in_rank_order`; DEV smoke |
+| 3 | canonical likelihood accepted on an eligible ANALYTIC_JUDGMENT / IMPLICATION | AS `test_likelihood_only_on_prospective_statements_and_distinct_from_confidence` (LIKELY on AS3, ROUGHLY_EVEN_CHANCE on an IMPLICATION) |
+| 4 | unknown term rejected | same test (PROBABLE, UNKNOWN, LIKELY_70_PERCENT → LIKELIHOOD_TERM_UNKNOWN) |
+| 5 | non-permitted statement type rejected | same test (KNOWN_FACT, INFORMATION_GAP → LIKELIHOOD_NOT_APPLICABLE) |
+| 6 | likelihood without rationale rejected | same test (missing / empty → schema; token rationale → LIKELIHOOD_RATIONALE_REQUIRED) |
+| 7 | M07 input receives exactly the seven terms in rank order | same test (`env.task.likelihood_terms`) |
+| 8 | likelihood and analytic confidence remain separate | same test (`likelihood_term` column vs `ai_recommended_confidence`; no confidence column on statements) |
+| 9 | M07 still cannot set final_analytic_confidence | same test (+ `test_m07_cannot_set_final_confidence_and_rationale_is_mandatory`) |
+
+The synthetic `TEST_PROBABLE` term is no longer inserted or removed by any test.
 
 Additional: worker jobs — P `test_worker_jobs_chain_m07_to_m08_and_end_in_human_review`; REJECT /
 ESCALATE / REQUEST_REPROCESSING — CR `test_reject_escalate_and_reprocessing_are_recorded_without_confidence`;
