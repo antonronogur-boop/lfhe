@@ -26,6 +26,7 @@ separation — such a change is a REQUIREMENT CHANGE.
 | 15 | Phase 4 Authoritative Baseline Addendum (Relevance, Assessment & Challenge) | v1.0 (2026-10-19) | PO baseline for Phase 4 — M06 Relevance, M07 Intelligence Assessor, M08 Challenger, analytical human review; baselines, reference contexts, trends, indicators (`docs/specs/LFHE_Phase4_Authoritative_Baseline_Addendum_v1.0.md`); stored before Phase 4 implementation per SD-12; does not supersede 2–9 or closed Phase 1–3 invariants |
 | 16 | PO Decision — Authorise Phase 4 | 2026-10-19 | Phase 4 AUTHORISED; implementation order P4-00…P4-09; Phase 5 NOT authorised (`docs/specs/PO_Decision_2026-10-19_Authorise_Phase4.md`) |
 | 17 | PO Decision — Final CG4 Pre-Closure Action | 2026-10-20 | DEV evidence for 2700–3300 accepted (34/34, 42/42); SD4-01…SD4-18 APPROVED; **CR4-01 resolved**: PO-defined canonical likelihood vocabulary (7 ordered terms, no numeric bands; explicit PO decision, not recovered from an earlier spec) via migration 3400; **CR4-02 APPROVED / CLOSED** (trend direction/velocity human free text; controlled vocabulary required before any machine use); Phase 5 NOT authorised (`docs/specs/PO_Decision_2026-10-20_CG4_PreClosure_CR4-01.md`) |
+| 18 | PO Decision — Control Gate 4 | 2026-10-20 | **CG4 APPROVED; Phase 4 ACCEPTED AND CLOSED**; K-11, real-provider trial and Phase 4 review UI NON-BLOCKING follow-on items; Phase 5 NOT authorised (SD-12) (`docs/specs/PO_Decision_2026-10-20_Control_Gate_4.md`) |
 
 ## Recorded normalisations (Product Owner, 2026-10-08)
 

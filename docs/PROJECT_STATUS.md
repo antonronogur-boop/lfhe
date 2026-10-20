@@ -2,12 +2,13 @@
 
 | Field | Value |
 | --- | --- |
-| Current phase | **Phase 4 — Relevance, Assessment & Challenge: IMPLEMENTED (P4-00…P4-09), awaiting Control Gate 4.** Phase 3 ACCEPTED AND CLOSED (2026-10-19) |
+| Current phase | **Phase 4 — Relevance, Assessment & Challenge: ACCEPTED AND CLOSED (2026-10-20).** Phase 5 NOT authorised. Phases 1–3 ACCEPTED AND CLOSED |
 | Earlier gate | **Control Gate 2 APPROVED** by the PO on 2026-10-19 (docs/control-gate-2-report.md): DEV 18/18 migrations + smoke 22/22 PASS, K-05 CLOSED and ACCEPTED (6/8 PASS; K05-03, K05-04 BLOCKED_BY_ROBOTS accepted), SD-01…SD-12 approved. Commits: implementation/CI baseline `1b31ed5`; K-05 run on `613f61a`; final documentation commit `40c00ff` |
-| Current gate | **CONTROL GATE 3 — APPROVED** by the PO on 2026-10-19 (docs/specs/PO_Decision_2026-10-19_Control_Gate_3.md): CG3-01 RESOLVED; CG3-02, CG3-03 RESOLVED / ACCEPTED; knowledge-bound retraction correction RESOLVED; SD3-01…SD3-12 APPROVED; SD3-13 replaced by the approved knowledge-bound retraction semantics (migration 2600); acceptance criteria 14/14, Phase 3 tests 63/63, Phase 1+2 regression 369/369, web 21/21; DEV 27/27 migrations, smoke 32/32 PASS, audit chain verified (108 entries). Optional service_role smoke check not run — NON-BLOCKING. Final code commit `128f1a7`; DEV evidence commit `106ecd9` |
-| Next authorised action | **Only remaining action: the PO Control Gate 4 closure decision.** DEV final (2026-10-20): 35 migrations, smoke 42/42 PASS, canonical likelihood vocabulary verified, audit chain verified (124 entries) — docs/dev-smoke-20261020-phase4-final.json. SD4-01…SD4-18 APPROVED; CR4-01 RESOLVED (migration 3400); CR4-02 APPROVED / CLOSED. **Phase 5 NOT authorised** |
+| Earlier gate (CG3) | **CONTROL GATE 3 — APPROVED** by the PO on 2026-10-19 (docs/specs/PO_Decision_2026-10-19_Control_Gate_3.md): CG3-01 RESOLVED; CG3-02, CG3-03 RESOLVED / ACCEPTED; knowledge-bound retraction correction RESOLVED; SD3-01…SD3-12 APPROVED; SD3-13 replaced by the approved knowledge-bound retraction semantics (migration 2600); acceptance criteria 14/14, Phase 3 tests 63/63, Phase 1+2 regression 369/369, web 21/21; DEV 27/27 migrations, smoke 32/32 PASS, audit chain verified (108 entries). Optional service_role smoke check not run — NON-BLOCKING. Final code commit `128f1a7`; DEV evidence commit `106ecd9` |
+| Current gate | **CONTROL GATE 4 — APPROVED** by the PO on 2026-10-20 (docs/specs/PO_Decision_2026-10-20_Control_Gate_4.md): P4-00…P4-09 ACCEPTED; SD4-01…SD4-18 APPROVED; CR4-01 RESOLVED (migration 3400); CR4-02 APPROVED / CLOSED; acceptance criteria 20/20; full suite 500/500 (Phase 4 68/68, Phase 1–3 432/432); web 21/21; prompt lock PASS; secret scan / gitleaks clean; DEV 35/35 migrations, smoke 42/42 PASS (Phase 4 checks 10/10), audit chain verified (124 entries). Optional service_role smoke check NON-BLOCKING. CI run 39477359815 success. Evidence commit `413ef3e` |
+| Next authorised action | **None — STOP.** Phase 5 may begin only after the Phase 5 authoritative phase-specific baseline is versioned under docs/specs/ and explicitly authorised by the PO (SD-12). Non-blocking follow-on items: K-11 / GS-001 Patriot-trap test channel, real-provider trial, Phase 4 review UI |
 
-## Phase 4 progress (Addendum v1.0)
+## Phase 4 progress (Addendum v1.0) — ACCEPTED AND CLOSED (CG4 APPROVED 2026-10-20)
 
 | Step | Status |
 | --- | --- |
@@ -102,7 +103,7 @@ testing); D-06 approved conditionally (CG1-06 verification since completed: CI +
 | K-08 | Canonical JSON | NON-BLOCKING | RFC 8785 JCS + SHA-256 (ADR-0003) |
 | K-09 | Template / renderer version + PDF hash in manifest | DEFER (P5–P6) | |
 | K-10 | M05 automatic application scope | RESOLVED (P3) | CREATE → CANDIDATE, UPDATE → AI-originated version pending review (claims only added); MERGE / SPLIT / SUPERSEDE / REJECT human-only (docs/lineage-events.md) |
-| K-11 | GS-001 Patriot-trap test channel | DEFER (P4) | Decide at raw-input materialisation |
+| K-11 | GS-001 Patriot-trap test channel | NON-BLOCKING follow-on (CG4 decision 2026-10-20) | Decide at raw-input materialisation; does not reopen CG4 |
 | K-12 | Canonical evidence-span field name | RESOLVED (P2) | `claims.evidence_span_original` (v1.2.2), verified by the database |
 | K-13 | QA-04 naming | NON-BLOCKING | Event time is never an eligibility criterion |
 | **DC-01** | **final_analytic_confidence — single source of truth** | **RESOLVED (P4-06)** | Phases 1–3 had no confidence column. Phase 4: the only owner is the immutable human approval row `lfhe.analytical_approvals.final_analytic_confidence` (one approval per assessment version, bound to version + hash; projected read-only by the view `assessment_version_states`). No model-written row holds it; `ai_recommended_confidence` is a separate field. Guarded by `test_final_analytic_confidence_has_exactly_one_canonical_owner` and the DEV smoke. |
