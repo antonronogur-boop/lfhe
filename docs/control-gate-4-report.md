@@ -3,7 +3,7 @@
 ## PHASE / GATE
 
 - Fázis: **Phase 4 — Relevance, Assessment & Challenge** (M06, M07, M08, baseline, reference context, emberi analitikai review, trend, indikátor).
-- Kapu: **Control Gate 4** — a PO 2026-10-20-i döntése (SPEC_INDEX 17) szerint a CG4 lezárás előtti utolsó lépés elkészült (CR4-01 feloldva, CR4-02 lezárva); a végső CG4 lezárás PO döntésre vár.
+- Kapu: **CONTROL GATE 4 — APPROVED** (PO, 2026-10-20, `docs/specs/PO_Decision_2026-10-20_Control_Gate_4.md`). **PHASE 4 — ACCEPTED AND CLOSED.**
 - Alap: `docs/specs/LFHE_Phase4_Authoritative_Baseline_Addendum_v1.0.md` (SPEC_INDEX 15), PO felhatalmazás `docs/specs/PO_Decision_2026-10-19_Authorise_Phase4.md` (SPEC_INDEX 16).
 - Végrehajtás: P4-00 … P4-09 a megadott sorrendben, köztes engedélykérés nélkül. CG1, CG2, CG3 nem lett újranyitva; általános architektúra-audit nem történt.
 - Commitok: P4-00 `a8f1db3`, P4-01 `737e6f1`, P4-02 `317597f`, P4-03/04 `05a397c`, P4-05/06 `d019b39`, P4-07 `f644683`, P4-08 `b066e96`, P4-09 `9d29ae8` (+ ez a jelentés).
@@ -327,5 +327,16 @@ Valódi, magasabb rendű specifikációval való anyagi ellentmondás nem merül
 2. ~~DEV 3400 + smoke~~ — kész: 35 migráció, 42/42 PASS.
 3. Utána egyetlen hátralévő lépés: a PO CG4-lezáró döntése.
 4. Phase 5 csak külön PO-felhatalmazással indulhat.
+
+## PRODUCT OWNER DECISION (2026-10-20)
+
+**CONTROL GATE 4 — APPROVED. PHASE 4 — ACCEPTED AND CLOSED.**
+
+- P4-00 … P4-09 ACCEPTED; SD4-01 … SD4-18 APPROVED; CR4-01 RESOLVED; CR4-02 APPROVED / CLOSED.
+- DEV: 35/35 migráció, smoke 42/42 PASS (Phase 4: 10/10), audit hash-lánc ellenőrizve (124 bejegyzés).
+- Teljes Python készlet 500/500, Phase 4 68/68, Phase 1–3 regresszió 432/432, web 21/21, prompt lock PASS, secret scan / gitleaks tiszta; CG4 kritériumok 20/20; model-run nyomonkövethetőség teljes.
+- Az opcionális service_role smoke ellenőrzés NEM BLOKKOLÓ.
+- K-11 / GS-001 Patriot-trap tesztcsatorna, valós provideres próba, Phase 4 review UI: NEM BLOKKOLÓ követő tételek; a CG4-et nem nyitják újra.
+- Phase 5 NEM engedélyezett: csak a Phase 5 hiteles, fázis-specifikus baseline `docs/specs/` alatti verziózása és explicit PO-felhatalmazás után indulhat (SD-12).
 
 **STOP — az implementáció itt megáll. Phase 5 NEM engedélyezett.**
