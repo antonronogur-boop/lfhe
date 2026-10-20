@@ -222,7 +222,7 @@ Lokális PostgreSQL 16 tesztkörnyezet (Supabase shim), Python 3.13:
 | Secret scan / gitleaks | `SECRET-SCAN: clean` / `no leaks found` |
 | §24 korpusz-metrikák | mind **0** (`docs/cg4-acceptance-metrics.json`; a CR4-01 nem érint metrikát) |
 | GitHub CI (`9d29ae8`) | **run 39308694707 — success** (secret-scan, python-tests, web) |
-| GitHub CI (CR4-01) | CI4_PLACEHOLDER |
+| GitHub CI (CR4-01, `4de4e32`) | **run 39477359815 — success** (secret-scan, python-tests, web) |
 | DEV Supabase (PO, 2026-10-20) | **34 migráció, smoke 42/42 PASS** (ebből 10 Phase 4 ellenőrzés), audit hash-lánc ellenőrizve (120 bejegyzés), pg_cron ütemezve; az opcionális service-role ellenőrzés nem futott — NEM BLOKKOLÓ (`docs/dev-smoke-20261020-phase4.json`) |
 
 ## PHASE 4 ACCEPTANCE CRITERIA
