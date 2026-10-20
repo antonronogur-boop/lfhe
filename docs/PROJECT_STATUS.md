@@ -5,7 +5,7 @@
 | Current phase | **Phase 4 — Relevance, Assessment & Challenge: IMPLEMENTED (P4-00…P4-09), awaiting Control Gate 4.** Phase 3 ACCEPTED AND CLOSED (2026-10-19) |
 | Earlier gate | **Control Gate 2 APPROVED** by the PO on 2026-10-19 (docs/control-gate-2-report.md): DEV 18/18 migrations + smoke 22/22 PASS, K-05 CLOSED and ACCEPTED (6/8 PASS; K05-03, K05-04 BLOCKED_BY_ROBOTS accepted), SD-01…SD-12 approved. Commits: implementation/CI baseline `1b31ed5`; K-05 run on `613f61a`; final documentation commit `40c00ff` |
 | Current gate | **CONTROL GATE 3 — APPROVED** by the PO on 2026-10-19 (docs/specs/PO_Decision_2026-10-19_Control_Gate_3.md): CG3-01 RESOLVED; CG3-02, CG3-03 RESOLVED / ACCEPTED; knowledge-bound retraction correction RESOLVED; SD3-01…SD3-12 APPROVED; SD3-13 replaced by the approved knowledge-bound retraction semantics (migration 2600); acceptance criteria 14/14, Phase 3 tests 63/63, Phase 1+2 regression 369/369, web 21/21; DEV 27/27 migrations, smoke 32/32 PASS, audit chain verified (108 entries). Optional service_role smoke check not run — NON-BLOCKING. Final code commit `128f1a7`; DEV evidence commit `106ecd9` |
-| Next authorised action | PO DEV re-run for migration 3400 (`python scripts/apply_migrations.py` + `python scripts/supabase_dev_smoke.py`; expected 35 migrations, 42/42 PASS), then the PO CG4 closure decision. Earlier DEV evidence (2026-10-20: 34 migrations, 42/42 PASS, docs/dev-smoke-20261020-phase4.json) remains valid for 2700–3300. SD4-01…SD4-18 APPROVED; CR4-01 RESOLVED (migration 3400); CR4-02 APPROVED / CLOSED. **Phase 5 NOT authorised** |
+| Next authorised action | **Only remaining action: the PO Control Gate 4 closure decision.** DEV final (2026-10-20): 35 migrations, smoke 42/42 PASS, canonical likelihood vocabulary verified, audit chain verified (124 entries) — docs/dev-smoke-20261020-phase4-final.json. SD4-01…SD4-18 APPROVED; CR4-01 RESOLVED (migration 3400); CR4-02 APPROVED / CLOSED. **Phase 5 NOT authorised** |
 
 ## Phase 4 progress (Addendum v1.0)
 
@@ -22,7 +22,7 @@
 | P4-08 Jobs/worker (3300), security/reproducibility tests, RBAC sweep, acceptance corpus | done |
 | P4-09 DEV smoke P4 checks, docs, CG4 report (docs/control-gate-4-report.md); CI run 39308694707 success on `9d29ae8` | done |
 | DEV apply 2700–3300 + smoke (PO, 2026-10-20) | done — 34 migrations, smoke 42/42 PASS, audit chain ok, 120 entries (docs/dev-smoke-20261020-phase4.json); accepted by the PO as valid evidence |
-| CG4 pre-closure (PO decision 2026-10-20, SPEC_INDEX 17): CR4-01 canonical likelihood vocabulary (migration 3400), CR4-02 closed | done — DEV re-run for 3400 pending (PO) |
+| CG4 pre-closure (PO decision 2026-10-20, SPEC_INDEX 17): CR4-01 canonical likelihood vocabulary (migration 3400), CR4-02 closed | done — DEV final: 35 migrations, smoke 42/42 PASS (docs/dev-smoke-20261020-phase4-final.json) |
 
 ## Phase 3 progress (Addendum v1.0)
 

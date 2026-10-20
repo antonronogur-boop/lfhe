@@ -47,7 +47,7 @@ Nem implementált (tiltás szerint): M09, report-kiválasztás/összeállítás,
 | `20261011003300_p4_jobs.sql` | job-típusok: ASSESS_RELEVANCE, ASSESS_EVENT, CHALLENGE_ASSESSMENT |
 | `20261011003400_p4_likelihood_vocabulary.sql` | CR4-01: `likelihood_terms` feltöltése a PO által definiált 7 kanonikus szóval (rang 1–7, leírás, `spec_source` = PO döntés 2026-10-20); nincs numerikus sáv, nincs UNKNOWN |
 
-Összesen 35 migráció (2700–3300 + 3400; a 2700–3300 nem módosult). Mind előrefelé (forward-only); Phase 1–3 objektum szemantikája nem változott. Egyetlen kompatibilitási érintés: a `relevance_results.previous_assessment_version_id` FK (2900, Phase 4 saját táblája). DEV alkalmazás: a 2700–3300-at a PO elvégezte 2026-10-20-án (34 migráció, a PO által érvényes bizonyítékként elfogadva); a 3400 DEV-futtatása a PO-ra vár (várható: 35 migráció, 42/42 PASS).
+Összesen 35 migráció (2700–3300 + 3400; a 2700–3300 nem módosult). Mind előrefelé (forward-only); Phase 1–3 objektum szemantikája nem változott. Egyetlen kompatibilitási érintés: a `relevance_results.previous_assessment_version_id` FK (2900, Phase 4 saját táblája). DEV alkalmazás: a 2700–3300-at a PO elvégezte 2026-10-20-án (34 migráció, a PO által érvényes bizonyítékként elfogadva); a 3400-at a PO szintén alkalmazta 2026-10-20-án: 35 migráció, smoke 42/42 PASS (`docs/dev-smoke-20261020-phase4-final.json`).
 
 ## PROMPTS / SCHEMAS
 
@@ -223,6 +223,7 @@ Lokális PostgreSQL 16 tesztkörnyezet (Supabase shim), Python 3.13:
 | §24 korpusz-metrikák | mind **0** (`docs/cg4-acceptance-metrics.json`; a CR4-01 nem érint metrikát) |
 | GitHub CI (`9d29ae8`) | **run 39308694707 — success** (secret-scan, python-tests, web) |
 | GitHub CI (CR4-01, `4de4e32`) | **run 39477359815 — success** (secret-scan, python-tests, web) |
+| DEV Supabase végső (PO, 2026-10-20, 3400 után) | **35 migráció, smoke 42/42 PASS**, kanonikus likelihood-szókincs ellenőrizve (1–7), audit hash-lánc ellenőrizve (124 bejegyzés), pg_cron aktív (`docs/dev-smoke-20261020-phase4-final.json`) |
 | DEV Supabase (PO, 2026-10-20) | **34 migráció, smoke 42/42 PASS** (ebből 10 Phase 4 ellenőrzés), audit hash-lánc ellenőrizve (120 bejegyzés), pg_cron ütemezve; az opcionális service-role ellenőrzés nem futott — NEM BLOKKOLÓ (`docs/dev-smoke-20261020-phase4.json`) |
 
 ## PHASE 4 ACCEPTANCE CRITERIA
@@ -315,7 +316,7 @@ Valódi, magasabb rendű specifikációval való anyagi ellentmondás nem merül
 
 1. ~~DEV migráció + smoke~~ — **LEZÁRVA** 2026-10-20: 34 migráció, 42/42 PASS (`docs/dev-smoke-20261020-phase4.json`).
 2. ~~CR4-01 / CR4-02~~ — CR4-01 FELOLDVA (3400), CR4-02 LEZÁRVA.
-6. DEV: a 3400 alkalmazása és a smoke újrafuttatása a PO által (várható: 35 migráció, 42/42 PASS).
+6. ~~DEV 3400 + smoke~~ — **LEZÁRVA**: 35 migráció, 42/42 PASS.
 3. K-11 (GS-001 Patriot-trap tesztcsatorna) továbbra is DEFER: Phase 4 nem materializált nyers GS bemenetet.
 4. Valós provideres próba (L-09 / L-33) — nem blokkoló.
 5. Phase 4 review UI nincs (L-32) — nem része a baseline-nak.
@@ -323,7 +324,7 @@ Valódi, magasabb rendű specifikációval való anyagi ellentmondás nem merül
 ## RECOMMENDED NEXT ACTION
 
 1. ~~DEV migráció és smoke~~ — kész (42/42 PASS).
-2. A PO futtassa DEV-en: `python scripts/apply_migrations.py` és `python scripts/supabase_dev_smoke.py` (várható: 35 migráció, 42/42 PASS).
+2. ~~DEV 3400 + smoke~~ — kész: 35 migráció, 42/42 PASS.
 3. Utána egyetlen hátralévő lépés: a PO CG4-lezáró döntése.
 4. Phase 5 csak külön PO-felhatalmazással indulhat.
 
