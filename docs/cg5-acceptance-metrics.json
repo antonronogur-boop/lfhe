@@ -1,0 +1,267 @@
+{
+  "metrics": {
+    "scenario_expectation_mismatches": 0,
+    "unselected_candidate_included": 0,
+    "report_statements_without_mapping": 0,
+    "unsupported_new_facts_accepted": 0,
+    "unsupported_new_judgments_accepted": 0,
+    "attribution_strength_violations": 0,
+    "confidence_changes_by_m09": 0,
+    "likelihood_changes_by_m09": 0,
+    "silent_caveat_contradiction_deletion": 0,
+    "automatic_substantive_removals": 0,
+    "fabricated_filler_accepted": 0,
+    "report_version_mutations": 0,
+    "human_statements_without_provenance": 0,
+    "non_human_authoritative_decisions": 0,
+    "canonical_hash_nondeterminism": 0,
+    "statement_provenance_gaps": 0,
+    "gs_leakage": 0,
+    "m09_traceability_gaps": 0,
+    "preview_render_nondeterminism": 0,
+    "human_adversarial_accepted": 0,
+    "m09_scenarios": 22,
+    "human_scenarios": 8,
+    "accepted_model_versions": 4,
+    "report_versions": 6,
+    "human_versions": 2,
+    "model_runs": 25
+  },
+  "scenarios": [
+    {
+      "id": "E01",
+      "mutation": "sound",
+      "expected": "REPORT_VERSION_RECORDED",
+      "got": [
+        "REPORT_VERSION_RECORDED"
+      ]
+    },
+    {
+      "id": "E02",
+      "mutation": "compress_merge",
+      "expected": "REPORT_VERSION_RECORDED",
+      "got": [
+        "REPORT_VERSION_RECORDED"
+      ]
+    },
+    {
+      "id": "E03",
+      "mutation": "foreign_candidate",
+      "expected": "OUTPUT_REJECTED:SOURCE_CANDIDATE_NOT_SELECTED",
+      "got": [
+        "OUTPUT_REJECTED:SOURCE_CANDIDATE_NOT_SELECTED"
+      ]
+    },
+    {
+      "id": "E04",
+      "mutation": "drop_sources",
+      "expected": "SCHEMA_VALIDATION_FAILED",
+      "got": [
+        "SCHEMA_VALIDATION_FAILED"
+      ]
+    },
+    {
+      "id": "E05",
+      "mutation": "inject_number",
+      "expected": "OUTPUT_REJECTED:UNSUPPORTED_NEW_FACT",
+      "got": [
+        "OUTPUT_REJECTED:UNSUPPORTED_NEW_FACT"
+      ]
+    },
+    {
+      "id": "E06",
+      "mutation": "inject_name",
+      "expected": "OUTPUT_REJECTED:UNSUPPORTED_NEW_FACT",
+      "got": [
+        "OUTPUT_REJECTED:UNSUPPORTED_NEW_FACT"
+      ]
+    },
+    {
+      "id": "E07",
+      "mutation": "inject_causal",
+      "expected": "OUTPUT_REJECTED:UNSUPPORTED_NEW_JUDGMENT",
+      "got": [
+        "OUTPUT_REJECTED:UNSUPPORTED_NEW_JUDGMENT"
+      ]
+    },
+    {
+      "id": "E08",
+      "mutation": "drop_attribution",
+      "expected": "OUTPUT_REJECTED:ATTRIBUTION_REMOVED",
+      "got": [
+        "OUTPUT_REJECTED:ATTRIBUTION_REMOVED"
+      ]
+    },
+    {
+      "id": "E09",
+      "mutation": "strengthen",
+      "expected": "OUTPUT_REJECTED:EPISTEMIC_STRENGTHENING",
+      "got": [
+        "OUTPUT_REJECTED:EPISTEMIC_STRENGTHENING"
+      ]
+    },
+    {
+      "id": "E10",
+      "mutation": "confidence_high",
+      "expected": "OUTPUT_REJECTED:CONFIDENCE_CHANGED",
+      "got": [
+        "OUTPUT_REJECTED:CONFIDENCE_CHANGED"
+      ]
+    },
+    {
+      "id": "E11",
+      "mutation": "add_likelihood",
+      "expected": "OUTPUT_REJECTED:LIKELIHOOD_ADDED",
+      "got": [
+        "OUTPUT_REJECTED:LIKELIHOOD_ADDED"
+      ]
+    },
+    {
+      "id": "E12",
+      "mutation": "change_likelihood",
+      "expected": "OUTPUT_REJECTED:LIKELIHOOD_CHANGED",
+      "got": [
+        "OUTPUT_REJECTED:LIKELIHOOD_CHANGED"
+      ]
+    },
+    {
+      "id": "E13",
+      "mutation": "omit_contradiction",
+      "expected": "OUTPUT_REJECTED:SELECTED_STATEMENT_OMITTED",
+      "got": [
+        "OUTPUT_REJECTED:SELECTED_STATEMENT_OMITTED"
+      ]
+    },
+    {
+      "id": "E14",
+      "mutation": "remove_caveat_proposal",
+      "expected": "OUTPUT_REJECTED:CAVEAT_REMOVAL_FOR_LENGTH_PROHIBITED",
+      "got": [
+        "OUTPUT_REJECTED:CAVEAT_REMOVAL_FOR_LENGTH_PROHIBITED"
+      ]
+    },
+    {
+      "id": "E15",
+      "mutation": "valid_removal_proposal",
+      "expected": "REPORT_VERSION_RECORDED",
+      "got": [
+        "REPORT_VERSION_RECORDED"
+      ]
+    },
+    {
+      "id": "E16",
+      "mutation": "four_kj",
+      "expected": "OUTPUT_REJECTED:MAX_KEY_JUDGMENTS_EXCEEDED",
+      "got": [
+        "OUTPUT_REJECTED:MAX_KEY_JUDGMENTS_EXCEEDED"
+      ]
+    },
+    {
+      "id": "E17",
+      "mutation": "promote_sd",
+      "expected": "OUTPUT_REJECTED:SECTION_NOT_AUTHORISED",
+      "got": [
+        "OUTPUT_REJECTED:KEY_JUDGMENT_WITHOUT_APPROVED_JUDGMENT",
+        "OUTPUT_REJECTED:SECTION_NOT_AUTHORISED",
+        "OUTPUT_REJECTED:STATEMENT_ROLE_INVALID"
+      ]
+    },
+    {
+      "id": "E18",
+      "mutation": "human_only_key",
+      "expected": "SCHEMA_VALIDATION_FAILED",
+      "got": [
+        "SCHEMA_VALIDATION_FAILED"
+      ]
+    },
+    {
+      "id": "E19",
+      "mutation": "operational_wtw",
+      "expected": "OUTPUT_REJECTED:OPERATIONAL_RECOMMENDATION_PROHIBITED",
+      "got": [
+        "OUTPUT_REJECTED:OPERATIONAL_RECOMMENDATION_PROHIBITED"
+      ]
+    },
+    {
+      "id": "E20",
+      "mutation": "filler",
+      "expected": "OUTPUT_REJECTED:ATTRIBUTION_REMOVED",
+      "got": [
+        "OUTPUT_REJECTED:ATTRIBUTION_REMOVED"
+      ]
+    },
+    {
+      "id": "E21",
+      "mutation": "republication_confidence",
+      "expected": "OUTPUT_REJECTED:EPISTEMIC_STRENGTHENING",
+      "got": [
+        "OUTPUT_REJECTED:EPISTEMIC_STRENGTHENING"
+      ]
+    },
+    {
+      "id": "E22",
+      "mutation": "unknown_statement",
+      "expected": "OUTPUT_REJECTED:UNKNOWN_SOURCE_STATEMENT",
+      "got": [
+        "OUTPUT_REJECTED:SELECTED_STATEMENT_OMITTED",
+        "OUTPUT_REJECTED:UNKNOWN_SOURCE_STATEMENT"
+      ]
+    },
+    {
+      "id": "H01",
+      "mutation": "unmapped_statement",
+      "expected": "REJECTED",
+      "got": "REJECTED",
+      "error": "REPORT_CONTENT_INVALID: REPORT_STATEMENT_WITHOUT_SOURCE:RS900"
+    },
+    {
+      "id": "H02",
+      "mutation": "caveat_removal",
+      "expected": "REJECTED",
+      "got": "REJECTED",
+      "error": "REPORT_CONTENT_INVALID: CAVEAT_REMOVAL_PROHIBITED"
+    },
+    {
+      "id": "H03",
+      "mutation": "wrong_hash",
+      "expected": "REJECTED",
+      "got": "REJECTED",
+      "error": "VERSION_HASH_MISMATCH: report version e82c47ab-5c36-4edd-8623-005c00f35ef4"
+    },
+    {
+      "id": "H04",
+      "mutation": "worker_edit",
+      "expected": "REJECTED",
+      "got": "REJECTED",
+      "error": "permission denied for function edit_report_version"
+    },
+    {
+      "id": "H05",
+      "mutation": "service_role_selection",
+      "expected": "REJECTED",
+      "got": "REJECTED",
+      "error": "permission denied for schema lfhe"
+    },
+    {
+      "id": "H06",
+      "mutation": "valid_reword",
+      "expected": "ACCEPTED",
+      "got": "ACCEPTED",
+      "error": null
+    },
+    {
+      "id": "H07",
+      "mutation": "stale_version",
+      "expected": "REJECTED",
+      "got": "REJECTED",
+      "error": "REPORT_VERSION_STALE: a later version of report 04295247-67b2-4b02-abd9-cd39a9fcc0c9 exists"
+    },
+    {
+      "id": "H08",
+      "mutation": "removal_accept",
+      "expected": "ACCEPTED",
+      "got": "ACCEPTED",
+      "error": null
+    }
+  ]
+}

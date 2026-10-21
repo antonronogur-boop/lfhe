@@ -95,6 +95,22 @@ analytic confidence. ADMIN, SECURITY_REVIEWER, RELEASE_AUTHORITY, VIEWER, anon,
 (`block_mutation`); `assessment_state_history` is append-only and the worker may write only
 NULL→DRAFT, DRAFT→CHALLENGED and CHALLENGED→IN_REVIEW.
 
+## Phase 5 functions (migrations `…3500` … `…3700`)
+
+| Function | Caller | Permission |
+| --- | --- | --- |
+| `create_report`, `refresh_report_candidates`, `decide_report_candidate`, `freeze_report_selection` | human (HUMAN_ONLY) | `REPORT_EDIT` |
+| `edit_report_version`, `decide_report_removals` | human (HUMAN_ONLY) | `REPORT_EDIT` |
+| `ingest_report_edit` (M09), `record_report_render`, eligibility / statement-pool helpers (`report_candidate_eligible`, `report_candidate_statements`, `report_selection_statements`, `report_object_hash`, `report_content_problems`, `p5_candidate_pins`, …) | `lfhe_worker` only | — |
+| `jcs`, `jcs_sha256`, `p5_ts` (pure canonicalisation) | `authenticated`, `lfhe_worker` | — |
+| internal writers (`p5_write_report_version`, `p5_canonical_sections`, `p5_require_latest_version`, …) | no grant | — |
+
+No new permission: `REPORT_EDIT` (seeded in Phase 1 for Phase 5) is held by ANALYST only. VIEWER,
+ADMIN, REVIEWER, SECURITY_REVIEWER, RELEASE_AUTHORITY, anon, `service_role` and `lfhe_worker` are
+refused by every Phase 5 HUMAN_ONLY function (`tests/security/test_p5_rbac.py`, DEV smoke P5 checks).
+All Phase 5 tables are readable with `CLAIM_READ` (RLS) and by `lfhe_worker`, written by nobody
+directly and immutable (`block_mutation`). No report table has a confidence column (DC-01).
+
 ## Non-human principals
 - `lfhe_registrar` (deployment pipeline): may only register prompt artifacts
   and model configurations (`register_prompt_version`,

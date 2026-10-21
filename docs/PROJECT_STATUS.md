@@ -2,11 +2,27 @@
 
 | Field | Value |
 | --- | --- |
-| Current phase | **Phase 5 — Executive Reporting: AUTHORISED (2026-10-21), in implementation.** Phase 4 ACCEPTED AND CLOSED (2026-10-20); Phases 1–3 ACCEPTED AND CLOSED |
+| Current phase | **Phase 5 — Executive Reporting: IMPLEMENTED (P5-00…P5-10), awaiting Control Gate 5.** Phase 4 ACCEPTED AND CLOSED (2026-10-20); Phases 1–3 ACCEPTED AND CLOSED |
 | Earlier gate | **Control Gate 2 APPROVED** by the PO on 2026-10-19 (docs/control-gate-2-report.md): DEV 18/18 migrations + smoke 22/22 PASS, K-05 CLOSED and ACCEPTED (6/8 PASS; K05-03, K05-04 BLOCKED_BY_ROBOTS accepted), SD-01…SD-12 approved. Commits: implementation/CI baseline `1b31ed5`; K-05 run on `613f61a`; final documentation commit `40c00ff` |
 | Earlier gate (CG3) | **CONTROL GATE 3 — APPROVED** by the PO on 2026-10-19 (docs/specs/PO_Decision_2026-10-19_Control_Gate_3.md): CG3-01 RESOLVED; CG3-02, CG3-03 RESOLVED / ACCEPTED; knowledge-bound retraction correction RESOLVED; SD3-01…SD3-12 APPROVED; SD3-13 replaced by the approved knowledge-bound retraction semantics (migration 2600); acceptance criteria 14/14, Phase 3 tests 63/63, Phase 1+2 regression 369/369, web 21/21; DEV 27/27 migrations, smoke 32/32 PASS, audit chain verified (108 entries). Optional service_role smoke check not run — NON-BLOCKING. Final code commit `128f1a7`; DEV evidence commit `106ecd9` |
 | Current gate | **CONTROL GATE 4 — APPROVED** by the PO on 2026-10-20 (docs/specs/PO_Decision_2026-10-20_Control_Gate_4.md): P4-00…P4-09 ACCEPTED; SD4-01…SD4-18 APPROVED; CR4-01 RESOLVED (migration 3400); CR4-02 APPROVED / CLOSED; acceptance criteria 20/20; full suite 500/500 (Phase 4 68/68, Phase 1–3 432/432); web 21/21; prompt lock PASS; secret scan / gitleaks clean; DEV 35/35 migrations, smoke 42/42 PASS (Phase 4 checks 10/10), audit chain verified (124 entries). Optional service_role smoke check NON-BLOCKING. CI run 39477359815 success. Evidence commit `413ef3e` |
-| Next authorised action | Phase 5 implementation P5-00…P5-10 per docs/specs/PO_Decision_2026-10-21_Authorise_Phase5.md, then the CG5 evidence report and STOP. **Phase 6 NOT authorised** |
+| Next authorised action | PO review of docs/control-gate-5-report.md; DEV apply of migrations 3500–3700 + `scripts/supabase_dev_smoke.py` (P5 checks; expected 38 migrations, 50/50 PASS) by the PO. Implementation STOPPED after P5-10. **Phase 6 NOT authorised** |
+
+## Phase 5 progress (Addendum v1.0)
+
+| Step | Status |
+| --- | --- |
+| P5-00 Baseline + PO authorisation stored under docs/specs, SPEC_INDEX rows 19–20 | done |
+| P5-01 Reports, candidate pool, HUMAN selection, frozen selection sets + RBAC (migration 3500) | done |
+| P5-02 Report versions / items / statements / statement sources (3600) | done |
+| P5-03 Canonical JSON: RFC 8785 JCS in SQL (parity with Python) + SHA-256 version hash (3500 / 3600) | done |
+| P5-04 M09_EXECUTIVE_EDITOR 1.0.0 bundle + deterministic input builder | done |
+| P5-05 M09 ingestion (one validator, fail closed) + length / removal review (3600) | done |
+| P5-06 Provenance-preserving human edits, immutable versioning (3600) | done |
+| P5-07 Deterministic HTML / print-ready preview rendering, EDIT_REPORT / RENDER_REPORT jobs (3700) | done |
+| P5-08 Analyst report workspace UI (`/reports`) | done |
+| P5-09 Acceptance corpus (§27 metrics), security / adversarial tests, regressions | done |
+| P5-10 DEV smoke P5 checks, docs, CG5 report | done — DEV apply/smoke pending (PO) |
 
 ## Phase 4 progress (Addendum v1.0) — ACCEPTED AND CLOSED (CG4 APPROVED 2026-10-20)
 
@@ -163,3 +179,14 @@ testing); D-06 approved conditionally (CG1-06 verification since completed: CI +
 | L-33 | Relevance/assessment/challenge quality is a model property; measured with scripted outputs (sound, naive, adversarial). No real-provider call (see L-09) | Real-provider trial non-blocking (§20) |
 | L-34 | The DS-38 automatic-assessment threshold is not defined by a higher-authority document: `automatic_assessment_recommended` is advisory and gates nothing | PO decision if a threshold is wanted |
 | L-35 | As-of checks are recursive on read (see L-26); full suite now ≈ 2 min 10 s | Materialise bounds if measurements require |
+
+## Known limitations at Control Gate 5
+
+| ID | Limitation | Impact / plan |
+| --- | --- | --- |
+| L-36 | New-fact / new-judgment / strengthening / operational guards on report text are deterministic lexical heuristics (numbers, capitalised names, causal and certainty lexicons); they can miss a purely semantic change and can refuse a legitimate capitalised word absent from the sources | Fail-closed direction; semantic QA is Phase 6 (M10-S); human edits re-validated by the same rules |
+| L-37 | `/reports` workspace built, type-checked, unit-tested and its server-side reads / RPCs tested as real `authenticated` sessions; not yet clicked through in a browser against DEV | Manual walkthrough on DEV (non-blocking, as L-01 / L-18) |
+| L-38 | No PDF in Phase 5: the HTML carries the print layout; PDF rendering and the PDF hash belong to the Phase 6 release manifest (K-09) | Phase 6 |
+| L-39 | M09 quality is a model property; measured with scripted outputs (sound, naive, adversarial); no real-provider call (L-09) | Real-provider trial non-blocking |
+| L-40 | One report item derives from one candidate; a single report statement cannot merge statements of two different assessments (conservative: no false independent-evidence impression) | Separate sentences / items; revisit only by PO decision |
+| L-41 | Full suite ≈ 2 min 50 s (as-of recursion, L-26 / L-35) | Materialise bounds if measurements require |

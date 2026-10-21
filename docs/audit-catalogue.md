@@ -99,6 +99,25 @@
 `ASSESSMENT_REVIEW_RECORDED` is registered by migration 3100 but not emitted (the decision-specific
 codes above are used); it is kept, because audit codes are append-only.
 
+
+## Mandatory audited transitions — Phase 5
+
+| Event | Trigger point |
+| --- | --- |
+| `REPORT_CREATED` | insert into `reports` |
+| `REPORT_CANDIDATE_ADDED` | insert into `report_candidate_pool` |
+| `REPORT_CANDIDATE_SELECTED` / `REPORT_CANDIDATE_REMOVED` / `REPORT_CANDIDATE_RETURNED_FOR_REVISION` | insert into `report_selection_decisions` (INCLUDE / EXCLUDE / RETURN_FOR_ANALYTICAL_REVISION) |
+| `REPORT_SELECTION_FROZEN` | insert into `report_selection_sets` |
+| `REPORT_EDIT_INGESTION_RECORDED` | insert into `report_edit_ingestion_results` (one per M09 run) |
+| `REPORT_VERSION_CREATED` | insert into `report_versions` (MODEL and HUMAN) |
+| `REPORT_TEXT_EDITED` / `REPORT_CONTENT_REORDERED` | `edit_report_version` (content change / pure reorder), with previous version, hashes, reason and removed source statements |
+| `REPORT_REMOVAL_PROPOSED` | insert into `report_removal_proposals` |
+| `REPORT_REMOVAL_DECIDED` | insert into `report_removal_decisions` |
+| `REPORT_PREVIEW_RENDERED` | insert into `report_renders` |
+
+`REPORT_VERSION_HASH_CHANGED`, `QA_INVALIDATED_BY_REPORT_CHANGE` and the release codes in the
+catalogue belong to Phase 6.
+
 Text and prompt contents are not copied into the audit log: the audit entry
 records their SHA-256 (the rows themselves are immutable and hash-checked).
 

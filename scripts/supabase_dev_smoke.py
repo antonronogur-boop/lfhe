@@ -236,6 +236,43 @@ def main() -> int:
            if rest.rpc(fn, {"p": {}}, admin).status_code < 400]
     check("P4: humans cannot call the M06/M07/M08 ingestion functions", not bad, ", ".join(bad))
 
+    # 4e. Phase 5 executive reporting (P5): schema / RLS / RBAC surface only; no report is created
+    p5_tables = ["reports", "report_candidate_pool", "report_selection_decisions", "report_selection_sets",
+                 "report_selection_set_items", "report_versions", "report_items", "report_item_statements",
+                 "report_statement_sources", "report_removal_proposals", "report_removal_decisions", "report_renders",
+                 "report_edit_ingestion_results"]
+    rls = {r["relname"]: r["relrowsecurity"] for r in db.execute(
+        "SELECT c.relname, c.relrowsecurity FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace "
+        "WHERE n.nspname = 'lfhe' AND c.relname = ANY(%s)", (p5_tables,))}
+    check("P5: report tables present with RLS", len(rls) == len(p5_tables) and all(rls.values()), f"{sum(rls.values())}/{len(p5_tables)}")
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "services", "shared"))
+    from lfhe_shared.canonical_json import canonical_sha256  # noqa: E402
+    probe = {"b": [1, True, None], "a": "é\u0001\"x", "C": {}}
+    got = db.execute("SELECT lfhe.jcs_sha256(%s::jsonb) AS h", (json.dumps(probe),)).fetchone()["h"]
+    check("P5: SQL RFC 8785 JCS hash equals the Python canonical hash", got == canonical_sha256(probe), got[:16])
+    states = db.execute("SELECT pg_get_constraintdef(c.oid) AS d FROM pg_constraint c JOIN pg_class t ON t.oid = c.conrelid "
+                        "JOIN pg_namespace n ON n.oid = t.relnamespace WHERE n.nspname = 'lfhe' AND t.relname IN "
+                        "('report_versions', 'report_renders') AND pg_get_constraintdef(c.oid) ~ '^CHECK \\(\\((state|status) = '").fetchall()
+    check("P5: report versions are DRAFT_VERSION and renders PREVIEW only (no QA / approval / release state)",
+          len(states) == 2 and all("RELEASED" not in r["d"] for r in states), "; ".join(r["d"] for r in states))
+    r = rest.select("report_candidate_state", viewer)
+    check("P5: viewer can read the report candidate pool (CLAIM_READ)", r.status_code == 200, f"HTTP {r.status_code}")
+    r = rest.select("report_versions", None)
+    check("P5: anon cannot read report versions", r.status_code in (401, 403, 404) or r.json() == [], f"HTTP {r.status_code}")
+    select_args = {"p_candidate": zero, "p_object_hash": "0" * 64, "p_decision": "INCLUDE", "p_section": "KEY_JUDGMENT",
+                   "p_priority": 1, "p_expected_previous_decision": None, "p_reason": "smoke test probe"}
+    r = rest.rpc("decide_report_candidate", select_args, viewer)
+    check("P5: viewer cannot select report content (HUMAN_ONLY + REPORT_EDIT)",
+          r.status_code >= 400 and "REPORT_EDIT" in r.text, f"HTTP {r.status_code}")
+    r = rest.rpc("edit_report_version", {"p_version": zero, "p_hash": "0" * 64, "p": {}, "p_reason": "smoke test probe"}, admin)
+    check("P5: ADMIN cannot edit a report version (no REPORT_EDIT)",
+          r.status_code >= 400 and "REPORT_EDIT" in r.text, f"HTTP {r.status_code}")
+    if service_key:
+        r = rest.rpc("freeze_report_selection", {"p_report": zero, "p_reason": "smoke test probe"}, service_key)
+        check("P5: service_role cannot freeze a report selection", r.status_code >= 400, f"HTTP {r.status_code}")
+    bad = [fn for fn in ("ingest_report_edit", "record_report_render") if rest.rpc(fn, {"p": {}}, admin).status_code < 400]
+    check("P5: humans cannot call the M09 ingestion / render recording functions", not bad, ", ".join(bad))
+
     # 5. source administration end-to-end
     r = rest.rpc("create_source", payload, admin)
     ok = check("source admin: admin creates source", r.status_code == 200, f"HTTP {r.status_code} {r.text}")

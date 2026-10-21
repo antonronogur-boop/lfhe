@@ -80,3 +80,17 @@ operator/Product Owner; record the JSON output of step 6 in PROJECT_STATUS.
 * CR4-01 (PO decision 2026-10-20): migration `20261011003400_p4_likelihood_vocabulary.sql` → 35
   migrations in total; the smoke total stays 42/42 PASS (the former "vocabulary empty" check was
   replaced, not added).
+
+## Phase 5 additions
+
+* Migrations `20261011003500` … `20261011003700` (reports / candidate pool / selection + JCS, report
+  versions / items / statements / sources / removal review, report renders) are applied with the same
+  `scripts/apply_migrations.py` command (38 migrations in total).
+* The smoke script adds 8 Phase 5 checks (9 with `LFHE_SMOKE_SERVICE_ROLE_KEY`): report tables present
+  with RLS, SQL RFC 8785 JCS hash equals the Python canonical hash, report versions DRAFT_VERSION / renders
+  PREVIEW only, viewer can read the candidate pool / anon cannot read report versions, viewer cannot
+  select report content, ADMIN cannot edit a report version, (service_role cannot freeze a selection),
+  humans cannot call the M09 ingestion / render recording functions. Expected result without the
+  service-role key: 50/50 PASS. The smoke test creates no report.
+* Worker configuration for Phase 5 jobs: `LFHE_M09_MODEL_CONFIGURATION_ID` (registered, low-variance).
+  The web workspace is at `/reports`.
