@@ -1,0 +1,8 @@
+{
+  "format": "lfhe-prompt-manifest/1",
+  "module_code": "M09_EXECUTIVE_EDITOR",
+  "semver": "1.0.0",
+  "module_version": "MPP-1.2.2+P5-ADDENDUM-1.0",
+  "test_fixture": false,
+  "description": "Executive editing of HUMAN-selected, APPROVED assessment statements into a concise report draft (Phase 5). Edits only; never selects, never removes, never decides."
+}

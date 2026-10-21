@@ -73,6 +73,9 @@ def result_of(pg, run_id):
 
 # --- 1, 2: closed scores, no publishing --------------------------------------------------
 def test_scores_are_0_to_5_and_m06_cannot_publish(pg, m06, analyst):
+    with pg.admin() as x:
+        report_rows_before = x.execute("SELECT (SELECT count(*) FROM lfhe.report_candidate_pool) + (SELECT count(*) FROM "
+                                       "lfhe.report_selection_decisions) + (SELECT count(*) FROM lfhe.report_versions) n").fetchone()["n"]
     e, vid, vh, _ = event(pg, analyst)
     bad = score(pg, vid, vh, lambda m, env: out(env, military_significance=6))
     assert bad.outcome == "SCHEMA_VALIDATION_FAILED" and len(bad.model_run_ids) == 2      # 1 + repair
@@ -86,8 +89,14 @@ def test_scores_are_0_to_5_and_m06_cannot_publish(pg, m06, analyst):
             x.execute("INSERT INTO lfhe.relevance_results SELECT (jsonb_populate_record(NULL::lfhe.relevance_results, "
                       "to_jsonb(r) || '{\"id\": \"00000000-0000-4000-8000-0000000000aa\", \"military_significance\": 9}')).* "
                       "FROM lfhe.relevance_results r WHERE id=%s", (r["id"],))
-        assert not x.execute("SELECT 1 FROM information_schema.tables WHERE table_schema='lfhe' "
-                             "AND table_name LIKE 'report%%'").fetchone()
+        # M06 has no path into report selection (Phase 5 forward form of this Phase 4 check, SD5-09):
+        # its run wrote no report row, and the worker cannot write selection / version tables.
+        assert x.execute("SELECT (SELECT count(*) FROM lfhe.report_candidate_pool) + (SELECT count(*) FROM "
+                         "lfhe.report_selection_decisions) + (SELECT count(*) FROM lfhe.report_versions) n").fetchone()["n"] \
+            == report_rows_before
+    with pg.worker() as w:
+        for t in ("report_candidate_pool", "report_selection_decisions", "report_selection_sets", "report_versions"):
+            assert not w.execute("SELECT has_table_privilege(current_user, %s, 'INSERT') p", (f"lfhe.{t}",)).fetchone()["p"], t
 
 
 # --- 3, 4, 5: low score never hides; manual promotion / request is human + audited -------
