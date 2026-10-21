@@ -18,6 +18,10 @@ Job types
 * CHALLENGE_ASSESSMENT (object: assessment_version; payload: assessment_version_hash) → M08;
                   ends in HUMAN_REVIEW: approval / final confidence / flag disposition are
                   human-only database functions.
+* EDIT_REPORT     (object: report_selection_set; payload: selection_set_hash) → M09 draft report
+                  version (enqueued only by the HUMAN_ONLY lfhe.freeze_report_selection).
+* RENDER_REPORT   (object: report_version; payload: report_version_hash) → deterministic HTML
+                  preview (enqueued by every new report version).
 
 Model configurations: LFHE_M02_MODEL_CONFIGURATION_ID / LFHE_M03_MODEL_CONFIGURATION_ID
 (registered rows). Provider credentials come only from the secret-managed
@@ -37,6 +41,8 @@ from .claim_inputs import InputBuildError
 from .claim_pipeline import classify_claims, extract_claims
 from .assessment_pipeline import run_assessment, run_challenge, run_relevance
 from .event_pipeline import run_event_builder, run_lineage
+from .report_pipeline import run_report_edit
+from .report_render import render_and_record
 from .providers import Provider
 
 log = logging.getLogger("lfhe.claims.worker")
@@ -44,7 +50,8 @@ log = logging.getLogger("lfhe.claims.worker")
 
 def make_handlers(conn, queue: JobQueue, provider: Provider, *, m02_config: str | None, m03_config: str | None,
                   worker_id: str, m04_config: str | None = None, m05_config: str | None = None,
-                  m06_config: str | None = None, m07_config: str | None = None, m08_config: str | None = None) -> dict:
+                  m06_config: str | None = None, m07_config: str | None = None, m08_config: str | None = None,
+                  m09_config: str | None = None) -> dict:
     def extract(job: Job):
         if not m02_config:
             raise PermanentJobError("M02 model configuration is not configured")
@@ -107,7 +114,8 @@ def make_handlers(conn, queue: JobQueue, provider: Provider, *, m02_config: str 
                 raise RuntimeError("provider error (recorded as model run); will retry within max_attempts")
             if after is not None:
                 after(job, out)
-            return "SUCCESS" if out.outcome in ("RELEVANCE_RECORDED", "ASSESSMENT_RECORDED") else "HUMAN_REVIEW"
+            return "SUCCESS" if out.outcome in ("RELEVANCE_RECORDED", "ASSESSMENT_RECORDED", "REPORT_VERSION_RECORDED") \
+                else "HUMAN_REVIEW"
         return handle
 
     def cutoff_args(p):
@@ -138,8 +146,21 @@ def make_handlers(conn, queue: JobQueue, provider: Provider, *, m02_config: str 
         return run_challenge(conn, job.object_id, job.payload["assessment_version_hash"], model_configuration_id=mc,
                              provider=provider, worker_id=worker_id, job_id=job.id)
 
+    def report_edit(job, mc):
+        return run_report_edit(conn, job.object_id, job.payload["selection_set_hash"], model_configuration_id=mc,
+                               provider=provider, worker_id=worker_id, job_id=job.id)
+
+    def render(job: Job):
+        try:
+            out = render_and_record(conn, job.object_id, job.payload["report_version_hash"], worker_id=worker_id)
+        except (KeyError, ValueError) as exc:
+            raise PermanentJobError(str(exc)) from exc
+        log.info("RENDER_REPORT %s → %s", job.object_id, out.get("content_sha256"))
+        return "SUCCESS"
+
     review = ("OUTPUT_REJECTED", "HUMAN_REVIEW_REQUIRED", "SCHEMA_VALIDATION_FAILED", "PROPOSALS_RECORDED")
-    return {"EXTRACT_CLAIMS": extract, "CLASSIFY_CLAIMS": classify,
+    return {"EDIT_REPORT": phase4(m09_config, "EDIT_REPORT", report_edit), "RENDER_REPORT": render,
+            "EXTRACT_CLAIMS": extract, "CLASSIFY_CLAIMS": classify,
             "ANALYSE_LINEAGE": analysis(m04_config, run_lineage, "ANALYSE_LINEAGE", review),
             "BUILD_EVENTS": analysis(m05_config, run_event_builder, "BUILD_EVENTS", review),
             "ASSESS_RELEVANCE": phase4(m06_config, "ASSESS_RELEVANCE", relevance),
@@ -171,7 +192,8 @@ def main(argv: list[str] | None = None) -> int:  # pragma: no cover - process en
                                  m05_config=settings.m05_model_configuration_id,
                                  m06_config=settings.m06_model_configuration_id,
                                  m07_config=settings.m07_model_configuration_id,
-                                 m08_config=settings.m08_model_configuration_id)
+                                 m08_config=settings.m08_model_configuration_id,
+                                 m09_config=settings.m09_model_configuration_id)
         while True:
             if args.enqueue:
                 conn.execute("SELECT lfhe.enqueue_pending_claim_extractions(50)")

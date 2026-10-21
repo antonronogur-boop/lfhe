@@ -354,7 +354,9 @@ BEGIN
           v_out := v_out || ('CONFIDENCE_CHANGED:' || (v_st ->> 'report_statement_local_id'));
         END IF;
         FOR r IN SELECT (pg_catalog.regexp_matches(lower(v_text), '\m(high|moderate|low) confidence\M', 'g'))[1] AS w LOOP
-          IF upper(r.w) IS DISTINCT FROM v_confs[1]::text THEN
+          IF upper(r.w) IS DISTINCT FROM v_confs[1]::text AND NOT EXISTS (
+               SELECT 1 FROM lfhe.assessment_statements s WHERE s.id = ANY (v_srcs)
+               AND lower(s.statement_text) ~ ('\m' || r.w || ' confidence\M')) THEN
             v_out := v_out || ('CONFIDENCE_CHANGED:' || (v_st ->> 'report_statement_local_id'));
           END IF;
         END LOOP;

@@ -1,0 +1,34 @@
+/* LFHE-EXECUTIVE-REPORT/1.0.0 — print-ready two-page leadership layout (preview foundation).
+   Visual encoding never adds certainty: LOW confidence is dashed and labelled, contested
+   statements are marked, empty sections say that no approved material was selected. */
+@page { size: A4; margin: 16mm 15mm 18mm 15mm; }
+:root { --ink: #1b1f24; --muted: #59636e; --rule: #c9d1d9; --hi: #1f4e79; --mod: #5b6f84; --low: #8a6d3b; --contested: #9a3412; }
+* { box-sizing: border-box; }
+body { font-family: "Source Sans 3", "Segoe UI", Arial, sans-serif; color: var(--ink); font-size: 10.5pt; line-height: 1.38; margin: 0; background: #fff; }
+.banner { border: 1px solid var(--contested); color: var(--contested); font-weight: 600; font-size: 8.5pt; letter-spacing: .04em;
+          text-transform: uppercase; padding: 4px 8px; margin-bottom: 10px; }
+header.report h1 { font-size: 17pt; margin: 0 0 2px 0; }
+header.report .meta { color: var(--muted); font-size: 9pt; border-bottom: 2px solid var(--ink); padding-bottom: 6px; margin-bottom: 10px; }
+section { margin: 0 0 10px 0; break-inside: avoid-page; }
+section h2 { font-size: 11pt; text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid var(--rule); margin: 8px 0 6px 0; padding-bottom: 2px; }
+section .gap { color: var(--muted); font-style: italic; font-size: 9.5pt; }
+section .target { color: var(--muted); font-size: 8.5pt; font-weight: normal; text-transform: none; letter-spacing: 0; }
+article.item { border-left: 3px solid var(--mod); padding: 2px 0 2px 8px; margin: 0 0 7px 0; break-inside: avoid; }
+article.item.conf-HIGH { border-left: 3px solid var(--hi); }
+article.item.conf-MODERATE { border-left: 3px solid var(--mod); }
+article.item.conf-LOW { border-left: 3px dashed var(--low); }
+article.item.conf-NONE { border-left: 3px dotted var(--rule); }
+.conf { font-size: 8.5pt; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.conf-LOW .conf { color: var(--low); }
+p.st { margin: 1px 0; }
+p.st.role-CAVEAT { color: var(--muted); font-size: 9.5pt; }
+p.st.role-CAVEAT::before { content: "Caveat: "; font-weight: 600; }
+.lk { font-size: 8.5pt; color: var(--muted); }
+.contested { font-size: 8pt; font-weight: 700; color: var(--contested); border: 1px solid var(--contested); padding: 0 3px; margin-left: 3px; }
+sup.src { color: var(--muted); font-size: 7pt; }
+.provenance { break-before: page; font-size: 7.5pt; color: var(--muted); }
+.provenance h2 { font-size: 9pt; }
+.provenance table { border-collapse: collapse; width: 100%; }
+.provenance td, .provenance th { border-top: 1px solid var(--rule); padding: 2px 4px; text-align: left; vertical-align: top; font-family: ui-monospace, Menlo, Consolas, monospace; }
+footer.version { margin-top: 12px; border-top: 1px solid var(--rule); padding-top: 4px; font-size: 7.5pt; color: var(--muted); font-family: ui-monospace, Menlo, Consolas, monospace; }
+@media screen { body { max-width: 190mm; margin: 12px auto; padding: 0 12px; } }
