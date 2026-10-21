@@ -12,7 +12,8 @@ export type Permission =
   | "AUDIT_READ"
   | "CLAIM_READ"
   | "CLAIM_REVIEW"
-  | "ENTITY_MANAGE";
+  | "ENTITY_MANAGE"
+  | "REPORT_EDIT";
 
 export interface Session {
   userId: string;
