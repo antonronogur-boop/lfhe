@@ -2,11 +2,11 @@
 
 | Field | Value |
 | --- | --- |
-| Current phase | **Phase 4 — Relevance, Assessment & Challenge: ACCEPTED AND CLOSED (2026-10-20).** Phase 5 NOT authorised. Phases 1–3 ACCEPTED AND CLOSED |
+| Current phase | **Phase 5 — Executive Reporting: AUTHORISED (2026-10-21), in implementation.** Phase 4 ACCEPTED AND CLOSED (2026-10-20); Phases 1–3 ACCEPTED AND CLOSED |
 | Earlier gate | **Control Gate 2 APPROVED** by the PO on 2026-10-19 (docs/control-gate-2-report.md): DEV 18/18 migrations + smoke 22/22 PASS, K-05 CLOSED and ACCEPTED (6/8 PASS; K05-03, K05-04 BLOCKED_BY_ROBOTS accepted), SD-01…SD-12 approved. Commits: implementation/CI baseline `1b31ed5`; K-05 run on `613f61a`; final documentation commit `40c00ff` |
 | Earlier gate (CG3) | **CONTROL GATE 3 — APPROVED** by the PO on 2026-10-19 (docs/specs/PO_Decision_2026-10-19_Control_Gate_3.md): CG3-01 RESOLVED; CG3-02, CG3-03 RESOLVED / ACCEPTED; knowledge-bound retraction correction RESOLVED; SD3-01…SD3-12 APPROVED; SD3-13 replaced by the approved knowledge-bound retraction semantics (migration 2600); acceptance criteria 14/14, Phase 3 tests 63/63, Phase 1+2 regression 369/369, web 21/21; DEV 27/27 migrations, smoke 32/32 PASS, audit chain verified (108 entries). Optional service_role smoke check not run — NON-BLOCKING. Final code commit `128f1a7`; DEV evidence commit `106ecd9` |
 | Current gate | **CONTROL GATE 4 — APPROVED** by the PO on 2026-10-20 (docs/specs/PO_Decision_2026-10-20_Control_Gate_4.md): P4-00…P4-09 ACCEPTED; SD4-01…SD4-18 APPROVED; CR4-01 RESOLVED (migration 3400); CR4-02 APPROVED / CLOSED; acceptance criteria 20/20; full suite 500/500 (Phase 4 68/68, Phase 1–3 432/432); web 21/21; prompt lock PASS; secret scan / gitleaks clean; DEV 35/35 migrations, smoke 42/42 PASS (Phase 4 checks 10/10), audit chain verified (124 entries). Optional service_role smoke check NON-BLOCKING. CI run 39477359815 success. Evidence commit `413ef3e` |
-| Next authorised action | **None — STOP.** Phase 5 may begin only after the Phase 5 authoritative phase-specific baseline is versioned under docs/specs/ and explicitly authorised by the PO (SD-12). Non-blocking follow-on items: K-11 / GS-001 Patriot-trap test channel, real-provider trial, Phase 4 review UI |
+| Next authorised action | Phase 5 implementation P5-00…P5-10 per docs/specs/PO_Decision_2026-10-21_Authorise_Phase5.md, then the CG5 evidence report and STOP. **Phase 6 NOT authorised** |
 
 ## Phase 4 progress (Addendum v1.0) — ACCEPTED AND CLOSED (CG4 APPROVED 2026-10-20)
 
