@@ -21,6 +21,7 @@ MODEL_REACHABLE = [
 ALLOWED = {
     REPO_ROOT / "tests" / "fixtures" / "phase3_acceptance" / "corpus.json",   # states it is not GS material
     REPO_ROOT / "tests" / "fixtures" / "phase4_acceptance" / "corpus.json",   # states it is not GS material
+    REPO_ROOT / "tests" / "fixtures" / "phase5_acceptance" / "corpus.json",   # states it is not GS material
 }
 
 
@@ -56,6 +57,6 @@ def test_no_gold_standard_tree_inside_repository():
 
 def test_input_builders_read_only_the_database():
     """Envelope builders take a DB connection and claim ids; they open no files."""
-    for name in ("claim_inputs.py", "event_inputs.py", "assessment_inputs.py"):
+    for name in ("claim_inputs.py", "event_inputs.py", "assessment_inputs.py", "report_inputs.py"):
         src = (REPO_ROOT / "services" / "ai-orchestrator" / "lfhe_orchestrator" / name).read_text()
         assert not re.search(r"\bopen\(|Path\(|read_text|os\.environ|getenv", src), name

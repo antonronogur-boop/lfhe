@@ -26,6 +26,14 @@ def activate(pg):
     return activate_real_prompts(pg, P5_MODULES)
 
 
+def park_report_jobs(pg):
+    """Test hygiene for the shared test database: report jobs enqueued by these tests (freeze →
+    EDIT_REPORT, new version → RENDER_REPORT) must not be picked up by other modules' workers."""
+    with pg.admin() as x:
+        x.execute("UPDATE lfhe.processing_jobs SET status='SKIPPED' WHERE status='PENDING' "
+                  "AND job_type IN ('EDIT_REPORT', 'RENDER_REPORT')")
+
+
 def approved_assessment(pg, analyst, *, statements=None, conf="LOW", contra=True, indicators=None, extra_claims=()):
     """statements: optional callable(claims) -> M07 statements. Returns (version_row, claims, event)."""
     e, vid, vh, claims = setup_event(pg, analyst, contra=contra, extra=extra_claims)
@@ -153,6 +161,6 @@ def edit(pg, user, v, content, reason="analyst tightens the wording"):
                          (str(v["id"]), v["report_version_hash"], json.dumps(content), reason)).fetchone()["r"]
 
 
-__all__ = ["CONF_RAT", "SECTION_KEYS", "activate", "approved_assessment", "auto_items", "candidates", "content_of", "decide",
+__all__ = ["CONF_RAT", "park_report_jobs", "SECTION_KEYS", "activate", "approved_assessment", "auto_items", "candidates", "content_of", "decide",
            "edit", "freeze", "latest_version", "m09", "new_report", "now", "pool", "rejected", "rs", "run_m09", "select",
            "statements_of", "version_of_run"]

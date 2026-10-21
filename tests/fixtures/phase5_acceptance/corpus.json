@@ -1,0 +1,187 @@
+{
+ "description": "Phase 5 acceptance corpus for LFHÉ: synthetic, invented 'Northland' material written for these tests; each scenario is a labelled M09 behaviour (sound, naive or adversarial) applied to a fixed human selection. Not Gold Standard material.",
+ "m09": [
+  {
+   "id": "E01",
+   "mutation": "sound",
+   "args": {},
+   "expect": "REPORT_VERSION_RECORDED"
+  },
+  {
+   "id": "E02",
+   "mutation": "compress_merge",
+   "args": {},
+   "expect": "REPORT_VERSION_RECORDED"
+  },
+  {
+   "id": "E03",
+   "mutation": "foreign_candidate",
+   "args": {},
+   "expect": "OUTPUT_REJECTED:SOURCE_CANDIDATE_NOT_SELECTED"
+  },
+  {
+   "id": "E04",
+   "mutation": "drop_sources",
+   "args": {},
+   "expect": "SCHEMA_VALIDATION_FAILED"
+  },
+  {
+   "id": "E05",
+   "mutation": "inject_number",
+   "args": {},
+   "expect": "OUTPUT_REJECTED:UNSUPPORTED_NEW_FACT"
+  },
+  {
+   "id": "E06",
+   "mutation": "inject_name",
+   "args": {},
+   "expect": "OUTPUT_REJECTED:UNSUPPORTED_NEW_FACT"
+  },
+  {
+   "id": "E07",
+   "mutation": "inject_causal",
+   "args": {},
+   "expect": "OUTPUT_REJECTED:UNSUPPORTED_NEW_JUDGMENT"
+  },
+  {
+   "id": "E08",
+   "mutation": "drop_attribution",
+   "args": {},
+   "expect": "OUTPUT_REJECTED:ATTRIBUTION_REMOVED"
+  },
+  {
+   "id": "E09",
+   "mutation": "strengthen",
+   "args": {},
+   "expect": "OUTPUT_REJECTED:EPISTEMIC_STRENGTHENING"
+  },
+  {
+   "id": "E10",
+   "mutation": "confidence_high",
+   "args": {},
+   "expect": "OUTPUT_REJECTED:CONFIDENCE_CHANGED"
+  },
+  {
+   "id": "E11",
+   "mutation": "add_likelihood",
+   "args": {},
+   "expect": "OUTPUT_REJECTED:LIKELIHOOD_ADDED"
+  },
+  {
+   "id": "E12",
+   "mutation": "change_likelihood",
+   "args": {},
+   "expect": "OUTPUT_REJECTED:LIKELIHOOD_CHANGED"
+  },
+  {
+   "id": "E13",
+   "mutation": "omit_contradiction",
+   "args": {},
+   "expect": "OUTPUT_REJECTED:SELECTED_STATEMENT_OMITTED"
+  },
+  {
+   "id": "E14",
+   "mutation": "remove_caveat_proposal",
+   "args": {},
+   "expect": "OUTPUT_REJECTED:CAVEAT_REMOVAL_FOR_LENGTH_PROHIBITED"
+  },
+  {
+   "id": "E15",
+   "mutation": "valid_removal_proposal",
+   "args": {},
+   "expect": "REPORT_VERSION_RECORDED"
+  },
+  {
+   "id": "E16",
+   "mutation": "four_kj",
+   "args": {},
+   "expect": "OUTPUT_REJECTED:MAX_KEY_JUDGMENTS_EXCEEDED"
+  },
+  {
+   "id": "E17",
+   "mutation": "promote_sd",
+   "args": {},
+   "expect": "OUTPUT_REJECTED:SECTION_NOT_AUTHORISED"
+  },
+  {
+   "id": "E18",
+   "mutation": "human_only_key",
+   "args": {},
+   "expect": "SCHEMA_VALIDATION_FAILED"
+  },
+  {
+   "id": "E19",
+   "mutation": "operational_wtw",
+   "args": {},
+   "expect": "OUTPUT_REJECTED:OPERATIONAL_RECOMMENDATION_PROHIBITED"
+  },
+  {
+   "id": "E20",
+   "mutation": "filler",
+   "args": {},
+   "expect": "OUTPUT_REJECTED:ATTRIBUTION_REMOVED"
+  },
+  {
+   "id": "E21",
+   "mutation": "republication_confidence",
+   "args": {},
+   "expect": "OUTPUT_REJECTED:EPISTEMIC_STRENGTHENING"
+  },
+  {
+   "id": "E22",
+   "mutation": "unknown_statement",
+   "args": {},
+   "expect": "OUTPUT_REJECTED:UNKNOWN_SOURCE_STATEMENT"
+  }
+ ],
+ "human": [
+  {
+   "id": "H01",
+   "mutation": "unmapped_statement",
+   "args": {},
+   "expect": "REJECTED"
+  },
+  {
+   "id": "H02",
+   "mutation": "caveat_removal",
+   "args": {},
+   "expect": "REJECTED"
+  },
+  {
+   "id": "H03",
+   "mutation": "wrong_hash",
+   "args": {},
+   "expect": "REJECTED"
+  },
+  {
+   "id": "H04",
+   "mutation": "worker_edit",
+   "args": {},
+   "expect": "REJECTED"
+  },
+  {
+   "id": "H05",
+   "mutation": "service_role_selection",
+   "args": {},
+   "expect": "REJECTED"
+  },
+  {
+   "id": "H06",
+   "mutation": "valid_reword",
+   "args": {},
+   "expect": "ACCEPTED"
+  },
+  {
+   "id": "H07",
+   "mutation": "stale_version",
+   "args": {},
+   "expect": "REJECTED"
+  },
+  {
+   "id": "H08",
+   "mutation": "removal_accept",
+   "args": {},
+   "expect": "ACCEPTED"
+  }
+ ]
+}

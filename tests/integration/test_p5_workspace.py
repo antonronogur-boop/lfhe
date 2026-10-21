@@ -8,7 +8,7 @@ import psycopg
 import pytest
 
 from conftest import REPO_ROOT
-from p5_helpers import activate, approved_assessment, m09, new_report, run_m09, select, version_of_run
+from p5_helpers import park_report_jobs, activate, approved_assessment, m09, new_report, run_m09, select, version_of_run
 
 pytestmark = pytest.mark.db
 GS = re.compile(r"gs-0\d\d|gold[ _-]?standard|answer[ _-]?key|expected_(claims|events|assessment)", re.IGNORECASE)
@@ -16,7 +16,8 @@ GS = re.compile(r"gs-0\d\d|gold[ _-]?standard|answer[ _-]?key|expected_(claims|e
 
 @pytest.fixture(scope="module")
 def p5(pg):
-    return activate(pg)
+    yield activate(pg)
+    park_report_jobs(pg)
 
 
 def test_workspace_reads_actions_and_provenance(pg, p5, make_user):

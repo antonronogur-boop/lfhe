@@ -6,7 +6,7 @@ import json
 import psycopg
 import pytest
 
-from p5_helpers import (activate, approved_assessment, auto_items, candidates, content_of, decide, edit, freeze,
+from p5_helpers import (park_report_jobs, activate, approved_assessment, auto_items, candidates, content_of, decide, edit, freeze,
                         latest_version, m09, new_report, pool, rejected, rs, run_m09, select, statements_of, version_of_run)
 
 pytestmark = pytest.mark.db
@@ -14,7 +14,8 @@ pytestmark = pytest.mark.db
 
 @pytest.fixture(scope="module")
 def p5(pg):
-    return activate(pg)
+    yield activate(pg)
+    park_report_jobs(pg)
 
 
 @pytest.fixture
