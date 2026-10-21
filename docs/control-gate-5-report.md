@@ -191,7 +191,7 @@ Nem implementált (tiltás szerint): M10-D / M10-S QA, figyelmeztetés-nyugtáz�
 | Prompt lock | `PROMPT-LOCK: ok` |
 | Secret scan / gitleaks | `SECRET-SCAN: clean` / `no leaks found` |
 | §27 korpusz-metrikák | mind **0** (30 forgatókönyv; `docs/cg5-acceptance-metrics.json`) |
-| GitHub CI (`71ede49`) | run 39652571441 — futás folyamatban (az eredmény ide kerül) |
+| GitHub CI (`71ede49`) | **run 39652571441 — success** (secret-scan, python-tests, web) |
 
 ## PHASE 5 ACCEPTANCE CRITERIA
 

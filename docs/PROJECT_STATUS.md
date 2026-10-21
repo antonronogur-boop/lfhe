@@ -22,7 +22,7 @@
 | P5-07 Deterministic HTML / print-ready preview rendering, EDIT_REPORT / RENDER_REPORT jobs (3700) | done |
 | P5-08 Analyst report workspace UI (`/reports`) | done |
 | P5-09 Acceptance corpus (§27 metrics), security / adversarial tests, regressions | done |
-| P5-10 DEV smoke P5 checks, docs, CG5 report | done — DEV apply/smoke pending (PO) |
+| P5-10 DEV smoke P5 checks, docs, CG5 report (docs/control-gate-5-report.md); CI run 39652571441 success on `71ede49` | done — DEV apply/smoke pending (PO) |
 
 ## Phase 4 progress (Addendum v1.0) — ACCEPTED AND CLOSED (CG4 APPROVED 2026-10-20)
 
