@@ -3,7 +3,7 @@
 ## PHASE / GATE
 
 - Fázis: **Phase 6 — QA, Approval & Release** (M10-D determinisztikus QA, M10-S szemantikus QA, kombinált QA-státusz, figyelmeztetés-nyugtázás, emberi tartalmi jóváhagyás, emberi security / kezelési review, release PDF, determinisztikus kiadhatósági ellenőrzés, emberi kiadási döntés, atomikus manifest + RELEASED, javítási út).
-- Kapu: **CONTROL GATE 6 — HOLD a CR6-01 célzott javításig** (PO, 2026-10-23, `docs/specs/PO_Decision_2026-10-23_CG6_Targeted_Correction_CR6-01.md`): SD6-01…09 és SD6-11…19 APPROVED; SD6-10 → CR6-01. **CR6-01: RESOLVED** (migráció `20261011004000`), a DEV-futtatás a PO-é. A CG6-ot csak a Product Owner hagyhatja jóvá; ez a jelentés nem jóváhagyás.
+- Kapu: **CONTROL GATE 6 — HOLD a CR6-01 célzott javításig** (PO, 2026-10-23, `docs/specs/PO_Decision_2026-10-23_CG6_Targeted_Correction_CR6-01.md`): SD6-01…09 és SD6-11…19 APPROVED; SD6-10 → CR6-01. **CR6-01: RESOLVED** (migráció `20261011004000`; CI zöld: run 39980095711, commit `d06f561` — secret-scan, python-tests, web), a DEV-futtatás a PO-é. A CG6-ot csak a Product Owner hagyhatja jóvá; ez a jelentés nem jóváhagyás.
 - Alap: `docs/specs/LFHE_Phase6_Authoritative_Baseline_Addendum_v1.0.md` (SPEC_INDEX 22), PO felhatalmazás `docs/specs/PO_Decision_2026-10-23_Authorise_Phase6.md` (SPEC_INDEX 23); mindkettő szó szerint tárolva a P6-00-ban.
 - Végrehajtás: P6-00 … P6-10 a megadott sorrendben, köztes engedélykérés nélkül. CG1–CG5 nincs újranyitva; általános architektúra-audit nem történt; a lezárt Phase 1–5 szemantika nem változott.
 - Commitok: P6-00 `b1d01a3`; P6-01…03 `44393a3`; P6-04…07 `91e45e4`; P6-08 `904c9a4`; CI Chromium-javítás `47eec80`; P6-09 `5fedf1b`; P6-10 `56c3967` (+ CI-eredmény rögzítése).
