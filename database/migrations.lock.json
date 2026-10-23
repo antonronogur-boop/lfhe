@@ -1,0 +1,170 @@
+{
+  "comment": "P7-00: SHA-256 (UTF-8 text, as computed by scripts/apply_migrations.py) of every migration applied to DEV through CG6 (41/41, PO 2026-10-23). These files are immutable; Phase 7 adds new forward-only migrations only.",
+  "locked_through": "20261011004000_p6_cr6_01_manifest_baseline_ids.sql",
+  "migrations": [
+    {
+      "filename": "20261011000100_foundation.sql",
+      "sha256": "d537bd4a9bef6c7d3a71c2d1c262f85780e8a7d1686e7bc1cc8d97d9c70565c2"
+    },
+    {
+      "filename": "20261011000200_rbac.sql",
+      "sha256": "0caffcd59dbf0ee4d747d3cbc55798f0385dc6190aa6ae64d7fd12d672a3666f"
+    },
+    {
+      "filename": "20261011000300_audit.sql",
+      "sha256": "7d7988e1ed2721cb45fa35a5c31ca9f19d56ad70773bf27132f2f2fcb3277b08"
+    },
+    {
+      "filename": "20261011000400_sources.sql",
+      "sha256": "91dda98b70ead5ce2b3c679a7ed8a370ee8c9f2da5fa1ded24ed5cdd852c175c"
+    },
+    {
+      "filename": "20261011000500_jobs.sql",
+      "sha256": "83b90a8fd21daa5f571c6fc5174377a833fce05f36f5da48987abf63de26479e"
+    },
+    {
+      "filename": "20261011000600_collection_runs.sql",
+      "sha256": "556db194f686a8f7408c4b71c1786026bd1b9102e1f3f7471bde3306b226a31f"
+    },
+    {
+      "filename": "20261011000601_pg_cron_schedule.sql",
+      "sha256": "7895bc3ef45d19e697cb06afb42f8e556df95ac42e3d4eed281b227fa9440047"
+    },
+    {
+      "filename": "20261011000700_articles_snapshots.sql",
+      "sha256": "208f5d5c879a07538d2e948cf4d9427de397e562d83fbcd6f109638397463cf8"
+    },
+    {
+      "filename": "20261011000800_prompts_model_runs.sql",
+      "sha256": "ff542c381955554612c2215c99b47704f5ae2b3531736c4000bb71244b92abb9"
+    },
+    {
+      "filename": "20261011000900_snapshot_source_state_identity.sql",
+      "sha256": "31024cf05d90bd0dcc7c47a7dc6ceecaa2ecd31fef63b22c762837c710f8226a"
+    },
+    {
+      "filename": "20261011001000_recursive_credential_keys.sql",
+      "sha256": "ed80af4c2e92cf82b3b1b0e2bd0caaf7e2f8e57ac62475f0b5a5f29e91d2e246"
+    },
+    {
+      "filename": "20261011001100_final_origin_provenance.sql",
+      "sha256": "45995a4535b24ec8295d2cfebf38447c38d8870dc63f89586e5f6a085bd17527"
+    },
+    {
+      "filename": "20261011001200_model_run_input_context_hashes.sql",
+      "sha256": "682d07901aabc544df0f24ad3892f80ea505097507798f9e32fd127aa6bc64e1"
+    },
+    {
+      "filename": "20261011001300_credential_urls.sql",
+      "sha256": "7a9b43cf8192955752e6ce288bcdf6106facfc70678f675d207572d4b76df22e"
+    },
+    {
+      "filename": "20261011001400_url_canonicalisation_and_source_urls.sql",
+      "sha256": "e352a7755cc4aee796f1431a23528ef6943c10cc3ceb7f40ef3609ae1425e3ee"
+    },
+    {
+      "filename": "20261011001500_model_settings_allowlist.sql",
+      "sha256": "a0d53343de53fafeb4a2bbe92afef2a0ae2dfce16ab7f02c3eea69b016ab1685"
+    },
+    {
+      "filename": "20261011001600_claims_pipeline.sql",
+      "sha256": "1d2a4073176d996aa670cd2d53154afd9edc6f4da79e3b0dc5002aca1d64146a"
+    },
+    {
+      "filename": "20261011001700_claim_jobs.sql",
+      "sha256": "b88d96e56e78327dd06b942912af952ee005cdc20aea5bac00696a0641a9b838"
+    },
+    {
+      "filename": "20261011001800_lineage.sql",
+      "sha256": "1913aec403b282ea9b5ad66ad2c3291abe6c94de3ea46a0e405136db05a2b527"
+    },
+    {
+      "filename": "20261011001900_events.sql",
+      "sha256": "715b6284b5d00977efa6c55b5680305bf14bdac89fdc0f7fc5209d9b55859aad"
+    },
+    {
+      "filename": "20261011002000_phase3_jobs.sql",
+      "sha256": "6b91336ef3a797dd9fae34e8e5c792fbfef154c3f86c3241f2853bb160bfc7fa"
+    },
+    {
+      "filename": "20261011002100_event_ai_update_carry_forward.sql",
+      "sha256": "a84dc4f4eec3cfd315d282fb6e0f3b8608a06cbb3a9a4ad10741fb7bdfdbf7fd"
+    },
+    {
+      "filename": "20261011002200_external_origin_reuse.sql",
+      "sha256": "5824a89397b44a5f8ecf6a2923db680c33b15d45119edfe109d73d27418fff06"
+    },
+    {
+      "filename": "20261011002300_cg3_01_asof_context.sql",
+      "sha256": "fbfd8f9e92492a65bb213838fa30550e0b13a36ef69009b6e98466dbd442a4e2"
+    },
+    {
+      "filename": "20261011002400_cg3_02_full_split_terminal.sql",
+      "sha256": "02f55bab43c7f17b88911d4ebe94f9d8f6251a0a6b545fb37ceb4afe25c666b9"
+    },
+    {
+      "filename": "20261011002500_cg3_03_external_origin_identity.sql",
+      "sha256": "4c8237318e6b5abe05b9818b9671e272a6069248f772f67ecb5868fddb289180"
+    },
+    {
+      "filename": "20261011002600_cg3_knowledge_bound_retractions.sql",
+      "sha256": "f80ea9ad560e7ef4afa4e9eea3fd0288c0b7795f0d7bec49ecf6499b75978b6d"
+    },
+    {
+      "filename": "20261011002700_p4_baselines_reference_contexts.sql",
+      "sha256": "52b459f9f5443e022d63464df273305e0b5acb4eec957857335d6323dc0acb49"
+    },
+    {
+      "filename": "20261011002800_p4_relevance.sql",
+      "sha256": "14f516452573832c7d30a2734e26f1c1a86d1eff5722acedb754194034ce9b52"
+    },
+    {
+      "filename": "20261011002900_p4_assessments.sql",
+      "sha256": "48ad0203f465a1a856687f53e1b5ed65e3be229f05dfd08851429d799e298cc8"
+    },
+    {
+      "filename": "20261011003000_p4_challenges.sql",
+      "sha256": "aea75e583dccc93ef1fa21d3ec2431776ead22082e18e12e9fde8516ec3fbe83"
+    },
+    {
+      "filename": "20261011003100_p4_analytical_review.sql",
+      "sha256": "6b862cf0895043ef014532f1c7b70b39e12f98a68d25ac6c50d81dc102a1ddcb"
+    },
+    {
+      "filename": "20261011003200_p4_trends_indicators.sql",
+      "sha256": "88e80ab72464e17fe80daf46c54b54902f1db2cea0aad49d918dbb4b16d7f317"
+    },
+    {
+      "filename": "20261011003300_p4_jobs.sql",
+      "sha256": "5c450ae3702f8427f562fb3170cc6530dfc9aa1994517c4554542064b72eb885"
+    },
+    {
+      "filename": "20261011003400_p4_likelihood_vocabulary.sql",
+      "sha256": "960213f6e643060d9731a79d637ee404064ba014a34710aec75d5447ce2c439c"
+    },
+    {
+      "filename": "20261011003500_p5_reports_selection.sql",
+      "sha256": "bcbd616b4a3b1a8c9d5f1c483e7c64608f277601a27cdcef4a5b458429ecf6f2"
+    },
+    {
+      "filename": "20261011003600_p5_report_versions.sql",
+      "sha256": "86d81b33e1cd4acbc998e91f3e3c55adc52ebe42b30d1fbf26e171485bfad166"
+    },
+    {
+      "filename": "20261011003700_p5_report_renders.sql",
+      "sha256": "c974dd6b4760b5fb325f33b935f6d6682f416135155ac20c0c2731f8d8c0aabb"
+    },
+    {
+      "filename": "20261011003800_p6_qa.sql",
+      "sha256": "07b7415b04b97c110219b703c9b39b8e783d09f46085cc67ee770ba012a4c21f"
+    },
+    {
+      "filename": "20261011003900_p6_approval_release.sql",
+      "sha256": "158a77d3d42dee422ef6df877e9a20194a10a8f342bd8d997f6218d4b9e28057"
+    },
+    {
+      "filename": "20261011004000_p6_cr6_01_manifest_baseline_ids.sql",
+      "sha256": "414eebf3cbd5a4620fae8e71e1957b1565c1cac335a5b5856f3ac3b894f92ac6"
+    }
+  ]
+}

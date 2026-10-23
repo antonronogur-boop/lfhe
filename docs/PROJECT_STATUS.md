@@ -2,14 +2,29 @@
 
 | Field | Value |
 | --- | --- |
-| Current phase | **Phase 6 — QA, Approval & Release: ACCEPTED AND CLOSED** (CG6 APPROVED 2026-10-23, docs/specs/PO_Decision_2026-10-23_Control_Gate_6.md). Phases 1–6 ACCEPTED AND CLOSED. Phase 7 NOT authorised and NOT started |
+| Current phase | **Phase 7 — AUTHORISED / IN PROGRESS** (Controlled Operational Pilot & Validation; docs/specs/LFHE_Phase7_Authoritative_Baseline_v1.0.md, docs/specs/PO_Decision_2026-10-23_Authorise_Phase7.md). Phases 1–6 ACCEPTED AND CLOSED |
 | Earlier gate | **Control Gate 2 APPROVED** by the PO on 2026-10-19 (docs/control-gate-2-report.md): DEV 18/18 migrations + smoke 22/22 PASS, K-05 CLOSED and ACCEPTED (6/8 PASS; K05-03, K05-04 BLOCKED_BY_ROBOTS accepted), SD-01…SD-12 approved. Commits: implementation/CI baseline `1b31ed5`; K-05 run on `613f61a`; final documentation commit `40c00ff` |
 | Earlier gate (CG3) | **CONTROL GATE 3 — APPROVED** by the PO on 2026-10-19 (docs/specs/PO_Decision_2026-10-19_Control_Gate_3.md): CG3-01 RESOLVED; CG3-02, CG3-03 RESOLVED / ACCEPTED; knowledge-bound retraction correction RESOLVED; SD3-01…SD3-12 APPROVED; SD3-13 replaced by the approved knowledge-bound retraction semantics (migration 2600); acceptance criteria 14/14, Phase 3 tests 63/63, Phase 1+2 regression 369/369, web 21/21; DEV 27/27 migrations, smoke 32/32 PASS, audit chain verified (108 entries). Optional service_role smoke check not run — NON-BLOCKING. Final code commit `128f1a7`; DEV evidence commit `106ecd9` |
 | Earlier gate (CG4) | **CONTROL GATE 4 — APPROVED** by the PO on 2026-10-20 (docs/specs/PO_Decision_2026-10-20_Control_Gate_4.md): P4-00…P4-09 ACCEPTED; SD4-01…SD4-18 APPROVED; CR4-01 RESOLVED (migration 3400); CR4-02 APPROVED / CLOSED; acceptance criteria 20/20; full suite 500/500 (Phase 4 68/68, Phase 1–3 432/432); web 21/21; prompt lock PASS; secret scan / gitleaks clean; DEV 35/35 migrations, smoke 42/42 PASS (Phase 4 checks 10/10), audit chain verified (124 entries). Optional service_role smoke check NON-BLOCKING. CI run 39477359815 success. Evidence commit `413ef3e` |
 | Earlier gate (CG5) | **CONTROL GATE 5 — APPROVED** by the PO on 2026-10-23 (docs/specs/PO_Decision_2026-10-23_Control_Gate_5.md): P5-00…P5-10 ACCEPTED; SD5-01…SD5-20 APPROVED; no change requests; CG5 criteria 22/22; acceptance corpus 30/30; full suite 532/532 (Phase 5 32/32, Phase 1–4 500/500); web 29/29, TypeScript and production build PASS; prompt lock PASS; secret scan / gitleaks clean; JCS / SHA-256 parity verified; DEV 38/38 migrations, smoke 50/50 PASS (Phase 5 checks 8/8), audit chain verified (132 entries), pg_cron active. Optional service_role smoke check NON-BLOCKING. Evidence commit `7007cbf` |
 | Earlier gate (CG6) | **CONTROL GATE 6 — APPROVED** by the PO on 2026-10-23 (docs/specs/PO_Decision_2026-10-23_Control_Gate_6.md): P6-00…P6-10 ACCEPTED; SD6-01…09, SD6-11…19 APPROVED; SD6-10 APPROVED AS CORRECTED BY CR6-01; **CR6-01 RESOLVED AND CLOSED** (migration `20261011004000`, 3800/3900 unchanged); no remaining change requests; full suite 563/563 (Phase 6 31/31, Phase 1–5 532/532); web 35/35, TypeScript and production build PASS; prompt lock PASS; secret scan / gitleaks clean; mandatory CG6 metrics 0 violations; DEV 41/41 migrations, smoke 62/62 PASS, audit chain 140 entries OK (docs/dev-smoke-20261023-cr6-01.json); CI green (run 39986425665 on `9ceca46`) |
-| Current gate | None open — CG1–CG6 APPROVED and CLOSED |
-| Next authorised action | **None — STOPPED after CG6 closure.** Phase 7 only after a versioned Phase 7 baseline and explicit PO authorisation (SD-12). Non-blocking follow-on items: `/reports` (incl. QA / release views) browser click-through on DEV, K-11 / GS-001 Patriot-trap test channel, real-provider trial (incl. M10-S detection quality), Phase 4 review UI, optional service-role smoke, Next.js security dependency update (tracked separately, to be resolved before any externally exposed or operational deployment — PO, CG6). |
+| Current gate | None open — CG1–CG6 APPROVED and CLOSED (confirmed in P7-00). Next gate: CONTROL GATE 7 (PO decision) |
+| Next authorised action | **Phase 7 P7-01 … P7-09** in baseline order (PO 2026-10-23), then STOP at CG7. Non-blocking items carried: K-11 / GS-001 Patriot-trap channel (may be exercised in P7-05), Phase 4 review UI, optional service-role smoke, Next.js security dependency update (tracked separately; DEV pilot only while not externally exposed; must be resolved before any exposed / operational deployment) |
+
+## Phase 7 progress (Baseline v1.0) — AUTHORISED / IN PROGRESS
+
+| Step | Status |
+| --- | --- |
+| P7-00 Baseline + PO authorisation stored verbatim (docs/specs, SPEC_INDEX 26–27); CG1–CG6 confirmed CLOSED; 41 applied migrations locked (`database/migrations.lock.json`, `tests/unit/test_migration_lock.py`; DEV runner rejects modified applied files); work on `main` | done |
+| P7-01 Pilot data model & instrumentation | pending |
+| P7-02 Pilot workspace / measurement UX | pending |
+| P7-03 Real provider trial | pending |
+| P7-04 Browser end-to-end validation | pending |
+| P7-05 Controlled benchmark | pending |
+| P7-06 Operational pilot cycles | pending |
+| P7-07 Performance & capacity analysis | pending |
+| P7-08 Pilot findings & capability assessment | pending |
+| P7-09 CG7 evidence pack & STOP | pending |
 
 ## Phase 6 progress (Addendum v1.0) — ACCEPTED AND CLOSED (CG6 APPROVED 2026-10-23)
 
