@@ -2,12 +2,29 @@
 
 | Field | Value |
 | --- | --- |
-| Current phase | **Phase 5 — Executive Reporting: ACCEPTED AND CLOSED (2026-10-23).** Phase 6 NOT authorised. Phases 1–4 ACCEPTED AND CLOSED |
+| Current phase | **Phase 6 — QA, Approval & Release: AUTHORISED (2026-10-23), IN PROGRESS** (docs/specs/PO_Decision_2026-10-23_Authorise_Phase6.md). Phases 1–5 ACCEPTED AND CLOSED. Phase 7 NOT authorised |
 | Earlier gate | **Control Gate 2 APPROVED** by the PO on 2026-10-19 (docs/control-gate-2-report.md): DEV 18/18 migrations + smoke 22/22 PASS, K-05 CLOSED and ACCEPTED (6/8 PASS; K05-03, K05-04 BLOCKED_BY_ROBOTS accepted), SD-01…SD-12 approved. Commits: implementation/CI baseline `1b31ed5`; K-05 run on `613f61a`; final documentation commit `40c00ff` |
 | Earlier gate (CG3) | **CONTROL GATE 3 — APPROVED** by the PO on 2026-10-19 (docs/specs/PO_Decision_2026-10-19_Control_Gate_3.md): CG3-01 RESOLVED; CG3-02, CG3-03 RESOLVED / ACCEPTED; knowledge-bound retraction correction RESOLVED; SD3-01…SD3-12 APPROVED; SD3-13 replaced by the approved knowledge-bound retraction semantics (migration 2600); acceptance criteria 14/14, Phase 3 tests 63/63, Phase 1+2 regression 369/369, web 21/21; DEV 27/27 migrations, smoke 32/32 PASS, audit chain verified (108 entries). Optional service_role smoke check not run — NON-BLOCKING. Final code commit `128f1a7`; DEV evidence commit `106ecd9` |
 | Earlier gate (CG4) | **CONTROL GATE 4 — APPROVED** by the PO on 2026-10-20 (docs/specs/PO_Decision_2026-10-20_Control_Gate_4.md): P4-00…P4-09 ACCEPTED; SD4-01…SD4-18 APPROVED; CR4-01 RESOLVED (migration 3400); CR4-02 APPROVED / CLOSED; acceptance criteria 20/20; full suite 500/500 (Phase 4 68/68, Phase 1–3 432/432); web 21/21; prompt lock PASS; secret scan / gitleaks clean; DEV 35/35 migrations, smoke 42/42 PASS (Phase 4 checks 10/10), audit chain verified (124 entries). Optional service_role smoke check NON-BLOCKING. CI run 39477359815 success. Evidence commit `413ef3e` |
-| Current gate | **CONTROL GATE 5 — APPROVED** by the PO on 2026-10-23 (docs/specs/PO_Decision_2026-10-23_Control_Gate_5.md): P5-00…P5-10 ACCEPTED; SD5-01…SD5-20 APPROVED; no change requests; CG5 criteria 22/22; acceptance corpus 30/30; full suite 532/532 (Phase 5 32/32, Phase 1–4 500/500); web 29/29, TypeScript and production build PASS; prompt lock PASS; secret scan / gitleaks clean; JCS / SHA-256 parity verified; DEV 38/38 migrations, smoke 50/50 PASS (Phase 5 checks 8/8), audit chain verified (132 entries), pg_cron active. Optional service_role smoke check NON-BLOCKING. Evidence commit `7007cbf` |
-| Next authorised action | **None — STOP.** Phase 6 may begin only after the Phase 6 authoritative phase-specific baseline is versioned under docs/specs/ and the PO explicitly authorises it (SD-12). Non-blocking follow-on items: `/reports` browser click-through on DEV, K-11 / GS-001 Patriot-trap test channel, real-provider trial, Phase 4 review UI |
+| Earlier gate (CG5) | **CONTROL GATE 5 — APPROVED** by the PO on 2026-10-23 (docs/specs/PO_Decision_2026-10-23_Control_Gate_5.md): P5-00…P5-10 ACCEPTED; SD5-01…SD5-20 APPROVED; no change requests; CG5 criteria 22/22; acceptance corpus 30/30; full suite 532/532 (Phase 5 32/32, Phase 1–4 500/500); web 29/29, TypeScript and production build PASS; prompt lock PASS; secret scan / gitleaks clean; JCS / SHA-256 parity verified; DEV 38/38 migrations, smoke 50/50 PASS (Phase 5 checks 8/8), audit chain verified (132 entries), pg_cron active. Optional service_role smoke check NON-BLOCKING. Evidence commit `7007cbf` |
+| Current gate | Control Gate 6 — not yet reached (Phase 6 in progress) |
+| Next authorised action | **Phase 6 P6-00 … P6-10** per docs/specs/LFHE_Phase6_Authoritative_Baseline_Addendum_v1.0.md (SPEC_INDEX 22–23); STOP at Control Gate 6. Non-blocking follow-on items unchanged: `/reports` browser click-through on DEV, K-11 / GS-001 Patriot-trap test channel, real-provider trial, Phase 4 review UI |
+
+## Phase 6 progress (Addendum v1.0)
+
+| Step | Status |
+| --- | --- |
+| P6-00 Baseline + PO authorisation stored under docs/specs, SPEC_INDEX rows 22–23 | done |
+| P6-01 Persistence / RBAC foundation | pending |
+| P6-02 M10-D deterministic QA | pending |
+| P6-03 M10-S semantic QA auditor | pending |
+| P6-04 Combined QA + warnings | pending |
+| P6-05 Content approval + security review | pending |
+| P6-06 PDF release artifact | pending |
+| P6-07 Release eligibility + decision + manifest | pending |
+| P6-08 Workspace UI | pending |
+| P6-09 Acceptance / adversarial / security / regression | pending |
+| P6-10 DEV smoke, docs, CG6 report | pending |
 
 ## Phase 5 progress (Addendum v1.0) — ACCEPTED AND CLOSED (CG5 APPROVED 2026-10-23)
 
