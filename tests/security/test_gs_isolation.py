@@ -22,6 +22,7 @@ ALLOWED = {
     REPO_ROOT / "tests" / "fixtures" / "phase3_acceptance" / "corpus.json",   # states it is not GS material
     REPO_ROOT / "tests" / "fixtures" / "phase4_acceptance" / "corpus.json",   # states it is not GS material
     REPO_ROOT / "tests" / "fixtures" / "phase5_acceptance" / "corpus.json",   # states it is not GS material
+    REPO_ROOT / "tests" / "fixtures" / "phase6_acceptance" / "corpus.json",   # states it is not GS material
 }
 
 

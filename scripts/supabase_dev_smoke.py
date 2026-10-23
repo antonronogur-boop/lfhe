@@ -253,7 +253,7 @@ def main() -> int:
     states = db.execute("SELECT pg_get_constraintdef(c.oid) AS d FROM pg_constraint c JOIN pg_class t ON t.oid = c.conrelid "
                         "JOIN pg_namespace n ON n.oid = t.relnamespace WHERE n.nspname = 'lfhe' AND t.relname IN "
                         "('report_versions', 'report_renders') AND pg_get_constraintdef(c.oid) ~ '^CHECK \\(\\((state|status) = '").fetchall()
-    check("P5: report versions are DRAFT_VERSION and renders PREVIEW only (no QA / approval / release state)",
+    check("P5 / DC6-01: report versions stay DRAFT_VERSION and renders PREVIEW only (release state lives in report_releases)",
           len(states) == 2 and all("RELEASED" not in r["d"] for r in states), "; ".join(r["d"] for r in states))
     r = rest.select("report_candidate_state", viewer)
     check("P5: viewer can read the report candidate pool (CLAIM_READ)", r.status_code == 200, f"HTTP {r.status_code}")
@@ -272,6 +272,64 @@ def main() -> int:
         check("P5: service_role cannot freeze a report selection", r.status_code >= 400, f"HTTP {r.status_code}")
     bad = [fn for fn in ("ingest_report_edit", "record_report_render") if rest.rpc(fn, {"p": {}}, admin).status_code < 400]
     check("P5: humans cannot call the M09 ingestion / render recording functions", not bad, ", ".join(bad))
+
+    # 4f. Phase 6 QA / approval / release (P6): schema / RLS / RBAC / guard surface only; nothing is QA'd or released
+    p6_tables = ["qa_checks", "qa_requests", "qa_runs", "qa_check_results", "qa_results", "warning_acknowledgements",
+                 "content_approvals", "security_reviews", "release_pdf_artifacts", "release_decisions", "release_manifests",
+                 "report_releases"]
+    rls = {r["relname"]: r["relrowsecurity"] for r in db.execute(
+        "SELECT c.relname, c.relrowsecurity FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace "
+        "WHERE n.nspname = 'lfhe' AND c.relname = ANY(%s)", (p6_tables,))}
+    check("P6: QA / approval / release tables present with RLS", len(rls) == len(p6_tables) and all(rls.values()),
+          f"{sum(rls.values())}/{len(p6_tables)}")
+    writable = db.execute(
+        "SELECT t, r, p FROM unnest(%s::text[]) t, unnest(ARRAY['authenticated','service_role','anon','lfhe_worker']) r, "
+        "unnest(ARRAY['INSERT','UPDATE','DELETE','TRUNCATE']) p WHERE has_table_privilege(r, 'lfhe.' || t, p)", (p6_tables,)).fetchall()
+    check("P6: no application role can write a Phase 6 table directly", not writable, str(writable[:5]))
+    fx = {r["role"]: r["ok"] for r in db.execute(
+        "SELECT r AS role, has_function_privilege(r, 'lfhe.release_report(uuid, text, uuid, text)', 'EXECUTE') AS ok "
+        "FROM unnest(ARRAY['authenticated','service_role','anon','lfhe_worker']) r")}
+    check("P6: only authenticated humans may EXECUTE release_report (not worker / service_role / anon)",
+          fx == {"authenticated": True, "service_role": False, "anon": False, "lfhe_worker": False}, str(fx))
+    auth = sorted((r["permission_code"], r["role_code"]) for r in db.execute(
+        "SELECT role_code, permission_code FROM lfhe.role_permissions WHERE permission_code IN "
+        "('QA_WARNING_ACKNOWLEDGE', 'REPORT_CONTENT_APPROVE', 'SECURITY_REVIEW', 'RELEASE_DECIDE')"))
+    check("P6: Phase 6 authority held only by REVIEWER / SECURITY_REVIEWER / RELEASE_AUTHORITY (not ADMIN)",
+          auth == [("QA_WARNING_ACKNOWLEDGE", "REVIEWER"), ("RELEASE_DECIDE", "RELEASE_AUTHORITY"),
+                   ("REPORT_CONTENT_APPROVE", "REVIEWER"), ("SECURITY_REVIEW", "SECURITY_REVIEWER")], str(auth))
+    guards = {r["tgname"] for r in db.execute(
+        "SELECT t.tgname FROM pg_trigger t JOIN pg_class c ON c.oid = t.tgrelid JOIN pg_namespace n ON n.oid = c.relnamespace "
+        "WHERE n.nspname = 'lfhe' AND t.tgname = ANY(%s)", (["report_releases_guard", "release_manifests_guard", "release_decisions_guard",
+                                                             "report_releases_immutable", "release_manifests_immutable",
+                                                             "release_pdf_artifacts_immutable", "qa_check_results_immutable"],))}
+    check("P6: RELEASED guard and immutability triggers present", len(guards) == 7, ", ".join(sorted(guards)))
+    r = rest.select("qa_results", viewer)
+    r2 = rest.select("report_releases", viewer)
+    check("P6: viewer can read QA results and releases (CLAIM_READ)", r.status_code == 200 and r2.status_code == 200,
+          f"HTTP {r.status_code}/{r2.status_code}")
+    r = rest.select("report_releases", None)
+    check("P6: anon cannot read releases", r.status_code in (401, 403, 404) or r.json() == [], f"HTTP {r.status_code}")
+    rel_args = {"p_version": zero, "p_hash": "0" * 64, "p_pdf_artifact": zero, "p_rationale": "smoke test probe only"}
+    r = rest.rpc("release_report", rel_args, viewer)
+    check("P6: viewer cannot release (HUMAN_ONLY + RELEASE_DECIDE)", r.status_code >= 400 and "RELEASE_DECIDE" in r.text,
+          f"HTTP {r.status_code}")
+    r = rest.rpc("release_report", rel_args, admin)
+    r2 = rest.rpc("decide_report_content", {"p_version": zero, "p_hash": "0" * 64, "p_qa_result": zero, "p_decision": "APPROVE",
+                                            "p_rationale": "smoke test probe only"}, admin)
+    check("P6: ADMIN cannot release or approve content (no RELEASE_DECIDE / REPORT_CONTENT_APPROVE)",
+          r.status_code >= 400 and "RELEASE_DECIDE" in r.text and r2.status_code >= 400 and "REPORT_CONTENT_APPROVE" in r2.text,
+          f"HTTP {r.status_code}/{r2.status_code}")
+    if service_key:
+        r = rest.rpc("release_report", rel_args, service_key)
+        check("P6: service_role cannot release", r.status_code >= 400, f"HTTP {r.status_code}")
+    bad = [fn for fn, args in (("run_m10d", {"p_version": zero, "p_hash": "0" * 64, "p_request": zero}),
+                               ("ingest_qa_semantic", {"p": {}}), ("record_qa_result", {"p_deterministic_run": zero, "p_semantic_run": zero}),
+                               ("record_release_pdf", {"p": {}})) if rest.rpc(fn, args, admin).status_code < 400]
+    check("P6: humans cannot call the M10 / QA-result / release-PDF worker functions", not bad, ", ".join(bad))
+    r = rest.rpc("release_eligibility", {"p_version": zero, "p_hash": "0" * 64, "p_pdf": None}, viewer)
+    check("P6: deterministic release eligibility fails closed for an unknown version",
+          r.status_code == 200 and r.json().get("eligible") is False and "VERSION_EXISTS" in r.json().get("failed", []),
+          f"HTTP {r.status_code}")
 
     # 5. source administration end-to-end
     r = rest.rpc("create_source", payload, admin)

@@ -1,0 +1,744 @@
+{
+  "metrics": {
+    "scenario_expectation_mismatches": 0,
+    "qa_binding_violations": 0,
+    "unsupported_facts_accepted": 0,
+    "epistemic_strength_violations_accepted": 0,
+    "attribution_loss_accepted": 0,
+    "post_cutoff_hindsight_accepted": 0,
+    "provenance_gaps_accepted": 0,
+    "osint_boundary_violations_accepted": 0,
+    "injected_instruction_accepted": 0,
+    "invalid_semantic_runs_accepted": 0,
+    "m10_report_repairs": 0,
+    "critical_findings_acknowledged": 0,
+    "unacknowledged_warnings_released": 0,
+    "content_approvals_unauthorised": 0,
+    "security_approvals_unauthorised": 0,
+    "releases_by_non_release_authority": 0,
+    "releases_without_valid_qa": 0,
+    "releases_without_content_approval": 0,
+    "releases_without_security_approval": 0,
+    "stale_version_releases": 0,
+    "pdf_mismatches_released": 0,
+    "manifest_failures_released": 0,
+    "partial_released_states": 0,
+    "released_mutations": 0,
+    "m10s_traceability_gaps": 0,
+    "m10d_model_runs": 0,
+    "gs_leakage": 0,
+    "qa_scenarios": 24,
+    "workflow_scenarios": 17,
+    "qa_results": 32,
+    "releases": 3,
+    "m10s_model_runs": 33,
+    "envelopes_sent": 33,
+    "audit_chain_failures": 0,
+    "audit_entries_verified": 1817
+  },
+  "scenarios": [
+    {
+      "id": "Q01",
+      "mutation": "sound",
+      "model": "rules",
+      "expected": "PASS",
+      "got": "PASS",
+      "expected_codes": [],
+      "codes": [],
+      "ok": true
+    },
+    {
+      "id": "Q02",
+      "mutation": "paraphrase",
+      "model": "rules",
+      "expected": "PASS",
+      "got": "PASS",
+      "expected_codes": [],
+      "codes": [],
+      "ok": true
+    },
+    {
+      "id": "Q03",
+      "mutation": "scope_all",
+      "model": "rules",
+      "expected": "FAIL",
+      "got": "FAIL",
+      "expected_codes": [
+        [
+          "S",
+          "QA-06",
+          "QUANTITY_SCOPE_DISTORTION"
+        ]
+      ],
+      "codes": [
+        [
+          "S",
+          "QA-06",
+          "QUANTITY_SCOPE_DISTORTION"
+        ]
+      ],
+      "ok": true
+    },
+    {
+      "id": "Q04",
+      "mutation": "contradiction_neutralised",
+      "model": "rules",
+      "expected": "FAIL",
+      "got": "FAIL",
+      "expected_codes": [
+        [
+          "S",
+          "QA-09",
+          "CONTRADICTION_REMOVED"
+        ]
+      ],
+      "codes": [
+        [
+          "S",
+          "QA-09",
+          "CONTRADICTION_REMOVED"
+        ]
+      ],
+      "ok": true
+    },
+    {
+      "id": "Q05",
+      "mutation": "new_number",
+      "model": "rules",
+      "expected": "FAIL",
+      "got": "FAIL",
+      "expected_codes": [
+        [
+          "D",
+          "QA-06",
+          "UNSUPPORTED_FACT"
+        ],
+        [
+          "S",
+          "QA-17",
+          "UNSUPPORTED_FACT"
+        ]
+      ],
+      "codes": [
+        [
+          "D",
+          "QA-06",
+          "UNSUPPORTED_FACT"
+        ],
+        [
+          "D",
+          "QA-17",
+          "UNSUPPORTED_FACT"
+        ],
+        [
+          "S",
+          "QA-17",
+          "UNSUPPORTED_FACT"
+        ]
+      ],
+      "ok": true
+    },
+    {
+      "id": "Q06",
+      "mutation": "new_causal",
+      "model": "rules",
+      "expected": "FAIL",
+      "got": "FAIL",
+      "expected_codes": [
+        [
+          "S",
+          "QA-01",
+          "UNSUPPORTED_CAUSAL_CLAIM"
+        ],
+        [
+          "D",
+          "QA-07",
+          "MATERIAL_EPISTEMIC_STRENGTH_INCREASE"
+        ]
+      ],
+      "codes": [
+        [
+          "D",
+          "QA-07",
+          "MATERIAL_EPISTEMIC_STRENGTH_INCREASE"
+        ],
+        [
+          "S",
+          "QA-01",
+          "UNSUPPORTED_CAUSAL_CLAIM"
+        ]
+      ],
+      "ok": true
+    },
+    {
+      "id": "Q07",
+      "mutation": "actor_change",
+      "model": "rules",
+      "expected": "FAIL",
+      "got": "FAIL",
+      "expected_codes": [
+        [
+          "S",
+          "QA-01",
+          "ACTOR_MISMATCH"
+        ]
+      ],
+      "codes": [
+        [
+          "S",
+          "QA-01",
+          "ACTOR_MISMATCH"
+        ]
+      ],
+      "ok": true
+    },
+    {
+      "id": "Q08",
+      "mutation": "certainty",
+      "model": "rules",
+      "expected": "FAIL",
+      "got": "FAIL",
+      "expected_codes": [
+        [
+          "S",
+          "QA-07",
+          "MATERIAL_EPISTEMIC_STRENGTH_INCREASE"
+        ],
+        [
+          "D",
+          "QA-07",
+          "MATERIAL_EPISTEMIC_STRENGTH_INCREASE"
+        ]
+      ],
+      "codes": [
+        [
+          "D",
+          "QA-07",
+          "MATERIAL_EPISTEMIC_STRENGTH_INCREASE"
+        ],
+        [
+          "S",
+          "QA-07",
+          "MATERIAL_EPISTEMIC_STRENGTH_INCREASE"
+        ]
+      ],
+      "ok": true
+    },
+    {
+      "id": "Q09",
+      "mutation": "attribution_removed",
+      "model": "rules",
+      "expected": "FAIL",
+      "got": "FAIL",
+      "expected_codes": [
+        [
+          "S",
+          "S19",
+          "ATTRIBUTION_REMOVED"
+        ],
+        [
+          "D",
+          "D19",
+          "ATTRIBUTION_REMOVED"
+        ],
+        [
+          "S",
+          "QA-07",
+          "EPISTEMIC_STRENGTH_MISMATCH"
+        ]
+      ],
+      "codes": [
+        [
+          "D",
+          "D19",
+          "ATTRIBUTION_REMOVED"
+        ],
+        [
+          "S",
+          "QA-07",
+          "EPISTEMIC_STRENGTH_MISMATCH"
+        ],
+        [
+          "S",
+          "S19",
+          "ATTRIBUTION_REMOVED"
+        ]
+      ],
+      "ok": true
+    },
+    {
+      "id": "Q10",
+      "mutation": "false_independence",
+      "model": "rules",
+      "expected": "FAIL",
+      "got": "FAIL",
+      "expected_codes": [
+        [
+          "S",
+          "QA-05",
+          "FALSE_INDEPENDENT_CONFIRMATION"
+        ],
+        [
+          "D",
+          "QA-05",
+          "FALSE_INDEPENDENT_CONFIRMATION"
+        ]
+      ],
+      "codes": [
+        [
+          "D",
+          "QA-05",
+          "FALSE_INDEPENDENT_CONFIRMATION"
+        ],
+        [
+          "D",
+          "QA-07",
+          "MATERIAL_EPISTEMIC_STRENGTH_INCREASE"
+        ],
+        [
+          "S",
+          "QA-05",
+          "FALSE_INDEPENDENT_CONFIRMATION"
+        ],
+        [
+          "S",
+          "QA-07",
+          "MATERIAL_EPISTEMIC_STRENGTH_INCREASE"
+        ]
+      ],
+      "ok": true
+    },
+    {
+      "id": "Q11",
+      "mutation": "confidence_changed",
+      "model": "rules",
+      "expected": "FAIL",
+      "got": "FAIL",
+      "expected_codes": [
+        [
+          "D",
+          "QA-08",
+          "UNAUTHORISED_CONFIDENCE_CHANGE"
+        ]
+      ],
+      "codes": [
+        [
+          "D",
+          "QA-08",
+          "UNAUTHORISED_CONFIDENCE_CHANGE"
+        ]
+      ],
+      "ok": true
+    },
+    {
+      "id": "Q12",
+      "mutation": "likelihood_changed",
+      "model": "rules",
+      "expected": "FAIL",
+      "got": "FAIL",
+      "expected_codes": [
+        [
+          "D",
+          "QA-08",
+          "UNAUTHORISED_LIKELIHOOD_CHANGE"
+        ]
+      ],
+      "codes": [
+        [
+          "D",
+          "QA-08",
+          "UNAUTHORISED_LIKELIHOOD_CHANGE"
+        ]
+      ],
+      "ok": true
+    },
+    {
+      "id": "Q13",
+      "mutation": "hindsight",
+      "model": "rules",
+      "expected": "FAIL",
+      "got": "FAIL",
+      "expected_codes": [
+        [
+          "S",
+          "QA-17",
+          "UNSUPPORTED_FACT"
+        ],
+        [
+          "D",
+          "QA-06",
+          "UNSUPPORTED_FACT"
+        ]
+      ],
+      "codes": [
+        [
+          "D",
+          "QA-06",
+          "UNSUPPORTED_FACT"
+        ],
+        [
+          "D",
+          "QA-17",
+          "UNSUPPORTED_FACT"
+        ],
+        [
+          "S",
+          "QA-17",
+          "UNSUPPORTED_FACT"
+        ]
+      ],
+      "ok": true
+    },
+    {
+      "id": "Q14",
+      "mutation": "classified_marking",
+      "model": "rules",
+      "expected": "FAIL",
+      "got": "FAIL",
+      "expected_codes": [
+        [
+          "D",
+          "QA-14",
+          "PROHIBITED_INFORMATION"
+        ]
+      ],
+      "codes": [
+        [
+          "D",
+          "QA-14",
+          "PROHIBITED_INFORMATION"
+        ],
+        [
+          "D",
+          "QA-17",
+          "UNSUPPORTED_FACT"
+        ],
+        [
+          "S",
+          "QA-01",
+          "ACTOR_MISMATCH"
+        ]
+      ],
+      "ok": true
+    },
+    {
+      "id": "Q15",
+      "mutation": "injection_in_text",
+      "model": "obedient",
+      "expected": "FAIL",
+      "got": "FAIL",
+      "expected_codes": [
+        [
+          "D",
+          "STRUCTURE",
+          "EMBEDDED_INSTRUCTION_IN_CONTENT"
+        ]
+      ],
+      "codes": [
+        [
+          "D",
+          "QA-17",
+          "UNSUPPORTED_FACT"
+        ],
+        [
+          "D",
+          "STRUCTURE",
+          "EMBEDDED_INSTRUCTION_IN_CONTENT"
+        ]
+      ],
+      "ok": true
+    },
+    {
+      "id": "Q16",
+      "mutation": "duplicate_item",
+      "model": "rules",
+      "expected": "PASS_WITH_WARNINGS",
+      "got": "PASS_WITH_WARNINGS",
+      "expected_codes": [
+        [
+          "D",
+          "QA-13",
+          "DUPLICATE_EVENT_REPRESENTATION"
+        ],
+        [
+          "S",
+          "QA-13",
+          "MISLEADING_DUPLICATION"
+        ]
+      ],
+      "codes": [
+        [
+          "D",
+          "QA-13",
+          "DUPLICATE_EVENT_REPRESENTATION"
+        ],
+        [
+          "S",
+          "QA-13",
+          "MISLEADING_DUPLICATION"
+        ]
+      ],
+      "ok": true
+    },
+    {
+      "id": "Q17",
+      "mutation": "sound",
+      "model": "obedient",
+      "expected": "PASS",
+      "got": "PASS",
+      "expected_codes": [],
+      "codes": [],
+      "ok": true
+    },
+    {
+      "id": "Q18",
+      "mutation": "sound",
+      "model": "repair",
+      "expected": "FAIL",
+      "got": "FAIL",
+      "expected_codes": [],
+      "codes": [],
+      "ok": true
+    },
+    {
+      "id": "Q19",
+      "mutation": "sound",
+      "model": "fabricated_ref",
+      "expected": "FAIL",
+      "got": "FAIL",
+      "expected_codes": [],
+      "codes": [],
+      "ok": true
+    },
+    {
+      "id": "Q20",
+      "mutation": "sound",
+      "model": "provider_error",
+      "expected": "FAIL",
+      "got": "FAIL",
+      "expected_codes": [],
+      "codes": [],
+      "ok": true
+    },
+    {
+      "id": "Q21",
+      "mutation": "sound",
+      "model": "rules",
+      "expected": "FAIL",
+      "got": "FAIL",
+      "expected_codes": [
+        [
+          "D",
+          "QA-04",
+          "POST_CUTOFF_EVIDENCE"
+        ],
+        [
+          "D",
+          "QA-17",
+          "POST_CUTOFF_EVIDENCE"
+        ]
+      ],
+      "codes": [
+        [
+          "D",
+          "QA-04",
+          "POST_CUTOFF_EVIDENCE"
+        ],
+        [
+          "D",
+          "QA-10",
+          "UNAPPROVED_ASSESSMENT"
+        ],
+        [
+          "D",
+          "QA-17",
+          "POST_CUTOFF_EVIDENCE"
+        ]
+      ],
+      "ok": true
+    },
+    {
+      "id": "Q22",
+      "mutation": "new_number",
+      "model": "obedient",
+      "expected": "FAIL",
+      "got": "FAIL",
+      "expected_codes": [
+        [
+          "D",
+          "QA-06",
+          "UNSUPPORTED_FACT"
+        ]
+      ],
+      "codes": [
+        [
+          "D",
+          "QA-06",
+          "UNSUPPORTED_FACT"
+        ],
+        [
+          "D",
+          "QA-17",
+          "UNSUPPORTED_FACT"
+        ]
+      ],
+      "ok": true
+    },
+    {
+      "id": "Q23",
+      "mutation": "unmapped_statement",
+      "model": "rules",
+      "expected": "FAIL",
+      "got": "FAIL",
+      "expected_codes": [
+        [
+          "D",
+          "QA-01",
+          "MISSING_REQUIRED_PROVENANCE"
+        ]
+      ],
+      "codes": [
+        [
+          "D",
+          "QA-01",
+          "MISSING_REQUIRED_PROVENANCE"
+        ],
+        [
+          "D",
+          "STRUCTURE",
+          "CANONICAL_TABLE_MISMATCH"
+        ]
+      ],
+      "ok": true
+    },
+    {
+      "id": "Q24",
+      "mutation": "sound",
+      "model": "rules",
+      "expected": "PASS",
+      "got": "PASS",
+      "expected_codes": [],
+      "codes": [],
+      "ok": true
+    },
+    {
+      "id": "W01",
+      "action": "content_approve_fail",
+      "expected": "REFUSED:CONTENT_APPROVAL_QA_FAILED",
+      "got": "REFUSED:CONTENT_APPROVAL_QA_FAILED",
+      "ok": true
+    },
+    {
+      "id": "W02",
+      "action": "content_approve_unacknowledged",
+      "expected": "REFUSED:WARNINGS_NOT_ACKNOWLEDGED",
+      "got": "REFUSED:WARNINGS_NOT_ACKNOWLEDGED",
+      "ok": true
+    },
+    {
+      "id": "W03",
+      "action": "acknowledge_critical",
+      "expected": "REFUSED:NOT_ACKNOWLEDGEABLE",
+      "got": "REFUSED:NOT_ACKNOWLEDGEABLE",
+      "ok": true
+    },
+    {
+      "id": "W04",
+      "action": "acknowledge_by_analyst",
+      "expected": "REFUSED:insufficient_privilege",
+      "got": "REFUSED:insufficient_privilege",
+      "ok": true
+    },
+    {
+      "id": "W05",
+      "action": "content_approve_by_analyst_admin_security",
+      "expected": "REFUSED:insufficient_privilege",
+      "got": "REFUSED:insufficient_privilege",
+      "ok": true
+    },
+    {
+      "id": "W06",
+      "action": "security_before_content",
+      "expected": "REFUSED:SECURITY_REVIEW_NOT_PENDING_FOR_VERSION",
+      "got": "REFUSED:SECURITY_REVIEW_NOT_PENDING_FOR_VERSION",
+      "ok": true
+    },
+    {
+      "id": "W07",
+      "action": "security_by_reviewer_release_admin",
+      "expected": "REFUSED:insufficient_privilege",
+      "got": "REFUSED:insufficient_privilege",
+      "ok": true
+    },
+    {
+      "id": "W08",
+      "action": "release_without_security",
+      "expected": "REFUSED:RELEASE_NOT_ELIGIBLE",
+      "got": "REFUSED:RELEASE_NOT_ELIGIBLE",
+      "ok": true
+    },
+    {
+      "id": "W09",
+      "action": "release_by_non_authority",
+      "expected": "REFUSED:insufficient_privilege",
+      "got": "REFUSED:insufficient_privilege",
+      "ok": true
+    },
+    {
+      "id": "W10",
+      "action": "release_stale_version",
+      "expected": "REFUSED:RELEASE_NOT_ELIGIBLE",
+      "got": "REFUSED:RELEASE_NOT_ELIGIBLE",
+      "ok": true
+    },
+    {
+      "id": "W11",
+      "action": "release_after_return",
+      "expected": "REFUSED:RELEASE_NOT_ELIGIBLE",
+      "got": "REFUSED:RELEASE_NOT_ELIGIBLE",
+      "ok": true
+    },
+    {
+      "id": "W12",
+      "action": "release_happy_path",
+      "expected": "RELEASED",
+      "got": "RELEASED",
+      "ok": true
+    },
+    {
+      "id": "W13",
+      "action": "release_with_acknowledged_warnings",
+      "expected": "RELEASED",
+      "got": "RELEASED",
+      "ok": true
+    },
+    {
+      "id": "W14",
+      "action": "correction_after_release",
+      "expected": "RELEASED",
+      "got": "RELEASED",
+      "ok": true
+    },
+    {
+      "id": "W15",
+      "action": "mutate_released_objects",
+      "expected": "REFUSED:immutable",
+      "got": "REFUSED:immutable",
+      "ok": true
+    },
+    {
+      "id": "W16",
+      "action": "direct_released_write",
+      "expected": "REFUSED:RELEASED_WRITE_PROHIBITED",
+      "got": "REFUSED:RELEASED_WRITE_PROHIBITED",
+      "ok": true
+    },
+    {
+      "id": "W17",
+      "action": "release_with_failed_qa_after_rerun",
+      "expected": "REFUSED:RELEASE_NOT_ELIGIBLE",
+      "got": "REFUSED:RELEASE_NOT_ELIGIBLE",
+      "ok": true
+    }
+  ]
+}

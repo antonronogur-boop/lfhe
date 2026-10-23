@@ -111,6 +111,28 @@ refused by every Phase 5 HUMAN_ONLY function (`tests/security/test_p5_rbac.py`, 
 All Phase 5 tables are readable with `CLAIM_READ` (RLS) and by `lfhe_worker`, written by nobody
 directly and immutable (`block_mutation`). No report table has a confidence column (DC-01).
 
+## Phase 6 functions (migrations `…3800`, `…3900`)
+
+| Function | Caller | Permission |
+| --- | --- | --- |
+| `request_report_qa` | human (HUMAN_ONLY) | `REPORT_EDIT` or `REPORT_CONTENT_APPROVE` |
+| `acknowledge_qa_warning` | human (HUMAN_ONLY) | `QA_WARNING_ACKNOWLEDGE` (REVIEWER) |
+| `decide_report_content` | human (HUMAN_ONLY) | `REPORT_CONTENT_APPROVE` (REVIEWER) |
+| `decide_security_review` | human (HUMAN_ONLY) | `SECURITY_REVIEW` (SECURITY_REVIEWER) |
+| `request_release_pdf`, `decide_release` (RETURN_FOR_REVISION / REJECT_RELEASE), `release_report` (the only path to RELEASED) | human (HUMAN_ONLY) | `RELEASE_DECIDE` (RELEASE_AUTHORITY) |
+| `release_eligibility` (read-only checklist for the caller) | human (`authenticated`) | `CLAIM_READ` |
+| `run_m10d` (M10-D), `ingest_qa_semantic` (M10-S), `record_qa_result` (combined status), `record_release_pdf` | `lfhe_worker` only | — |
+| `p6_release_checklist`, `p6_build_manifest`, `p6_manifest_problems`, `p6_current_*`, `p6_release_guard`, `p6_new_version_audit` | no grant (inside the functions above / triggers) | — |
+
+No new permission: the four Phase 6 permissions were seeded in Phase 1 and are held by exactly one role
+each (table above). ADMIN, ANALYST, VIEWER, `service_role`, anon and `lfhe_worker` hold none of them;
+REVIEWER cannot security-review or release, SECURITY_REVIEWER cannot approve content or release
+(`tests/security/test_p6_rbac.py`, DEV smoke P6 checks). One human may hold several roles (K-06);
+every authority still needs its explicit role. All Phase 6 tables are readable with `CLAIM_READ` (RLS)
+and by `lfhe_worker`, written by nobody directly and immutable; `release_decisions` (APPROVE_FOR_RELEASE),
+`release_manifests` and `report_releases` additionally refuse any insert that does not come from inside
+`lfhe.release_report` (guard trigger, even for the owner).
+
 ## Non-human principals
 - `lfhe_registrar` (deployment pipeline): may only register prompt artifacts
   and model configurations (`register_prompt_version`,

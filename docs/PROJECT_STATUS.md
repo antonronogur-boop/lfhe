@@ -2,29 +2,30 @@
 
 | Field | Value |
 | --- | --- |
-| Current phase | **Phase 6 — QA, Approval & Release: AUTHORISED (2026-10-23), IN PROGRESS** (docs/specs/PO_Decision_2026-10-23_Authorise_Phase6.md). Phases 1–5 ACCEPTED AND CLOSED. Phase 7 NOT authorised |
+| Current phase | **Phase 6 — QA, Approval & Release: P6-00 … P6-10 implemented; STOPPED at Control Gate 6** (docs/specs/PO_Decision_2026-10-23_Authorise_Phase6.md). Phases 1–5 ACCEPTED AND CLOSED. Phase 7 NOT authorised and NOT started |
 | Earlier gate | **Control Gate 2 APPROVED** by the PO on 2026-10-19 (docs/control-gate-2-report.md): DEV 18/18 migrations + smoke 22/22 PASS, K-05 CLOSED and ACCEPTED (6/8 PASS; K05-03, K05-04 BLOCKED_BY_ROBOTS accepted), SD-01…SD-12 approved. Commits: implementation/CI baseline `1b31ed5`; K-05 run on `613f61a`; final documentation commit `40c00ff` |
 | Earlier gate (CG3) | **CONTROL GATE 3 — APPROVED** by the PO on 2026-10-19 (docs/specs/PO_Decision_2026-10-19_Control_Gate_3.md): CG3-01 RESOLVED; CG3-02, CG3-03 RESOLVED / ACCEPTED; knowledge-bound retraction correction RESOLVED; SD3-01…SD3-12 APPROVED; SD3-13 replaced by the approved knowledge-bound retraction semantics (migration 2600); acceptance criteria 14/14, Phase 3 tests 63/63, Phase 1+2 regression 369/369, web 21/21; DEV 27/27 migrations, smoke 32/32 PASS, audit chain verified (108 entries). Optional service_role smoke check not run — NON-BLOCKING. Final code commit `128f1a7`; DEV evidence commit `106ecd9` |
 | Earlier gate (CG4) | **CONTROL GATE 4 — APPROVED** by the PO on 2026-10-20 (docs/specs/PO_Decision_2026-10-20_Control_Gate_4.md): P4-00…P4-09 ACCEPTED; SD4-01…SD4-18 APPROVED; CR4-01 RESOLVED (migration 3400); CR4-02 APPROVED / CLOSED; acceptance criteria 20/20; full suite 500/500 (Phase 4 68/68, Phase 1–3 432/432); web 21/21; prompt lock PASS; secret scan / gitleaks clean; DEV 35/35 migrations, smoke 42/42 PASS (Phase 4 checks 10/10), audit chain verified (124 entries). Optional service_role smoke check NON-BLOCKING. CI run 39477359815 success. Evidence commit `413ef3e` |
 | Earlier gate (CG5) | **CONTROL GATE 5 — APPROVED** by the PO on 2026-10-23 (docs/specs/PO_Decision_2026-10-23_Control_Gate_5.md): P5-00…P5-10 ACCEPTED; SD5-01…SD5-20 APPROVED; no change requests; CG5 criteria 22/22; acceptance corpus 30/30; full suite 532/532 (Phase 5 32/32, Phase 1–4 500/500); web 29/29, TypeScript and production build PASS; prompt lock PASS; secret scan / gitleaks clean; JCS / SHA-256 parity verified; DEV 38/38 migrations, smoke 50/50 PASS (Phase 5 checks 8/8), audit chain verified (132 entries), pg_cron active. Optional service_role smoke check NON-BLOCKING. Evidence commit `7007cbf` |
-| Current gate | Control Gate 6 — not yet reached (Phase 6 in progress) |
-| Next authorised action | **Phase 6 P6-00 … P6-10** per docs/specs/LFHE_Phase6_Authoritative_Baseline_Addendum_v1.0.md (SPEC_INDEX 22–23); STOP at Control Gate 6. Non-blocking follow-on items unchanged: `/reports` browser click-through on DEV, K-11 / GS-001 Patriot-trap test channel, real-provider trial, Phase 4 review UI |
+| Current gate | **CONTROL GATE 6 — awaiting PO decision** (docs/control-gate-6-report.md): CG6 criteria 29/30 PASS, criterion 29 (DEV smoke) awaits the PO run; full suite 561/561 (Phase 6 29/29, Phase 1–5 532/532); web 35/35, TypeScript and production build PASS; prompt lock PASS (incl. M10_QA_AUDITOR 1.0.0); secret scan / gitleaks clean; acceptance corpus 41/41, every CG6 metric 0 (docs/cg6-acceptance-metrics.json); SD6-01…SD6-19 for PO decision; no change requests |
+| Next authorised action | **None — STOP at CG6.** PO: apply migrations 3800 + 3900 on DEV (40 migrations) and run the smoke (expected 61/61 PASS); decide SD6-01…SD6-19 and CONTROL GATE 6. Phase 7 only after a versioned Phase 7 baseline and explicit PO authorisation (SD-12). Non-blocking follow-on items: `/reports` (incl. QA / release views) browser click-through on DEV, K-11 / GS-001 Patriot-trap test channel, real-provider trial (incl. M10-S detection quality), Phase 4 review UI, Next.js security upgrade |
 
-## Phase 6 progress (Addendum v1.0)
+## Phase 6 progress (Addendum v1.0) — implemented; STOPPED at Control Gate 6
 
 | Step | Status |
 | --- | --- |
 | P6-00 Baseline + PO authorisation stored under docs/specs, SPEC_INDEX rows 22–23 | done |
-| P6-01 Persistence / RBAC foundation | pending |
-| P6-02 M10-D deterministic QA | pending |
-| P6-03 M10-S semantic QA auditor | pending |
-| P6-04 Combined QA + warnings | pending |
-| P6-05 Content approval + security review | pending |
-| P6-06 PDF release artifact | pending |
-| P6-07 Release eligibility + decision + manifest | pending |
-| P6-08 Workspace UI | pending |
-| P6-09 Acceptance / adversarial / security / regression | pending |
-| P6-10 DEV smoke, docs, CG6 report | pending |
+| P6-01 Persistence / RBAC foundation (migrations 3800, 3900: QA, acknowledgement, approval, security, PDF, decision, manifest, RELEASED tables; RLS; HUMAN_ONLY functions) | done |
+| P6-02 M10-D deterministic QA (`lfhe.run_m10d`, 25 checks, fail closed, no model_run) | done |
+| P6-03 M10-S semantic QA auditor (M10_QA_AUDITOR 1.0.0, qa_inputs, ingestion of the stored model output) | done |
+| P6-04 Combined QA + warnings (`record_qa_result`, reruns, `acknowledge_qa_warning`) | done |
+| P6-05 Content approval + security review (`decide_report_content`, `decide_security_review`) | done |
+| P6-06 PDF release artifact (headless Chromium, write-once storage, SHA-256 binding) | done |
+| P6-07 Release eligibility + decision + manifest (`p6_release_checklist`, `decide_release`, atomic `release_report`, JCS manifest, correction path) | done |
+| P6-08 Workspace UI (`/reports/[id]` qa + release views, PDF download) | done |
+| P6-09 Acceptance corpus 41/41 (CG6 metrics 0), RBAC sweep, injection, atomicity, regression; CI | done |
+| P6-10 DEV smoke P6 checks (11), docs, CG6 report (docs/control-gate-6-report.md) | done |
+| DEV apply 3800–3900 + smoke (PO) | pending — expected 40 migrations, smoke 61/61 PASS |
 
 ## Phase 5 progress (Addendum v1.0) — ACCEPTED AND CLOSED (CG5 APPROVED 2026-10-23)
 
@@ -136,7 +137,7 @@ testing); D-06 approved conditionally (CG1-06 verification since completed: CI +
 | K-06 | Separation of duties | NON-BLOCKING | Configurable; one person may hold several roles in the prototype, logged |
 | K-07 | Region | NON-BLOCKING | EU region default |
 | K-08 | Canonical JSON | NON-BLOCKING | RFC 8785 JCS + SHA-256 (ADR-0003) |
-| K-09 | Template / renderer version + PDF hash in manifest | DEFER (P5–P6) | |
+| K-09 | Template / renderer version + PDF hash in manifest | RESOLVED (P6-07) | Release manifest carries template version / hash, renderer version / hash and PDF SHA-256 (docs/qa-release-design.md §5) |
 | K-10 | M05 automatic application scope | RESOLVED (P3) | CREATE → CANDIDATE, UPDATE → AI-originated version pending review (claims only added); MERGE / SPLIT / SUPERSEDE / REJECT human-only (docs/lineage-events.md) |
 | K-11 | GS-001 Patriot-trap test channel | NON-BLOCKING follow-on (CG4 decision 2026-10-20) | Decide at raw-input materialisation; does not reopen CG4 |
 | K-12 | Canonical evidence-span field name | RESOLVED (P2) | `claims.evidence_span_original` (v1.2.2), verified by the database |
@@ -209,3 +210,15 @@ testing); D-06 approved conditionally (CG1-06 verification since completed: CI +
 | L-39 | M09 quality is a model property; measured with scripted outputs (sound, naive, adversarial); no real-provider call (L-09) | Real-provider trial non-blocking |
 | L-40 | One report item derives from one candidate; a single report statement cannot merge statements of two different assessments (conservative: no false independent-evidence impression) | Separate sentences / items; revisit only by PO decision |
 | L-41 | Full suite ≈ 2 min 50 s (as-of recursion, L-26 / L-35) | Materialise bounds if measurements require |
+
+## Known limitations at Control Gate 6
+
+| ID | Limitation | Impact / plan |
+| --- | --- | --- |
+| L-42 | M10-S detection quality is a model property; verified with a rule-based stand-in that reads only the envelope and with labelled scripted behaviours (obedient, repairing, fabricating, failing); no real-provider call | Real-provider trial non-blocking (SD6-11) |
+| L-43 | Chromium PDF bytes are not claimed reproducible (DC6-04): every distinct byte artifact has its own identity; only the one chosen by the release transaction is released | By design |
+| L-44 | The release manifest implements Addendum §23 + K-09 + analytical pins; Prompt Pack v1.2.1 §11 (referenced by CG0) is not stored in the repository | PO confirmation requested (SD6-10); forward-only extension if fields are missing |
+| L-45 | `/reports` QA / release views built, type-checked, unit-tested and their reads / RPCs tested as real `authenticated` sessions; not yet clicked through in a browser against DEV | Manual walkthrough on DEV (non-blocking, as L-37) |
+| L-46 | The RENDER_RELEASE_PDF worker needs headless Chromium and object storage on its host; `--no-sandbox` only in root containers / CI runners without user namespaces | Worker hosting decision (K-01) |
+| L-47 | `next build` printed a Next.js security-vulnerability upgrade reminder (first run stopped, retry passed; CI web job green) | Dependency upgrade = separate PO decision |
+| L-48 | Full suite ≈ 4 min (as-of recursion, Chromium PDFs) | Acceptable for CI |

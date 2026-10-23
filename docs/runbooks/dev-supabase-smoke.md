@@ -94,3 +94,22 @@ operator/Product Owner; record the JSON output of step 6 in PROJECT_STATUS.
   service-role key: 50/50 PASS. The smoke test creates no report.
 * Worker configuration for Phase 5 jobs: `LFHE_M09_MODEL_CONFIGURATION_ID` (registered, low-variance).
   The web workspace is at `/reports`.
+
+## Phase 6 additions
+
+* Migrations `20261011003800_p6_qa.sql` and `20261011003900_p6_approval_release.sql` are applied with the
+  same `scripts/apply_migrations.py` command (40 migrations in total).
+* The smoke script adds 11 Phase 6 checks (12 with `LFHE_SMOKE_SERVICE_ROLE_KEY`): QA / approval / release
+  tables present with RLS, no application role can write them, only authenticated humans may EXECUTE
+  `release_report`, Phase 6 authority held only by REVIEWER / SECURITY_REVIEWER / RELEASE_AUTHORITY,
+  RELEASED guard and immutability triggers present, viewer can read QA results / releases, anon cannot read
+  releases, viewer cannot release, ADMIN cannot release or approve content, (service_role cannot release),
+  humans cannot call the M10 / QA-result / release-PDF worker functions, release eligibility fails closed
+  for an unknown version. Expected result without the service-role key: **61/61 PASS**. The smoke test
+  creates no QA run, approval or release.
+* Worker configuration for Phase 6 jobs: `LFHE_M10_MODEL_CONFIGURATION_ID` (registered, low-variance) for
+  RUN_REPORT_QA; RENDER_RELEASE_PDF needs headless Chromium (`LFHE_CHROMIUM_PATH`, or chromium /
+  google-chrome on PATH; `LFHE_CHROMIUM_NO_SANDBOX=1` only on hosts without user-namespace sandboxing)
+  and the configured object storage (release PDFs are stored write-once under `release-pdf/sha256/…`).
+  The prompt bundle `packages/prompts/M10_QA_AUDITOR/1.0.0` is registered with
+  `scripts/prompt_registry.py register` and activated by a human (PROMPT_ACTIVATE) as for M02–M09.

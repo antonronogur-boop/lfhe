@@ -115,8 +115,25 @@ codes above are used); it is kept, because audit codes are append-only.
 | `REPORT_REMOVAL_DECIDED` | insert into `report_removal_decisions` |
 | `REPORT_PREVIEW_RENDERED` | insert into `report_renders` |
 
-`REPORT_VERSION_HASH_CHANGED`, `QA_INVALIDATED_BY_REPORT_CHANGE` and the release codes in the
-catalogue belong to Phase 6.
+### Phase 6 (migrations `…3800`, `…3900`)
+
+| Event | Written by |
+| --- | --- |
+| `REPORT_QA_REQUESTED` (Phase 6 impl.) | `request_report_qa` (request id, version hash, job, reason) |
+| `QA_RUN_CREATED` | insert into `qa_runs` (M10-D and M10-S runs; findings stay in `qa_check_results`) |
+| `QA_RESULT_RECORDED` (Phase 6 impl.) | insert into `qa_results` (combined status) |
+| `QA_RESULT_CHANGED_BY_RERUN` | `record_qa_result` when the authoritative combined status of a version changes |
+| `QA_WARNING_ACKNOWLEDGED` | `acknowledge_qa_warning` (result, finding, check, rationale) |
+| `REPORT_CONTENT_DECIDED` (Phase 6 impl.; content approval human decision) | `decide_report_content` (APPROVE / RETURN_FOR_REVISION / REJECT, QA result, acknowledgements) |
+| `SECURITY_REVIEW_OPENED` (Phase 6 impl.) | content APPROVE opens the PENDING review |
+| `SECURITY_REVIEW_DECIDED` | `decide_security_review` |
+| `RELEASE_PDF_RECORDED` / `RELEASE_PDF_REQUESTED` (Phase 6 impl.) | insert into `release_pdf_artifacts` (bytes excluded) / `request_release_pdf` |
+| `REPORT_RELEASE_APPROVED` + `REPORT_RELEASE_MANIFEST_CREATED` | `release_report` (same transaction as the decision, manifest and RELEASED row) |
+| `RELEASE_RETURNED_FOR_REVISION` / `REPORT_RELEASE_REJECTED` | `decide_release` |
+| `REPORT_CORRECTION_CREATED` | new report version after a released version of the same report |
+| `QA_INVALIDATED_BY_REPORT_CHANGE` / `SECURITY_APPROVAL_INVALIDATED` | new report version whose predecessor had QA / an approved security review (nothing is deleted) |
+
+`REPORT_VERSION_HASH_CHANGED` stays unused: a version's hash can never change (a change is a new version).
 
 Text and prompt contents are not copied into the audit log: the audit entry
 records their SHA-256 (the rows themselves are immutable and hash-checked).
