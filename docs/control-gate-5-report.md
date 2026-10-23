@@ -3,7 +3,7 @@
 ## PHASE / GATE
 
 - Fázis: **Phase 5 — Executive Reporting** (jelöltkészlet, emberi kiválasztás, M09 Executive Editor, immutábilis JCS-hash-elt reportverziók, determinisztikus előnézet, elemzői report workspace).
-- Kapu: **Control Gate 5** — PO döntésre vár.
+- Kapu: **CONTROL GATE 5 — APPROVED** (PO, 2026-10-23, `docs/specs/PO_Decision_2026-10-23_Control_Gate_5.md`). **PHASE 5 — ACCEPTED AND CLOSED.**
 - Alap: `docs/specs/LFHE_Phase5_Authoritative_Baseline_Addendum_v1.0.md` (SPEC_INDEX 19), PO felhatalmazás `docs/specs/PO_Decision_2026-10-21_Authorise_Phase5.md` (SPEC_INDEX 20).
 - Végrehajtás: P5-00 … P5-10 a megadott sorrendben, köztes engedélykérés nélkül. CG1–CG4 nem lett újranyitva; általános architektúra-audit nem történt.
 - Commitok: P5-00 `6e9913e`, P5-01…06 `2a31038`, P5-07 `32386db`, P5-08 `430c676`, P5-09 `9842c5a`, P5-10 `71ede49` (+ ez a jelentés).
@@ -288,5 +288,16 @@ Nincs. Magasabb rendű specifikációval való anyagi ellentmondás nem merült 
 1. ~~DEV migráció és smoke~~ — kész (50/50 PASS).
 2. A PO hozzon döntést a Control Gate 5-ről (SD5-01 … SD5-20).
 3. Phase 6 csak külön, `docs/specs/` alatt verziózott baseline-nal és explicit PO-felhatalmazással indulhat.
+
+## PRODUCT OWNER DECISION (2026-10-23)
+
+**CONTROL GATE 5 — APPROVED. PHASE 5 — ACCEPTED AND CLOSED.**
+
+- P5-00 … P5-10 ACCEPTED; SD5-01 … SD5-20 APPROVED; változtatási kérés nincs.
+- DEV: 38/38 migráció, smoke 50/50 PASS (Phase 5: 8/8), audit hash-lánc ellenőrizve (132 bejegyzés), pg_cron aktív.
+- Teljes Python készlet 532/532, Phase 5 32/32, Phase 1–4 regresszió 500/500, web 29/29, TypeScript és production build PASS, prompt lock PASS, secret scan / gitleaks tiszta; korpusz 30/30; CG5 kritériumok 22/22; M09 nyomonkövethetőség teljes; JCS / SHA-256 paritás ellenőrizve.
+- Az opcionális service_role smoke ellenőrzés és a `/reports` böngészős végigkattintása DEV-en NEM BLOKKOLÓ.
+- K-11 / GS-001, valós provideres próba, Phase 4 review UI: NEM BLOKKOLÓ követő tételek; a CG5-öt nem nyitják újra.
+- Phase 6 NEM engedélyezett: csak a Phase 6 hiteles, fázis-specifikus baseline `docs/specs/` alatti verziózása és explicit PO-felhatalmazás után indulhat (SD-12).
 
 **STOP — az implementáció itt megáll. Phase 6 NEM engedélyezett.**

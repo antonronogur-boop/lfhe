@@ -29,6 +29,7 @@ separation — such a change is a REQUIREMENT CHANGE.
 | 18 | PO Decision — Control Gate 4 | 2026-10-20 | **CG4 APPROVED; Phase 4 ACCEPTED AND CLOSED**; K-11, real-provider trial and Phase 4 review UI NON-BLOCKING follow-on items; Phase 5 NOT authorised (SD-12) (`docs/specs/PO_Decision_2026-10-20_Control_Gate_4.md`) |
 | 19 | Phase 5 Authoritative Baseline Addendum (Executive Reporting) | v1.0 (2026-10-21) | PO baseline for Phase 5 — report candidate pool, human selection, M09 Executive Editor, reports / report_versions / items / statements / statement sources, canonical JCS JSON + SHA-256, deterministic rendering foundation, analyst report workspace (`docs/specs/LFHE_Phase5_Authoritative_Baseline_Addendum_v1.0.md`); stored before Phase 5 implementation per SD-12; does not supersede 2–9 or closed Phase 1–4 invariants |
 | 20 | PO Decision — Authorise Phase 5 | 2026-10-21 | Phase 5 AUTHORISED; implementation order P5-00…P5-10; Phase 6 NOT authorised (`docs/specs/PO_Decision_2026-10-21_Authorise_Phase5.md`) |
+| 21 | PO Decision — Control Gate 5 | 2026-10-23 | **CG5 APPROVED; Phase 5 ACCEPTED AND CLOSED**; SD5-01…SD5-20 approved, no change requests; `/reports` browser click-through, K-11, real-provider trial and Phase 4 review UI NON-BLOCKING follow-on items; Phase 6 NOT authorised (SD-12) (`docs/specs/PO_Decision_2026-10-23_Control_Gate_5.md`) |
 
 ## Recorded normalisations (Product Owner, 2026-10-08)
 
