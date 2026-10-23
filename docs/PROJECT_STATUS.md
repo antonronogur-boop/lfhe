@@ -6,7 +6,7 @@
 | Earlier gate | **Control Gate 2 APPROVED** by the PO on 2026-10-19 (docs/control-gate-2-report.md): DEV 18/18 migrations + smoke 22/22 PASS, K-05 CLOSED and ACCEPTED (6/8 PASS; K05-03, K05-04 BLOCKED_BY_ROBOTS accepted), SD-01…SD-12 approved. Commits: implementation/CI baseline `1b31ed5`; K-05 run on `613f61a`; final documentation commit `40c00ff` |
 | Earlier gate (CG3) | **CONTROL GATE 3 — APPROVED** by the PO on 2026-10-19 (docs/specs/PO_Decision_2026-10-19_Control_Gate_3.md): CG3-01 RESOLVED; CG3-02, CG3-03 RESOLVED / ACCEPTED; knowledge-bound retraction correction RESOLVED; SD3-01…SD3-12 APPROVED; SD3-13 replaced by the approved knowledge-bound retraction semantics (migration 2600); acceptance criteria 14/14, Phase 3 tests 63/63, Phase 1+2 regression 369/369, web 21/21; DEV 27/27 migrations, smoke 32/32 PASS, audit chain verified (108 entries). Optional service_role smoke check not run — NON-BLOCKING. Final code commit `128f1a7`; DEV evidence commit `106ecd9` |
 | Current gate | **CONTROL GATE 4 — APPROVED** by the PO on 2026-10-20 (docs/specs/PO_Decision_2026-10-20_Control_Gate_4.md): P4-00…P4-09 ACCEPTED; SD4-01…SD4-18 APPROVED; CR4-01 RESOLVED (migration 3400); CR4-02 APPROVED / CLOSED; acceptance criteria 20/20; full suite 500/500 (Phase 4 68/68, Phase 1–3 432/432); web 21/21; prompt lock PASS; secret scan / gitleaks clean; DEV 35/35 migrations, smoke 42/42 PASS (Phase 4 checks 10/10), audit chain verified (124 entries). Optional service_role smoke check NON-BLOCKING. CI run 39477359815 success. Evidence commit `413ef3e` |
-| Next authorised action | PO review of docs/control-gate-5-report.md; DEV apply of migrations 3500–3700 + `scripts/supabase_dev_smoke.py` (P5 checks; expected 38 migrations, 50/50 PASS) by the PO. Implementation STOPPED after P5-10. **Phase 6 NOT authorised** |
+| Next authorised action | PO decision on Control Gate 5 (docs/control-gate-5-report.md; SD5-01…SD5-20). DEV done 2026-10-23: 38 migrations, smoke 50/50 PASS, audit chain verified (132 entries) — docs/dev-smoke-20261023-phase5.json. Implementation STOPPED after P5-10. **Phase 6 NOT authorised** |
 
 ## Phase 5 progress (Addendum v1.0)
 
@@ -22,7 +22,8 @@
 | P5-07 Deterministic HTML / print-ready preview rendering, EDIT_REPORT / RENDER_REPORT jobs (3700) | done |
 | P5-08 Analyst report workspace UI (`/reports`) | done |
 | P5-09 Acceptance corpus (§27 metrics), security / adversarial tests, regressions | done |
-| P5-10 DEV smoke P5 checks, docs, CG5 report (docs/control-gate-5-report.md); CI run 39652571441 success on `71ede49` | done — DEV apply/smoke pending (PO) |
+| P5-10 DEV smoke P5 checks, docs, CG5 report (docs/control-gate-5-report.md); CI run 39652571441 success on `71ede49` | done |
+| DEV apply 3500–3700 + smoke (PO, 2026-10-23) | done — 38 migrations, smoke 50/50 PASS, audit chain ok, 132 entries (docs/dev-smoke-20261023-phase5.json) |
 
 ## Phase 4 progress (Addendum v1.0) — ACCEPTED AND CLOSED (CG4 APPROVED 2026-10-20)
 

@@ -43,7 +43,7 @@ Nem implementált (tiltás szerint): M10-D / M10-S QA, figyelmeztetés-nyugtáz�
 | `20261011003600_p5_report_versions.sql` | `editorial_transform` (§30); `report_edit_ingestion_results`, `report_versions`, `report_items`, `report_item_statements`, `report_statement_sources`, `report_removal_proposals`, `report_removal_decisions`; `report_content_problems` validátor; kanonikus JSON író; `ingest_report_edit` (worker); HUMAN_ONLY `edit_report_version`, `decide_report_removals`; `report_version_states` nézet; audit |
 | `20261011003700_p5_report_renders.sql` | `report_renders` (PREVIEW, verzió+hash kötés, template / renderer verzió és SHA-256), `record_report_render` (worker, RENDER_NONDETERMINISTIC őr) |
 
-Összesen 38 migráció, mind előrefelé; 2700–3400 nem módosult. A 3600-at egyszer, még az első telepítés előtt, helyben pontosítottam: a forrásszövegben már szereplő bizalmi kifejezés nem minősül szerkesztői változtatásnak (SD5-20). DEV alkalmazás: a PO végzi.
+Összesen 38 migráció, mind előrefelé; 2700–3400 nem módosult. A 3600-at egyszer, még az első telepítés előtt, helyben pontosítottam: a forrásszövegben már szereplő bizalmi kifejezés nem minősül szerkesztői változtatásnak (SD5-20). DEV alkalmazás: a PO elvégezte 2026-10-23-án — 38 migráció, smoke 50/50 PASS (`docs/dev-smoke-20261023-phase5.json`).
 
 ## PROMPTS / SCHEMAS
 
@@ -177,7 +177,7 @@ Nem implementált (tiltás szerint): M10-D / M10-S QA, figyelmeztetés-nyugtáz�
 - Lokális PostgreSQL 16 (Supabase shim), Python 3.13: `python -m pytest -q` (teljes készlet), a Phase 5 korpusz `LFHE_P5_METRICS_OUT=docs/cg5-acceptance-metrics.json` beállítással.
 - `apps/web`: `tsc --noEmit`, `vitest run`, `next build`.
 - `python scripts/prompt_registry.py check-lock`; `python scripts/secret_scan.py`; `gitleaks detect --source .`.
-- A DEV smoke Phase 5 SQL-lekérdezései a lokális adatbázison ellenőrizve; a DEV futtatás a PO-ra vár.
+- DEV Supabase: a PO alkalmazta a 3500–3700 migrációkat és lefuttatta a `scripts/supabase_dev_smoke.py`-t (2026-10-23); eredmény: `docs/dev-smoke-20261023-phase5.json`.
 - GitHub CI a `71ede49` commiton.
 
 ## TEST RESULTS
@@ -192,6 +192,7 @@ Nem implementált (tiltás szerint): M10-D / M10-S QA, figyelmeztetés-nyugtáz�
 | Secret scan / gitleaks | `SECRET-SCAN: clean` / `no leaks found` |
 | §27 korpusz-metrikák | mind **0** (30 forgatókönyv; `docs/cg5-acceptance-metrics.json`) |
 | GitHub CI (`71ede49`) | **run 39652571441 — success** (secret-scan, python-tests, web) |
+| DEV Supabase (PO, 2026-10-23) | **38 migráció, smoke 50/50 PASS** (ebből 8 Phase 5 ellenőrzés), audit hash-lánc ellenőrizve (132 bejegyzés), pg_cron aktív; az opcionális service-role ellenőrzés nem futott — NEM BLOKKOLÓ |
 
 ## PHASE 5 ACCEPTANCE CRITERIA
 
@@ -278,13 +279,13 @@ Nincs. Magasabb rendű specifikációval való anyagi ellentmondás nem merült 
 
 ## OPEN ITEMS
 
-1. **DEV**: a 3500–3700 migrációk alkalmazása és `scripts/supabase_dev_smoke.py` futtatása a PO által (várható: 38 migráció, 50/50 PASS service-role kulcs nélkül). Csak a JSON kimenetet kérem vissza, jelszót / kulcsot nem.
+1. ~~DEV migráció + smoke~~ — **LEZÁRVA** 2026-10-23: 38 migráció, 50/50 PASS (`docs/dev-smoke-20261023-phase5.json`).
 2. Böngészős végigkattintás a `/reports` workspace-en DEV-en (L-37, nem blokkoló).
 3. Nem blokkoló, korábbról nyitva maradt tételek: K-11 (GS-001), valós provideres próba (L-09 / L-39), Phase 4 review UI (L-32).
 
 ## RECOMMENDED NEXT ACTION
 
-1. A PO futtassa a DEV migrációt és smoke-ot, és küldje vissza a kimenetet.
+1. ~~DEV migráció és smoke~~ — kész (50/50 PASS).
 2. A PO hozzon döntést a Control Gate 5-ről (SD5-01 … SD5-20).
 3. Phase 6 csak külön, `docs/specs/` alatt verziózott baseline-nal és explicit PO-felhatalmazással indulhat.
 
