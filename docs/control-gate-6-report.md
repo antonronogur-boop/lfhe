@@ -3,7 +3,7 @@
 ## PHASE / GATE
 
 - Fázis: **Phase 6 — QA, Approval & Release** (M10-D determinisztikus QA, M10-S szemantikus QA, kombinált QA-státusz, figyelmeztetés-nyugtázás, emberi tartalmi jóváhagyás, emberi security / kezelési review, release PDF, determinisztikus kiadhatósági ellenőrzés, emberi kiadási döntés, atomikus manifest + RELEASED, javítási út).
-- Kapu: **CONTROL GATE 6 — HOLD a CR6-01 célzott javításig** (PO, 2026-10-23, `docs/specs/PO_Decision_2026-10-23_CG6_Targeted_Correction_CR6-01.md`): SD6-01…09 és SD6-11…19 APPROVED; SD6-10 → CR6-01. **CR6-01: RESOLVED** (migráció `20261011004000`; CI zöld: run 39980095711, commit `d06f561` — secret-scan, python-tests, web), a DEV-futtatás a PO-é. A CG6-ot csak a Product Owner hagyhatja jóvá; ez a jelentés nem jóváhagyás.
+- Kapu: **CONTROL GATE 6 — APPROVED** (PO, 2026-10-23, `docs/specs/PO_Decision_2026-10-23_Control_Gate_6.md`). **PHASE 6 — ACCEPTED AND CLOSED.** **CR6-01 — RESOLVED AND CLOSED** (migráció `20261011004000`; 3800 / 3900 változatlan). SD6-01…09 és SD6-11…19 APPROVED; SD6-10 APPROVED AS CORRECTED BY CR6-01; további change request nincs. Végső DEV-validáció: 41 / 41 migráció, smoke 62 / 62 PASS, audit hash-lánc 140 bejegyzés OK. Előzmény: CG6 HOLD a CR6-01 célzott javításig (`docs/specs/PO_Decision_2026-10-23_CG6_Targeted_Correction_CR6-01.md`).
 - Alap: `docs/specs/LFHE_Phase6_Authoritative_Baseline_Addendum_v1.0.md` (SPEC_INDEX 22), PO felhatalmazás `docs/specs/PO_Decision_2026-10-23_Authorise_Phase6.md` (SPEC_INDEX 23); mindkettő szó szerint tárolva a P6-00-ban.
 - Végrehajtás: P6-00 … P6-10 a megadott sorrendben, köztes engedélykérés nélkül. CG1–CG5 nincs újranyitva; általános architektúra-audit nem történt; a lezárt Phase 1–5 szemantika nem változott.
 - Commitok: P6-00 `b1d01a3`; P6-01…03 `44393a3`; P6-04…07 `91e45e4`; P6-08 `904c9a4`; CI Chromium-javítás `47eec80`; P6-09 `5fedf1b`; P6-10 `56c3967` (+ CI-eredmény rögzítése).
@@ -215,7 +215,7 @@ A §26 lista minden eleme teszttel lefedve (`docs/phase6-test-traceability.md`):
 | 29 | DEV smoke PASS | Phase 6: PASS (PO, 2026-10-23: 40 migráció, smoke 61 / 61; `docs/dev-smoke-20261023-phase6.json`); **CR6-01: PASS** (PO, 2026-10-23: 41 migráció, smoke 62 / 62, a CR6-01 ellenőrzés PASS, audit hash-lánc 140 bejegyzés OK; `docs/dev-smoke-20261023-cr6-01.json`) |
 | 30 | Phase 7 NEM indult | PASS |
 
-Összesítve: a CR6-01 előtt 30 / 30 PASS volt; a CR6-01 helyben teljesen tesztelve. A CR6-01 DEV-smoke 62 / 62 PASS (2026-10-23). **CG6 ajánlás: APPROVED** — a döntés a PO-é.
+Összesítve: a CR6-01 előtt 30 / 30 PASS volt; a CR6-01 helyben teljesen tesztelve. A CR6-01 DEV-smoke 62 / 62 PASS (2026-10-23). **CG6: APPROVED** (PO, 2026-10-23).
 
 ## DEV SMOKE STATUS
 
@@ -280,7 +280,7 @@ Egyik sem önjóváhagyott; PO-döntésre bízva.
 
 ## CHANGE REQUESTS
 
-- **CR6-01 — Release manifest baseline version ids — RESOLVED.** Nyitotta: PO, 2026-10-23 (SD6-10 nem jóváhagyva). Szabály: a Module Prompt Pack delta-audit PG-07 a release manifestben `baseline_version_ids`-t követel. Javítás: új előrefelé migráció `20261011004000_p6_cr6_01_manifest_baseline_ids.sql` (3800 / 3900 változatlan); a mezőt a ténylegesen használt, jóváhagyott analitikai objektumokból számolja (`p6_required_baseline_versions`), deduplikálva és rendezve, a JCS / SHA-256 része; a kiadási tranzakció teljesség-ellenőrzése fail closed hiányzó / ismeretlen / láncon kívüli / cutoff szerint nem használható baseline esetén; új baseline-szemantika nincs, más spekulatív manifest-mező nem került be. Tesztek: `tests/integration/test_p6_cr6_01.py` (a PO által kért 10 bizonyíték, `docs/phase6-test-traceability.md`), DEV smoke +1 ellenőrzés. DEV-alkalmazás: a PO-é.
+- **CR6-01 — Release manifest baseline version ids — RESOLVED AND CLOSED** (PO, CG6, 2026-10-23). Nyitotta: PO, 2026-10-23 (SD6-10 nem jóváhagyva). Szabály: a Module Prompt Pack delta-audit PG-07 a release manifestben `baseline_version_ids`-t követel. Javítás: új előrefelé migráció `20261011004000_p6_cr6_01_manifest_baseline_ids.sql` (3800 / 3900 változatlan); a mezőt a ténylegesen használt, jóváhagyott analitikai objektumokból számolja (`p6_required_baseline_versions`), deduplikálva és rendezve, a JCS / SHA-256 része; a kiadási tranzakció teljesség-ellenőrzése fail closed hiányzó / ismeretlen / láncon kívüli / cutoff szerint nem használható baseline esetén; új baseline-szemantika nincs, más spekulatív manifest-mező nem került be. Tesztek: `tests/integration/test_p6_cr6_01.py` (a PO által kért 10 bizonyíték, `docs/phase6-test-traceability.md`), DEV smoke +1 ellenőrzés. DEV-alkalmazás: a PO-é.
 
 ## OPEN ITEMS
 
@@ -295,7 +295,7 @@ Nem blokkoló (a PO eddigi döntése szerint):
 ## RECOMMENDED NEXT ACTION
 
 1. ~~A PO alkalmazza a `20261011004000` migrációt DEV-en~~ — kész (2026-10-23: 41 migráció, smoke 62 / 62 PASS).
-2. A PO hozza meg a végső CONTROL GATE 6 döntést.
+2. ~~A PO hozza meg a végső CONTROL GATE 6 döntést~~ — CONTROL GATE 6 APPROVED, PHASE 6 ACCEPTED AND CLOSED (2026-10-23).
 3. Phase 7 csak egy verziózott Phase 7 baseline és kifejezett PO-felhatalmazás után indulhat (SD-12).
 
 **STOP — Control Gate 6, PO-döntésre vár.**
