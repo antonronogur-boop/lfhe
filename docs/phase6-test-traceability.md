@@ -115,6 +115,24 @@ non-blocking follow-on item).
 | 99 | DEV smoke has Phase 6 guards | `scripts/supabase_dev_smoke.py` (11 P6 checks) |
 | 100 | Phase 7 not started | no Phase 7 object / migration / code; PROJECT_STATUS |
 
+## CR6-01 — `baseline_version_ids` (PO decision 2026-10-23)
+
+Tests: `tests/integration/test_p6_cr6_01.py` (CR), plus `test_p6_release.py` (manifest key set).
+
+| # | Required test | Evidence |
+|---|---|---|
+| 1 | manifest contains `baseline_version_ids` | CR `test_manifest_preserves_exact_deduplicated_baseline_version_ids`; R `MANIFEST_KEYS`; DEV smoke CR6-01 check |
+| 2 | ids = baselines of the released analytical provenance | CR same (`p6_required_baseline_versions` = assessment versions' baselines) |
+| 3 | multiple baselines deduplicated, deterministic order | CR same (two assessments, one baseline also cited as evidence; sorted) |
+| 4 | missing required baseline blocks manifest / release | CR same (`BASELINE_VERSION_MISSING`, absent field → completeness failure → `MANIFEST_INCOMPLETE` in `release_report`) |
+| 5 | unknown baseline id blocks release | CR same (`BASELINE_VERSION_UNKNOWN`, `BASELINE_VERSION_NOT_IN_CHAIN`, non-canonical order) |
+| 6 | post-cutoff / ineligible baseline stays blocked | CR same (M10-D D21 FAIL → `RELEASE_NOT_ELIGIBLE`; `BASELINE_VERSION_NOT_ELIGIBLE`) |
+| 7 | manifest hash changes with the field | CR same |
+| 8 | SQL / Python JCS parity | CR same (stored = SQL = Python hash) |
+| 9 | released manifest immutable | CR same (UPDATE / DELETE refused, hash unchanged) |
+| 10 | Phase 1–6 regression green | full `pytest` run |
+| — | reports without baselines carry `[]`; helpers not executable by app roles | CR `test_reports_without_baselines_carry_an_empty_list` |
+
 ## §33 CG6 criteria → metrics (`docs/cg6-acceptance-metrics.json`, all must be 0)
 
 | §33 | Metric / evidence |

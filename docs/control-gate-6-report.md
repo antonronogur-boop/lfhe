@@ -3,7 +3,7 @@
 ## PHASE / GATE
 
 - Fázis: **Phase 6 — QA, Approval & Release** (M10-D determinisztikus QA, M10-S szemantikus QA, kombinált QA-státusz, figyelmeztetés-nyugtázás, emberi tartalmi jóváhagyás, emberi security / kezelési review, release PDF, determinisztikus kiadhatósági ellenőrzés, emberi kiadási döntés, atomikus manifest + RELEASED, javítási út).
-- Kapu: **CONTROL GATE 6 — PO-DÖNTÉSRE VÁR.** A CG6-ot csak a Product Owner hagyhatja jóvá; ez a jelentés nem jóváhagyás.
+- Kapu: **CONTROL GATE 6 — HOLD a CR6-01 célzott javításig** (PO, 2026-10-23, `docs/specs/PO_Decision_2026-10-23_CG6_Targeted_Correction_CR6-01.md`): SD6-01…09 és SD6-11…19 APPROVED; SD6-10 → CR6-01. **CR6-01: RESOLVED** (migráció `20261011004000`), a DEV-futtatás a PO-é. A CG6-ot csak a Product Owner hagyhatja jóvá; ez a jelentés nem jóváhagyás.
 - Alap: `docs/specs/LFHE_Phase6_Authoritative_Baseline_Addendum_v1.0.md` (SPEC_INDEX 22), PO felhatalmazás `docs/specs/PO_Decision_2026-10-23_Authorise_Phase6.md` (SPEC_INDEX 23); mindkettő szó szerint tárolva a P6-00-ban.
 - Végrehajtás: P6-00 … P6-10 a megadott sorrendben, köztes engedélykérés nélkül. CG1–CG5 nincs újranyitva; általános architektúra-audit nem történt; a lezárt Phase 1–5 szemantika nem változott.
 - Commitok: P6-00 `b1d01a3`; P6-01…03 `44393a3`; P6-04…07 `91e45e4`; P6-08 `904c9a4`; CI Chromium-javítás `47eec80`; P6-09 `5fedf1b`; P6-10 `56c3967` (+ CI-eredmény rögzítése).
@@ -44,7 +44,9 @@ Nem implementált (tiltás szerint): Phase 7, éles telepítés, minősített ad
 | `20261011003800_p6_qa.sql` | `qa_checks`, `qa_requests`, `qa_runs`, `qa_check_results`, `qa_results`, `warning_acknowledgements`; segédfüggvények (`p6_autofail_codes`, `p6_recommended_actions`, `p6_prohibited_marking`, `p6_instruction_like`, `p6_current_qa_result`, `p6_unacknowledged_warnings`, …); HUMAN_ONLY `request_report_qa`, `acknowledge_qa_warning`; worker `run_m10d`, `ingest_qa_semantic`, `record_qa_result`; audit-triggerek; RUN_REPORT_QA / RENDER_RELEASE_PDF job-típusok |
 | `20261011003900_p6_approval_release.sql` | `content_approvals`, `security_reviews`, `release_pdf_artifacts`, `release_decisions`, `release_manifests`, `report_releases`; guard trigger (`p6_release_guard`); `p6_release_checklist`, `release_eligibility`, `p6_build_manifest`, `p6_manifest_problems`; HUMAN_ONLY `decide_report_content`, `decide_security_review`, `request_release_pdf`, `decide_release`, `release_report`; worker `record_release_pdf`; új-verzió trigger (javítás / érvénytelenítés audit); `report_version_workflow` nézet |
 
-**Új migrációk:** 2 (`20261011003800_p6_qa.sql`, `20261011003900_p6_approval_release.sql`). **Összes migráció: 40.** A 3500–3700 nem módosult. A két új migrációt az első push után, de még bármely telepítés előtt, helyben pontosítottam (SD6-16).
+| `20261011004000_p6_cr6_01_manifest_baseline_ids.sql` (CR6-01) | `p6_required_baseline_versions`; `p6_build_manifest` + `baseline_version_ids`; `p6_manifest_problems` + `baseline_version_ids` kötelező mező és fail-closed baseline-ellenőrzések (kanonikus, hiányzó, ismeretlen, láncon kívüli, cutoff szerint nem használható) |
+
+**Új migrációk:** 3 (`20261011003800_p6_qa.sql`, `20261011003900_p6_approval_release.sql`, CR6-01: `20261011004000_p6_cr6_01_manifest_baseline_ids.sql`). **Összes migráció: 41.** A 3800 és 3900 a DEV-alkalmazás óta nem változott (a CR6-01 előrefelé, új migrációban). A 3500–3700 nem módosult. A két új migrációt az első push után, de még bármely telepítés előtt, helyben pontosítottam (SD6-16).
 
 ## PHASE 6 STATE MODEL
 
@@ -117,7 +119,7 @@ CHECK-ek: SHA-256 = digest(bájtok), méret, `%PDF-` mágia, tároló-kulcs = ha
 
 ## RELEASE MANIFEST / MANIFEST HASH
 
-Kanonikus manifest (`lfhe-release-manifest/1`, séma 1.0.0): report (id, kód, cím, ciklus, mód, cutoff), verzió (id, hash, szám, eredet, előd, szerző M09-futás + prompt-hash), kiválasztási készlet (id, hash), analitikai proveniencia (tételenként értékelés- / esemény- / indikátor- / trendverzió + hash + analitikai jóváhagyás id), QA (eredmény, státusz, D-futás + motorverzió, S-futás, M10-S model_run, M10 prompt verzió / semver / hash / modulverzió, modellkonfiguráció-hash), nyugtázás-id-k, tartalmi jóváhagyás, security review, kiadási döntés, kiadó, időbélyeg, renderelés (template verzió / hash, renderer verzió / hash, preview render, forrás-HTML hash), PDF (id, SHA-256, méret, MIME, tároló-kulcs). `manifest_hash = SHA-256(JCS(manifest))` CHECK-kel; SQL = Python = tárolt hash; teljesség-ellenőrzés (`p6_manifest_problems`) a tranzakcióban; kiadás után immutábilis (UPDATE / DELETE / TRUNCATE tiltva).
+Kanonikus manifest (`lfhe-release-manifest/1`, séma 1.0.0): report (id, kód, cím, ciklus, mód, cutoff), verzió (id, hash, szám, eredet, előd, szerző M09-futás + prompt-hash), kiválasztási készlet (id, hash), **`baseline_version_ids`** (CR6-01: a kiadott analitikai lánc ténylegesen használt baseline-verziói — a tételek által pinelt és a forrásként idézett értékelésverziók `baseline_version_id`-je, plusz az idézett állítások `baseline_version` bizonyítékai; deduplikálva, id szerint rendezve; a JCS / SHA-256 része; a kiadási tranzakcióban fail-closed ellenőrizve: hiányzó, ismeretlen, láncon kívüli vagy a cutoffkor nem használható baseline → `MANIFEST_INCOMPLETE`), analitikai proveniencia (tételenként értékelés- / esemény- / indikátor- / trendverzió + hash + analitikai jóváhagyás id), QA (eredmény, státusz, D-futás + motorverzió, S-futás, M10-S model_run, M10 prompt verzió / semver / hash / modulverzió, modellkonfiguráció-hash), nyugtázás-id-k, tartalmi jóváhagyás, security review, kiadási döntés, kiadó, időbélyeg, renderelés (template verzió / hash, renderer verzió / hash, preview render, forrás-HTML hash), PDF (id, SHA-256, méret, MIME, tároló-kulcs). `manifest_hash = SHA-256(JCS(manifest))` CHECK-kel; SQL = Python = tárolt hash; teljesség-ellenőrzés (`p6_manifest_problems`) a tranzakcióban; kiadás után immutábilis (UPDATE / DELETE / TRUNCATE tiltva).
 
 ## RELEASED PROTECTION
 
@@ -162,15 +164,15 @@ A §26 lista minden eleme teszttel lefedve (`docs/phase6-test-traceability.md`):
 ## TESTS ACTUALLY RUN
 
 - Teljes Python-tesztkészlet (throw-away PostgreSQL 16, `-W error::DeprecationWarning`): lásd TEST RESULTS.
-- Phase 6 tesztek: 29 (D 5, S 5, AP 3, R 4, W 2, RB 9, A 1).
+- Phase 6 tesztek: 31 (D 5, S 5, AP 3, R 4, W 2, CR6-01 2, RB 9, A 1).
 - Web: `npx vitest run`, `npx tsc --noEmit`, `npx next build`.
 - `scripts/prompt_registry.py check-lock`, `scripts/secret_scan.py`, gitleaks (pinned 8.24.3; `git` mód teljes történeten).
 - CI (GitHub Actions: secret-scan, python-tests, web) a záró commiton.
 
 ## TEST RESULTS
 
-- Teljes készlet: **561 / 561 PASS** (Phase 6: 29 / 29; Phase 1–5: 532 / 532).
-- Web: **35 / 35** (4 fájl), TypeScript PASS, production build PASS.
+- Teljes készlet: **563 / 563 PASS** (Phase 6: 31 / 31, benne CR6-01 2 / 2; Phase 1–5: 532 / 532) — a CR6-01 után újrafuttatva.
+- Web: **35 / 35** (4 fájl), TypeScript PASS, production build PASS (a CR6-01 után újrafuttatva; a Next.js frissítési figyelmeztetés változatlan, lásd KNOWN FAILURES).
 - Prompt lock: PASS (9 bundle, benne `M10_QA_AUDITOR/1.0.0`). Secret scan: clean. Gitleaks (git-történet): no leaks.
 - CI: run **39971116835** a `56c3967` commiton — secret-scan, python-tests, web: mind **success**. (A `5fedf1b` futás python-tests jobja a GS-izolációs teszt miatt bukott: az új korpusz kötelező „Not Gold Standard material” nyilatkozatát fel kellett venni az engedélyezett fájlok közé; javítva a `56c3967`-ben.)
 
@@ -199,7 +201,7 @@ A §26 lista minden eleme teszttel lefedve (`docs/phase6-test-traceability.md`):
 | 15 | security jóváhagyás nélküli kiadás = 0 | PASS |
 | 16 | elavult verzió kiadása = 0 | PASS |
 | 17 | PDF / verzió / hash eltéréssel kiadott = 0 | PASS |
-| 18 | manifest teljesség / hash hibával kiadott = 0 | PASS |
+| 18 | manifest teljesség / hash hibával kiadott = 0 | PASS (a teljesség a CR6-01 óta a `baseline_version_ids`-t is magában foglalja) |
 | 19 | részleges / nem atomikus RELEASED = 0 | PASS |
 | 20 | kiadott report / verzió / PDF / manifest módosítása = 0 | PASS |
 | 21 | M10-S model_run nyomonkövetési hiány = 0 | PASS |
@@ -210,10 +212,10 @@ A §26 lista minden eleme teszttel lefedve (`docs/phase6-test-traceability.md`):
 | 26 | prompt lock PASS | PASS |
 | 27 | secret scan / gitleaks clean | PASS |
 | 28 | web typecheck / teszt / build PASS | PASS |
-| 29 | DEV smoke PASS | PASS (PO, 2026-10-23: 40 migráció, smoke 61 / 61, Phase 6 ellenőrzések 11 / 11; `docs/dev-smoke-20261023-phase6.json`) |
+| 29 | DEV smoke PASS | Phase 6: PASS (PO, 2026-10-23: 40 migráció, smoke 61 / 61; `docs/dev-smoke-20261023-phase6.json`); **CR6-01 DEV-futtatás a PO-ra vár** (várt: 41 migráció, 62 / 62) |
 | 30 | Phase 7 NEM indult | PASS |
 
-Összesítve: **30 / 30 PASS. CG6 ajánlás: APPROVED** — a döntés a PO-é.
+Összesítve: a CR6-01 előtt 30 / 30 PASS volt; a CR6-01 helyben teljesen tesztelve. **CG6 ajánlás: APPROVED, ha a CR6-01 DEV-smoke 62 / 62 PASS** — a döntés a PO-é.
 
 ## DEV SMOKE STATUS
 
@@ -222,6 +224,16 @@ A §26 lista minden eleme teszttel lefedve (`docs/phase6-test-traceability.md`):
 - smoke **61 / 61 PASS**, ebből a Phase 6 ellenőrzések **11 / 11** (12 / 12 RLS-es tábla; közvetlen írás egyetlen alkalmazás-szerepkörnek sem; `release_report` EXECUTE csak `authenticated`; Phase 6 jogosultság csak REVIEWER / SECURITY_REVIEWER / RELEASE_AUTHORITY; mind a 7 guard / immutábilis trigger megvan; viewer olvas, anon nem; viewer és ADMIN nem adhat ki / nem hagyhat jóvá; worker-függvények emberre zárva; az eligibility ismeretlen verzióra fail closed);
 - audit hash-lánc ellenőrizve (136 bejegyzés), pg_cron aktív;
 - az opcionális service-role ellenőrzés nem futott (NON-BLOCKING, mint korábban).
+
+**CR6-01 — PO teendője** (a `C:\Users\bdatA\lfhe` mappából, a már ismert környezeti változókkal):
+
+```powershell
+git pull
+python scripts/apply_migrations.py $env:LFHE_DEV_DB_URL
+python scripts/supabase_dev_smoke.py | Out-File -Encoding utf8 dev-smoke-cr6-01.json
+```
+
+Várt eredmény: **41 migráció** (új: `20261011004000_p6_cr6_01_manifest_baseline_ids.sql`), smoke **62 / 62 PASS** (61 korábbi + 1 CR6-01 ellenőrzés: a manifest-építő kiadja és a teljesség-ellenőrzés megköveteli a `baseline_version_ids` mezőt). A smoke nem ad ki reportot.
 
 ## KNOWN FAILURES
 
@@ -255,7 +267,7 @@ Egyik sem önjóváhagyott; PO-döntésre bízva.
 - **SD6-07** — Szabály: a PDF nem tartalmazhat a kanonikus / determinisztikus forrásban nem szereplő tartalmat. Megvalósítás: RELEASE-változat = ugyanaz a renderelés, csak a „draft preview, not released” sáv / cím helyett release-sáv. Indok: a kiadott PDF nem állíthatja magáról, hogy nem kiadott.
 - **SD6-08** — Szabály: a lánc szerint a PDF a security review után. Megvalósítás: a PDF-job az APPROVED security review-ra indul; a security reviewer az azonos törzsű determinisztikus preview-t nézi; `request_release_pdf` (RELEASE_DECIDE) újrarenderelésre. Indok: a lánc sorrendje; a PDF a kiadási jelölt artefaktuma.
 - **SD6-09** — Szabály: „minden nyugtázást igénylő figyelmeztetés”. Megvalósítás: minden WARNING finding nyugtázást igényel; nyugtázás sosem öröklődik QA-eredmények között. Indok: a baseline „default safest” iránya.
-- **SD6-10** — Szabály: a magasabb rendű manifest-specifikáció (Prompt Pack v1.2.1 11. pont, CG0 E.19) mezőit meg kell őrizni. Megvalósítás: a v1.2.1 11. pont szövege nincs a repóban; a manifest a §23 listát + K-09 + analitikai pineket (jóváhagyás-id-kkal) + a szerző M09-futást tartalmazza. Indok: amit a tárolt specifikáció előír, az mind benne van; ha a v1.2.1 11. pont további kötelező mezőt tartalmaz, előrefelé bővíthető (kérem a PO megerősítését).
+- **SD6-10** — *PO, 2026-10-23: NOT APPROVED as implemented → CR6-01 (RESOLVED).* Szabály: a magasabb rendű manifest-specifikáció (Prompt Pack v1.2.1 11. pont, CG0 E.19) mezőit meg kell őrizni. Megvalósítás: a v1.2.1 11. pont szövege nincs a repóban; a manifest a §23 listát + K-09 + analitikai pineket (jóváhagyás-id-kkal) + a szerző M09-futást tartalmazza. Indok: amit a tárolt specifikáció előír, az mind benne van; ha a v1.2.1 11. pont további kötelező mezőt tartalmaz, előrefelé bővíthető (kérem a PO megerősítését).
 - **SD6-11** — Szabály: M10-S szemantikus ellenőrzések. Megvalósítás: a tesztek a valós bundle-t, bemenet-építőt és ingestiont használják, de a modell helyén szabályalapú helyettesítő / címkézett scriptelt viselkedés áll. Indok: valós provider-próba nem blokkoló; a szerződés teljesen tesztelt, a modell detektálási minősége nem.
 - **SD6-12** — Szabály: M10-D ellenőrzési lista. Megvalósítás: plusz determinisztikus ellenőrzés: utasításszerű szöveg a reportban → CRITICAL (`STRUCTURE / EMBEDDED_INSTRUCTION_IN_CONTENT`). Indok: §27 (a jóváhagyott forrásból átvett injekció a szemantikus réteget is megkerülhetné).
 - **SD6-13** — Szabály: QA-14 OSINT-határ, kétes esetben ember. Megvalósítás: minősítési / kezelési jelölések regex-listája → CRITICAL; forrás `access_restrictions` → WARNING (emberi kezelés). Indok: a sémában nincs „tiltott” forráskategória (minden regisztrált forrás nyilvános OSINT-típus).
@@ -268,7 +280,7 @@ Egyik sem önjóváhagyott; PO-döntésre bízva.
 
 ## CHANGE REQUESTS
 
-Nincs (CR6: —). Nem találtam olyan valódi ellentmondást, amely bármely részt blokkolna; az SD6-10 egy megerősítést kér.
+- **CR6-01 — Release manifest baseline version ids — RESOLVED.** Nyitotta: PO, 2026-10-23 (SD6-10 nem jóváhagyva). Szabály: a Module Prompt Pack delta-audit PG-07 a release manifestben `baseline_version_ids`-t követel. Javítás: új előrefelé migráció `20261011004000_p6_cr6_01_manifest_baseline_ids.sql` (3800 / 3900 változatlan); a mezőt a ténylegesen használt, jóváhagyott analitikai objektumokból számolja (`p6_required_baseline_versions`), deduplikálva és rendezve, a JCS / SHA-256 része; a kiadási tranzakció teljesség-ellenőrzése fail closed hiányzó / ismeretlen / láncon kívüli / cutoff szerint nem használható baseline esetén; új baseline-szemantika nincs, más spekulatív manifest-mező nem került be. Tesztek: `tests/integration/test_p6_cr6_01.py` (a PO által kért 10 bizonyíték, `docs/phase6-test-traceability.md`), DEV smoke +1 ellenőrzés. DEV-alkalmazás: a PO-é.
 
 ## OPEN ITEMS
 
@@ -279,11 +291,11 @@ Nem blokkoló (a PO eddigi döntése szerint):
 - Phase 4 review UI.
 - Opcionális service-role smoke-ellenőrzés.
 - Next.js biztonsági frissítés (a build-eszköz jelzése alapján) — külön PO-döntés.
-- SD6-10: a v1.2.1 11. pont manifest-mezőinek megerősítése.
 
 ## RECOMMENDED NEXT ACTION
 
-1. A PO döntsön az SD6-01 … SD6-19 eltérésekről és a CONTROL GATE 6-ról (minden kritérium PASS, DEV-bizonyíték rögzítve).
-2. Phase 7 csak egy verziózott Phase 7 baseline és kifejezett PO-felhatalmazás után indulhat (SD-12).
+1. A PO alkalmazza a `20261011004000` migrációt DEV-en, futtassa a smoke-ot (várt: 41 migráció, 62 / 62 PASS), és küldje vissza a JSON-t.
+2. A PO hozza meg a végső CONTROL GATE 6 döntést.
+3. Phase 7 csak egy verziózott Phase 7 baseline és kifejezett PO-felhatalmazás után indulhat (SD-12).
 
 **STOP — Control Gate 6, PO-döntésre vár.**

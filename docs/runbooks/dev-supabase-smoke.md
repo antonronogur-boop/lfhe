@@ -113,3 +113,9 @@ operator/Product Owner; record the JSON output of step 6 in PROJECT_STATUS.
   and the configured object storage (release PDFs are stored write-once under `release-pdf/sha256/…`).
   The prompt bundle `packages/prompts/M10_QA_AUDITOR/1.0.0` is registered with
   `scripts/prompt_registry.py register` and activated by a human (PROMPT_ACTIVATE) as for M02–M09.
+
+### CR6-01 addition
+
+* Migration `20261011004000_p6_cr6_01_manifest_baseline_ids.sql` (release manifest `baseline_version_ids`) →
+  41 migrations in total; the smoke adds one check (release manifest carries and requires
+  `baseline_version_ids`). Expected result without the service-role key: **62/62 PASS**.

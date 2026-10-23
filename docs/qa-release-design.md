@@ -3,7 +3,7 @@
 Baseline: `docs/specs/LFHE_Phase6_Authoritative_Baseline_Addendum_v1.0.md` (SPEC_INDEX 22), PO
 authorisation `docs/specs/PO_Decision_2026-10-23_Authorise_Phase6.md` (SPEC_INDEX 23), Module Prompt Pack
 v1.2 §34–§55, CG0 E.16–E.19, F (REPORT / SECURITY REVIEW / RELEASE state machines), G (RELEASED
-protection), H (QA architecture). Migrations `20261011003800_p6_qa.sql`, `20261011003900_p6_approval_release.sql`.
+protection), H (QA architecture). Migrations `20261011003800_p6_qa.sql`, `20261011003900_p6_approval_release.sql`, `20261011004000_p6_cr6_01_manifest_baseline_ids.sql` (CR6-01).
 
 Phase 6 does not add analytical semantics (M07 / M08 / M09 unchanged) and does not start Phase 7.
 
@@ -103,9 +103,19 @@ QA_ACCEPTABLE, NO_CRITICAL_FINDING, CONTENT_APPROVED, SECURITY_APPROVED, NOT_RET
 PDF_EXISTS, PDF_BOUND_TO_VERSION, PDF_HASH_VALID, TEMPLATE_RENDERER_RESOLVE, MODEL_PROVENANCE_RESOLVES,
 ANALYTICAL_PROVENANCE_RESOLVES, MANIFEST_INPUTS_COMPLETE, CALLER_HUMAN_RELEASE_AUTHORITY.
 
+**CR6-01 (migration `20261011004000`)** — the manifest carries `baseline_version_ids` (Prompt Pack
+delta-audit PG-07): `lfhe.p6_required_baseline_versions(version)` = the distinct `baseline_version_id` of every
+assessment version pinned by an item or cited by a statement source, plus every `baseline_version` cited as
+evidence by a cited assessment statement, ordered by id text (nothing inferred). `p6_manifest_problems`
+requires the field and fails closed when the ids are not canonical (uuid, sorted, distinct), when a required
+baseline is missing (`BASELINE_VERSION_MISSING`), when an id is unknown (`BASELINE_VERSION_UNKNOWN`) or not in
+the chain (`BASELINE_VERSION_NOT_IN_CHAIN`), or when it is not usable under the existing cutoff rules for the
+version's mode / cutoff (`BASELINE_VERSION_NOT_ELIGIBLE`). A post-cutoff baseline is still caught earlier by
+M10-D D21 (QA FAIL → not eligible). No new baseline semantics.
+
 `lfhe.release_report` (HUMAN_ONLY, RELEASE_DECIDE): locks the report, re-evaluates the checklist, sets a
 transaction-local release token, writes the APPROVE_FOR_RELEASE decision, builds the manifest
-(`p6_build_manifest`, Addendum §23 fields + item pins with analytical approval ids + authoring M09
+(`p6_build_manifest`, Addendum §23 fields + `baseline_version_ids` (CR6-01) + item pins with analytical approval ids + authoring M09
 run), checks completeness (`p6_manifest_problems`), stores `manifest_hash = SHA-256(JCS(manifest))`
 (CHECK), writes `report_releases` (RELEASED) and the audit entries — one transaction; any failure leaves
 nothing. A guard trigger refuses APPROVE decisions, manifests and RELEASED rows outside that token.

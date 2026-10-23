@@ -19,7 +19,7 @@ pytestmark = pytest.mark.db
 IP = psycopg.errors.InsufficientPrivilege
 MANIFEST_KEYS = {"format", "manifest_schema_version", "report", "report_version", "selection_set", "analytical_provenance", "qa",
                  "warning_acknowledgement_ids", "content_approval_id", "security_review_id", "release_decision_id", "released_by",
-                 "release_timestamp", "rendering", "pdf"}
+                 "release_timestamp", "rendering", "pdf", "baseline_version_ids"}
 
 
 @pytest.fixture(scope="module")

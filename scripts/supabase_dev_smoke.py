@@ -326,6 +326,10 @@ def main() -> int:
                                ("ingest_qa_semantic", {"p": {}}), ("record_qa_result", {"p_deterministic_run": zero, "p_semantic_run": zero}),
                                ("record_release_pdf", {"p": {}})) if rest.rpc(fn, args, admin).status_code < 400]
     check("P6: humans cannot call the M10 / QA-result / release-PDF worker functions", not bad, ", ".join(bad))
+    probs = db.execute("SELECT lfhe.p6_manifest_problems('{}'::jsonb) AS p").fetchone()["p"]
+    keys = db.execute("SELECT lfhe.p6_build_manifest(NULL::uuid) ? 'baseline_version_ids' AS k").fetchone()["k"]
+    check("P6 / CR6-01: release manifest carries and requires baseline_version_ids (PG-07)",
+          "{baseline_version_ids}" in probs and keys is True, f"required={'{baseline_version_ids}' in probs} built={keys}")
     r = rest.rpc("release_eligibility", {"p_version": zero, "p_hash": "0" * 64, "p_pdf": None}, viewer)
     check("P6: deterministic release eligibility fails closed for an unknown version",
           r.status_code == 200 and r.json().get("eligible") is False and "VERSION_EXISTS" in r.json().get("failed", []),
