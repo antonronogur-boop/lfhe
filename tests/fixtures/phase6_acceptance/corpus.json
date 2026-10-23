@@ -1,0 +1,455 @@
+{
+ "description": "Phase 6 acceptance corpus for LFHÉ: synthetic, invented 'Northland' material written for these tests; each QA scenario is a labelled report-version mutation plus a labelled M10-S model behaviour; workflow scenarios are labelled human / non-human actions. Not Gold Standard material.",
+ "qa": [
+  {
+   "id": "Q01",
+   "mutation": "sound",
+   "write": "base",
+   "model": "rules",
+   "expect": "PASS",
+   "expect_codes": [],
+   "class": "sound"
+  },
+  {
+   "id": "Q02",
+   "mutation": "paraphrase",
+   "write": "edit",
+   "model": "rules",
+   "expect": "PASS",
+   "expect_codes": [],
+   "class": "sound"
+  },
+  {
+   "id": "Q03",
+   "mutation": "scope_all",
+   "write": "edit",
+   "model": "rules",
+   "expect": "FAIL",
+   "expect_codes": [
+    [
+     "S",
+     "QA-06",
+     "QUANTITY_SCOPE_DISTORTION"
+    ]
+   ],
+   "class": "unsupported_fact"
+  },
+  {
+   "id": "Q04",
+   "mutation": "contradiction_neutralised",
+   "write": "edit",
+   "model": "rules",
+   "expect": "FAIL",
+   "expect_codes": [
+    [
+     "S",
+     "QA-09",
+     "CONTRADICTION_REMOVED"
+    ]
+   ],
+   "class": "epistemic"
+  },
+  {
+   "id": "Q05",
+   "mutation": "new_number",
+   "write": "unvalidated",
+   "model": "rules",
+   "expect": "FAIL",
+   "expect_codes": [
+    [
+     "D",
+     "QA-06",
+     "UNSUPPORTED_FACT"
+    ],
+    [
+     "S",
+     "QA-17",
+     "UNSUPPORTED_FACT"
+    ]
+   ],
+   "class": "unsupported_fact"
+  },
+  {
+   "id": "Q06",
+   "mutation": "new_causal",
+   "write": "unvalidated",
+   "model": "rules",
+   "expect": "FAIL",
+   "expect_codes": [
+    [
+     "S",
+     "QA-01",
+     "UNSUPPORTED_CAUSAL_CLAIM"
+    ],
+    [
+     "D",
+     "QA-07",
+     "MATERIAL_EPISTEMIC_STRENGTH_INCREASE"
+    ]
+   ],
+   "class": "unsupported_fact"
+  },
+  {
+   "id": "Q07",
+   "mutation": "actor_change",
+   "write": "unvalidated",
+   "model": "rules",
+   "expect": "FAIL",
+   "expect_codes": [
+    [
+     "S",
+     "QA-01",
+     "ACTOR_MISMATCH"
+    ]
+   ],
+   "class": "unsupported_fact"
+  },
+  {
+   "id": "Q08",
+   "mutation": "certainty",
+   "write": "unvalidated",
+   "model": "rules",
+   "expect": "FAIL",
+   "expect_codes": [
+    [
+     "S",
+     "QA-07",
+     "MATERIAL_EPISTEMIC_STRENGTH_INCREASE"
+    ],
+    [
+     "D",
+     "QA-07",
+     "MATERIAL_EPISTEMIC_STRENGTH_INCREASE"
+    ]
+   ],
+   "class": "epistemic"
+  },
+  {
+   "id": "Q09",
+   "mutation": "attribution_removed",
+   "write": "unvalidated",
+   "model": "rules",
+   "expect": "FAIL",
+   "expect_codes": [
+    [
+     "S",
+     "S19",
+     "ATTRIBUTION_REMOVED"
+    ],
+    [
+     "D",
+     "D19",
+     "ATTRIBUTION_REMOVED"
+    ],
+    [
+     "S",
+     "QA-07",
+     "EPISTEMIC_STRENGTH_MISMATCH"
+    ]
+   ],
+   "class": "attribution"
+  },
+  {
+   "id": "Q10",
+   "mutation": "false_independence",
+   "write": "unvalidated",
+   "model": "rules",
+   "expect": "FAIL",
+   "expect_codes": [
+    [
+     "S",
+     "QA-05",
+     "FALSE_INDEPENDENT_CONFIRMATION"
+    ],
+    [
+     "D",
+     "QA-05",
+     "FALSE_INDEPENDENT_CONFIRMATION"
+    ]
+   ],
+   "class": "epistemic"
+  },
+  {
+   "id": "Q11",
+   "mutation": "confidence_changed",
+   "write": "unvalidated",
+   "model": "rules",
+   "expect": "FAIL",
+   "expect_codes": [
+    [
+     "D",
+     "QA-08",
+     "UNAUTHORISED_CONFIDENCE_CHANGE"
+    ]
+   ],
+   "class": "provenance"
+  },
+  {
+   "id": "Q12",
+   "mutation": "likelihood_changed",
+   "write": "unvalidated",
+   "model": "rules",
+   "expect": "FAIL",
+   "expect_codes": [
+    [
+     "D",
+     "QA-08",
+     "UNAUTHORISED_LIKELIHOOD_CHANGE"
+    ]
+   ],
+   "class": "provenance"
+  },
+  {
+   "id": "Q13",
+   "mutation": "hindsight",
+   "write": "unvalidated",
+   "model": "rules",
+   "expect": "FAIL",
+   "expect_codes": [
+    [
+     "S",
+     "QA-17",
+     "UNSUPPORTED_FACT"
+    ],
+    [
+     "D",
+     "QA-06",
+     "UNSUPPORTED_FACT"
+    ]
+   ],
+   "class": "unsupported_fact"
+  },
+  {
+   "id": "Q14",
+   "mutation": "classified_marking",
+   "write": "unvalidated",
+   "model": "rules",
+   "expect": "FAIL",
+   "expect_codes": [
+    [
+     "D",
+     "QA-14",
+     "PROHIBITED_INFORMATION"
+    ]
+   ],
+   "class": "osint"
+  },
+  {
+   "id": "Q15",
+   "mutation": "injection_in_text",
+   "write": "unvalidated",
+   "model": "obedient",
+   "expect": "FAIL",
+   "expect_codes": [
+    [
+     "D",
+     "STRUCTURE",
+     "EMBEDDED_INSTRUCTION_IN_CONTENT"
+    ]
+   ],
+   "class": "injection"
+  },
+  {
+   "id": "Q16",
+   "mutation": "duplicate_item",
+   "write": "unvalidated",
+   "model": "rules",
+   "expect": "PASS_WITH_WARNINGS",
+   "expect_codes": [
+    [
+     "D",
+     "QA-13",
+     "DUPLICATE_EVENT_REPRESENTATION"
+    ],
+    [
+     "S",
+     "QA-13",
+     "MISLEADING_DUPLICATION"
+    ]
+   ],
+   "class": "duplication"
+  },
+  {
+   "id": "Q17",
+   "mutation": "sound",
+   "write": "unvalidated",
+   "model": "obedient",
+   "expect": "PASS",
+   "expect_codes": [],
+   "class": "sound"
+  },
+  {
+   "id": "Q18",
+   "mutation": "sound",
+   "write": "unvalidated",
+   "model": "repair",
+   "expect": "FAIL",
+   "expect_codes": [],
+   "class": "m10s_invalid"
+  },
+  {
+   "id": "Q19",
+   "mutation": "sound",
+   "write": "unvalidated",
+   "model": "fabricated_ref",
+   "expect": "FAIL",
+   "expect_codes": [],
+   "class": "m10s_invalid"
+  },
+  {
+   "id": "Q20",
+   "mutation": "sound",
+   "write": "unvalidated",
+   "model": "provider_error",
+   "expect": "FAIL",
+   "expect_codes": [],
+   "class": "m10s_invalid"
+  },
+  {
+   "id": "Q21",
+   "mutation": "sound",
+   "write": "replay_early",
+   "model": "rules",
+   "expect": "FAIL",
+   "expect_codes": [
+    [
+     "D",
+     "QA-04",
+     "POST_CUTOFF_EVIDENCE"
+    ],
+    [
+     "D",
+     "QA-17",
+     "POST_CUTOFF_EVIDENCE"
+    ]
+   ],
+   "class": "cutoff"
+  },
+  {
+   "id": "Q22",
+   "mutation": "new_number",
+   "write": "unvalidated",
+   "model": "obedient",
+   "expect": "FAIL",
+   "expect_codes": [
+    [
+     "D",
+     "QA-06",
+     "UNSUPPORTED_FACT"
+    ]
+   ],
+   "class": "unsupported_fact"
+  },
+  {
+   "id": "Q23",
+   "mutation": "unmapped_statement",
+   "write": "unvalidated",
+   "model": "rules",
+   "expect": "FAIL",
+   "expect_codes": [
+    [
+     "D",
+     "QA-01",
+     "MISSING_REQUIRED_PROVENANCE"
+    ]
+   ],
+   "class": "provenance"
+  },
+  {
+   "id": "Q24",
+   "mutation": "sound",
+   "write": "unvalidated",
+   "model": "rules",
+   "expect": "PASS",
+   "expect_codes": [],
+   "class": "sound"
+  }
+ ],
+ "workflow": [
+  {
+   "id": "W01",
+   "action": "content_approve_fail",
+   "expect": "REFUSED:CONTENT_APPROVAL_QA_FAILED"
+  },
+  {
+   "id": "W02",
+   "action": "content_approve_unacknowledged",
+   "expect": "REFUSED:WARNINGS_NOT_ACKNOWLEDGED"
+  },
+  {
+   "id": "W03",
+   "action": "acknowledge_critical",
+   "expect": "REFUSED:NOT_ACKNOWLEDGEABLE"
+  },
+  {
+   "id": "W04",
+   "action": "acknowledge_by_analyst",
+   "expect": "REFUSED:insufficient_privilege"
+  },
+  {
+   "id": "W05",
+   "action": "content_approve_by_analyst_admin_security",
+   "expect": "REFUSED:insufficient_privilege"
+  },
+  {
+   "id": "W06",
+   "action": "security_before_content",
+   "expect": "REFUSED:SECURITY_REVIEW_NOT_PENDING_FOR_VERSION"
+  },
+  {
+   "id": "W07",
+   "action": "security_by_reviewer_release_admin",
+   "expect": "REFUSED:insufficient_privilege"
+  },
+  {
+   "id": "W08",
+   "action": "release_without_security",
+   "expect": "REFUSED:RELEASE_NOT_ELIGIBLE"
+  },
+  {
+   "id": "W09",
+   "action": "release_by_non_authority",
+   "expect": "REFUSED:insufficient_privilege"
+  },
+  {
+   "id": "W10",
+   "action": "release_stale_version",
+   "expect": "REFUSED:RELEASE_NOT_ELIGIBLE"
+  },
+  {
+   "id": "W11",
+   "action": "release_after_return",
+   "expect": "REFUSED:RELEASE_NOT_ELIGIBLE"
+  },
+  {
+   "id": "W12",
+   "action": "release_happy_path",
+   "expect": "RELEASED"
+  },
+  {
+   "id": "W13",
+   "action": "release_with_acknowledged_warnings",
+   "expect": "RELEASED"
+  },
+  {
+   "id": "W14",
+   "action": "correction_after_release",
+   "expect": "RELEASED"
+  },
+  {
+   "id": "W15",
+   "action": "mutate_released_objects",
+   "expect": "REFUSED:immutable"
+  },
+  {
+   "id": "W16",
+   "action": "direct_released_write",
+   "expect": "REFUSED:RELEASED_WRITE_PROHIBITED"
+  },
+  {
+   "id": "W17",
+   "action": "release_with_failed_qa_after_rerun",
+   "expect": "REFUSED:RELEASE_NOT_ELIGIBLE"
+  }
+ ]
+}
