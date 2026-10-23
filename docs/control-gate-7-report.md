@@ -63,8 +63,10 @@
 
 ## DEV SMOKE RESULT
 
-**NOT YET EVIDENCED** — a PO futtatja: `git pull`; `python scripts/apply_migrations.py $env:LFHE_DEV_DB_URL`;
-`python scripts/supabase_dev_smoke.py | Out-File -Encoding utf8 dev-smoke-phase7.json`. Várt: **42 migráció, 68 / 68 PASS**.
+**PASS** (PO, 2026-10-23): 42 migráció, smoke **68 / 68 PASS**, ebből a 6 Phase 7 ellenőrzés 6 / 6 (pilot-táblák RLS-sel 13 / 13;
+nincs közvetlen írás, a worker nem olvas pilot-adatot; 16 HUMAN_ONLY pilot-függvény, 0 kitett; viewer és ADMIN nem hozhat
+létre ciklust; PILOT_LEAD-nek nincs analitikai / QA / jóváhagyási / biztonsági / kiadási joga; a 41 lezárt migráció megegyezik a
+zárolással). Audit hash-lánc: PASS, 161 bejegyzés; pg_cron aktív. `docs/dev-smoke-20261023-phase7.json`.
 
 ## REAL-PROVIDER TRIAL RESULT / PROVIDER COST & LATENCY
 
@@ -125,7 +127,7 @@ Nincs (CR7: —). Lezárt Phase 1–6 viselkedésben nem találtam olyan hibát,
 
 ## OPEN ITEMS
 
-1. DEV: 4100 migráció + smoke (várt 42 / 68).
+1. ~~DEV: 4100 migráció + smoke~~ — kész (2026-10-23: 42 migráció, 68 / 68 PASS).
 2. Szerepek: PILOT_LEAD kiosztása; külön DEV-felhasználók az elemzői / reviewer / security / release szerepekhez.
 3. Költség-feltevés és provider-ár rögzítése.
 4. Valós-provider próba (workflow és / vagy DEV worker) → trial + benchmark JSON.
@@ -140,7 +142,7 @@ Nincs (CR7: —). Lezárt Phase 1–6 viselkedésben nem találtam olyan hibát,
 | --- | --- | --- | --- |
 | 1 | Baseline és PO-felhatalmazás szó szerint tárolva | PASS | `docs/specs/…Phase7…`, SPEC_INDEX 26–27 (diff-ellenőrzött) |
 | 2 | CG1–CG6 CLOSED marad | PASS | PROJECT_STATUS; semmi nincs újranyitva |
-| 3 | Lezárt migráció nem módosult | PASS | `migrations.lock.json` + `test_migration_lock.py`; DEV-oldali ellenőrzés a smoke-ban (futtatásra vár) |
+| 3 | Lezárt migráció nem módosult | PASS | `migrations.lock.json` + `test_migration_lock.py`; DEV: 41 / 41 egyezik a zárolással (smoke 2026-10-23) |
 | 4 | Minden új migráció előrefelé | PASS | `test_new_migrations_are_forward_only` |
 | 5 | Phase 1–6 regresszió zöld | PASS | 563 / 563 |
 | 6 | Az instrumentáció nem módosíthatja az analitikai igazságot | PASS | táblázat-ujjlenyomat teszt; pilot-függvények csak pilot_* táblákat írnak |
