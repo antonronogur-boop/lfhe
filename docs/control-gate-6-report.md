@@ -6,7 +6,7 @@
 - Kapu: **CONTROL GATE 6 — PO-DÖNTÉSRE VÁR.** A CG6-ot csak a Product Owner hagyhatja jóvá; ez a jelentés nem jóváhagyás.
 - Alap: `docs/specs/LFHE_Phase6_Authoritative_Baseline_Addendum_v1.0.md` (SPEC_INDEX 22), PO felhatalmazás `docs/specs/PO_Decision_2026-10-23_Authorise_Phase6.md` (SPEC_INDEX 23); mindkettő szó szerint tárolva a P6-00-ban.
 - Végrehajtás: P6-00 … P6-10 a megadott sorrendben, köztes engedélykérés nélkül. CG1–CG5 nincs újranyitva; általános architektúra-audit nem történt; a lezárt Phase 1–5 szemantika nem változott.
-- Commitok: P6-00 `b1d01a3`; P6-01…03 `44393a3`; P6-04…07 `91e45e4`; P6-08 `904c9a4`; CI Chromium-javítás `47eec80`; P6-09 `5fedf1b`; P6-10 (dokumentáció, smoke, ez a jelentés) a záró commitban.
+- Commitok: P6-00 `b1d01a3`; P6-01…03 `44393a3`; P6-04…07 `91e45e4`; P6-08 `904c9a4`; CI Chromium-javítás `47eec80`; P6-09 `5fedf1b`; P6-10 `56c3967` (+ CI-eredmény rögzítése).
 - **Phase 7 NEM indult el. Az implementáció a P6-10 után MEGÁLLT.**
 
 ## IMPLEMENTED
@@ -172,7 +172,7 @@ A §26 lista minden eleme teszttel lefedve (`docs/phase6-test-traceability.md`):
 - Teljes készlet: **561 / 561 PASS** (Phase 6: 29 / 29; Phase 1–5: 532 / 532).
 - Web: **35 / 35** (4 fájl), TypeScript PASS, production build PASS.
 - Prompt lock: PASS (9 bundle, benne `M10_QA_AUDITOR/1.0.0`). Secret scan: clean. Gitleaks (git-történet): no leaks.
-- CI: a záró commit futását a commit után rögzítem (PROJECT_STATUS).
+- CI: run **39971116835** a `56c3967` commiton — secret-scan, python-tests, web: mind **success**. (A `5fedf1b` futás python-tests jobja a GS-izolációs teszt miatt bukott: az új korpusz kötelező „Not Gold Standard material” nyilatkozatát fel kellett venni az engedélyezett fájlok közé; javítva a `56c3967`-ben.)
 
 ## PHASE 1–5 REGRESSION STATUS
 
