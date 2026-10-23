@@ -1,0 +1,310 @@
+{
+  "environment": "DEV",
+  "results": [
+    {
+      "check": "migrations applied",
+      "result": "PASS",
+      "detail": "40 migration(s)"
+    },
+    {
+      "check": "auth: password sign-in (admin, viewer)",
+      "result": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "RLS: anon cannot read lfhe.sources",
+      "result": "PASS",
+      "detail": "HTTP 401"
+    },
+    {
+      "check": "RLS: viewer can read sources (SOURCE_READ)",
+      "result": "PASS",
+      "detail": "HTTP 200"
+    },
+    {
+      "check": "RLS: viewer sees no audit rows (no AUDIT_READ)",
+      "result": "PASS",
+      "detail": "HTTP 200"
+    },
+    {
+      "check": "RPC: viewer permissions",
+      "result": "PASS",
+      "detail": "[\"ARTICLE_READ\", \"CLAIM_READ\", \"SOURCE_READ\"]"
+    },
+    {
+      "check": "HUMAN_ONLY: anon cannot create_source",
+      "result": "PASS",
+      "detail": "HTTP 401"
+    },
+    {
+      "check": "HUMAN_ONLY: viewer lacks SOURCE_CREATE",
+      "result": "PASS",
+      "detail": "HTTP 403"
+    },
+    {
+      "check": "CG1-03: nested credential key rejected via RPC",
+      "result": "PASS",
+      "detail": "HTTP 400"
+    },
+    {
+      "check": "CG1-08: credential-bearing URL rejected via RPC, not echoed, not audited",
+      "result": "PASS",
+      "detail": "HTTP 400"
+    },
+    {
+      "check": "CG1-08A: whitespace/relative credential URL rejected via RPC, not echoed, not audited",
+      "result": "PASS",
+      "detail": "HTTP 400"
+    },
+    {
+      "check": "P2: closed taxonomy LFHE-TAX-1.2 seeded (62 items)",
+      "result": "PASS",
+      "detail": "62 item(s)"
+    },
+    {
+      "check": "P2: viewer can read claims (CLAIM_READ)",
+      "result": "PASS",
+      "detail": "HTTP 200"
+    },
+    {
+      "check": "P2: anon cannot read claims",
+      "result": "PASS",
+      "detail": "HTTP 401"
+    },
+    {
+      "check": "P2: viewer cannot record a claim review (HUMAN_ONLY + CLAIM_REVIEW)",
+      "result": "PASS",
+      "detail": "HTTP 403"
+    },
+    {
+      "check": "P2: ADMIN cannot record a claim review (no CLAIM_REVIEW)",
+      "result": "PASS",
+      "detail": "HTTP 403"
+    },
+    {
+      "check": "P2: humans cannot call the worker ingestion function",
+      "result": "PASS",
+      "detail": "HTTP 403"
+    },
+    {
+      "check": "P3: lineage/event tables present with RLS",
+      "result": "PASS",
+      "detail": "16/16"
+    },
+    {
+      "check": "P3: claim_status_auto_rules empty (no automatic status rule)",
+      "result": "PASS",
+      "detail": "0 rule(s)"
+    },
+    {
+      "check": "P3: every SECURITY DEFINER pins search_path",
+      "result": "PASS",
+      "detail": "0 function(s)"
+    },
+    {
+      "check": "P3: viewer can read events (CLAIM_READ)",
+      "result": "PASS",
+      "detail": "HTTP 200"
+    },
+    {
+      "check": "P3: anon cannot read events",
+      "result": "PASS",
+      "detail": "HTTP 401"
+    },
+    {
+      "check": "P3: viewer cannot MERGE (HUMAN_ONLY + EVENT_ACTION)",
+      "result": "PASS",
+      "detail": "HTTP 403"
+    },
+    {
+      "check": "P3: viewer cannot validate lineage (CLAIM_REVIEW)",
+      "result": "PASS",
+      "detail": "HTTP 403"
+    },
+    {
+      "check": "P3: ADMIN cannot MERGE (HUMAN_ONLY + EVENT_ACTION)",
+      "result": "PASS",
+      "detail": "HTTP 403"
+    },
+    {
+      "check": "P3: ADMIN cannot validate lineage (CLAIM_REVIEW)",
+      "result": "PASS",
+      "detail": "HTTP 403"
+    },
+    {
+      "check": "P3: humans cannot call the M04/M05 ingestion functions",
+      "result": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "P4: assessment/challenge/trend tables present with RLS",
+      "result": "PASS",
+      "detail": "21/21"
+    },
+    {
+      "check": "P4: final_analytic_confidence has exactly one owner (DC-01)",
+      "result": "PASS",
+      "detail": "analytical_approvals.final_analytic_confidence"
+    },
+    {
+      "check": "P4: likelihood vocabulary is exactly the canonical CR4-01 set in rank order",
+      "result": "PASS",
+      "detail": "1:REMOTE_CHANCE, 2:HIGHLY_UNLIKELY, 3:UNLIKELY, 4:ROUGHLY_EVEN_CHANCE, 5:LIKELY, 6:HIGHLY_LIKELY, 7:ALMOST_CERTAIN"
+    },
+    {
+      "check": "P4: viewer can read assessment versions (CLAIM_READ)",
+      "result": "PASS",
+      "detail": "HTTP 200"
+    },
+    {
+      "check": "P4: anon cannot read assessment versions",
+      "result": "PASS",
+      "detail": "HTTP 401"
+    },
+    {
+      "check": "P4: viewer cannot APPROVE an assessment (HUMAN_ONLY + ASSESSMENT_REVIEW)",
+      "result": "PASS",
+      "detail": "HTTP 403"
+    },
+    {
+      "check": "P4: viewer cannot dispose of an M08 flag (ASSESSMENT_REVIEW)",
+      "result": "PASS",
+      "detail": "HTTP 403"
+    },
+    {
+      "check": "P4: ADMIN cannot APPROVE an assessment (HUMAN_ONLY + ASSESSMENT_REVIEW)",
+      "result": "PASS",
+      "detail": "HTTP 403"
+    },
+    {
+      "check": "P4: ADMIN cannot dispose of an M08 flag (ASSESSMENT_REVIEW)",
+      "result": "PASS",
+      "detail": "HTTP 403"
+    },
+    {
+      "check": "P4: humans cannot call the M06/M07/M08 ingestion functions",
+      "result": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "P5: report tables present with RLS",
+      "result": "PASS",
+      "detail": "13/13"
+    },
+    {
+      "check": "P5: SQL RFC 8785 JCS hash equals the Python canonical hash",
+      "result": "PASS",
+      "detail": "c343f9aadf1d2c79"
+    },
+    {
+      "check": "P5 / DC6-01: report versions stay DRAFT_VERSION and renders PREVIEW only (release state lives in report_releases)",
+      "result": "PASS",
+      "detail": "CHECK ((status = 'PREVIEW'::text)); CHECK ((state = 'DRAFT_VERSION'::text))"
+    },
+    {
+      "check": "P5: viewer can read the report candidate pool (CLAIM_READ)",
+      "result": "PASS",
+      "detail": "HTTP 200"
+    },
+    {
+      "check": "P5: anon cannot read report versions",
+      "result": "PASS",
+      "detail": "HTTP 401"
+    },
+    {
+      "check": "P5: viewer cannot select report content (HUMAN_ONLY + REPORT_EDIT)",
+      "result": "PASS",
+      "detail": "HTTP 403"
+    },
+    {
+      "check": "P5: ADMIN cannot edit a report version (no REPORT_EDIT)",
+      "result": "PASS",
+      "detail": "HTTP 403"
+    },
+    {
+      "check": "P5: humans cannot call the M09 ingestion / render recording functions",
+      "result": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "P6: QA / approval / release tables present with RLS",
+      "result": "PASS",
+      "detail": "12/12"
+    },
+    {
+      "check": "P6: no application role can write a Phase 6 table directly",
+      "result": "PASS",
+      "detail": "[]"
+    },
+    {
+      "check": "P6: only authenticated humans may EXECUTE release_report (not worker / service_role / anon)",
+      "result": "PASS",
+      "detail": "{'authenticated': True, 'service_role': False, 'anon': False, 'lfhe_worker': False}"
+    },
+    {
+      "check": "P6: Phase 6 authority held only by REVIEWER / SECURITY_REVIEWER / RELEASE_AUTHORITY (not ADMIN)",
+      "result": "PASS",
+      "detail": "[('QA_WARNING_ACKNOWLEDGE', 'REVIEWER'), ('RELEASE_DECIDE', 'RELEASE_AUTHORITY'), ('REPORT_CONTENT_APPROVE', 'REVIEWER'), ('SECURITY_REVIEW', 'SECURITY_REVIEWER')]"
+    },
+    {
+      "check": "P6: RELEASED guard and immutability triggers present",
+      "result": "PASS",
+      "detail": "qa_check_results_immutable, release_decisions_guard, release_manifests_guard, release_manifests_immutable, release_pdf_artifacts_immutable, report_releases_guard, report_releases_immutable"
+    },
+    {
+      "check": "P6: viewer can read QA results and releases (CLAIM_READ)",
+      "result": "PASS",
+      "detail": "HTTP 200/200"
+    },
+    {
+      "check": "P6: anon cannot read releases",
+      "result": "PASS",
+      "detail": "HTTP 401"
+    },
+    {
+      "check": "P6: viewer cannot release (HUMAN_ONLY + RELEASE_DECIDE)",
+      "result": "PASS",
+      "detail": "HTTP 403"
+    },
+    {
+      "check": "P6: ADMIN cannot release or approve content (no RELEASE_DECIDE / REPORT_CONTENT_APPROVE)",
+      "result": "PASS",
+      "detail": "HTTP 403/403"
+    },
+    {
+      "check": "P6: humans cannot call the M10 / QA-result / release-PDF worker functions",
+      "result": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "P6: deterministic release eligibility fails closed for an unknown version",
+      "result": "PASS",
+      "detail": "HTTP 200"
+    },
+    {
+      "check": "source admin: admin creates source",
+      "result": "PASS",
+      "detail": "HTTP 200 \"b47d350b-8f6c-475d-9666-af43c7565f23\""
+    },
+    {
+      "check": "source admin: approve / activate / deactivate",
+      "result": "PASS",
+      "detail": "204/204/204"
+    },
+    {
+      "check": "audit: source lifecycle audited",
+      "result": "PASS",
+      "detail": "{'SOURCE_CREATED', 'SOURCE_DEACTIVATED', 'SOURCE_COLLECTION_METHOD_APPROVED', 'SOURCE_ACTIVATED'}"
+    },
+    {
+      "check": "audit: hash chain verifies",
+      "result": "PASS",
+      "detail": "ChainVerification(ok=True, entries_checked=136, head_seq=136, head_hash='c8c673dc46476ece0e11c2176713269220ece1792b368b44cd47071adad0f1cf', first_bad_seq=None, reason=None)"
+    },
+    {
+      "check": "pg_cron: lfhe-enqueue-due-collections scheduled",
+      "result": "PASS",
+      "detail": "{'jobid': 1, 'schedule': '*/5 * * * *', 'active': True}"
+    }
+  ]
+}

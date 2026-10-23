@@ -210,22 +210,18 @@ A §26 lista minden eleme teszttel lefedve (`docs/phase6-test-traceability.md`):
 | 26 | prompt lock PASS | PASS |
 | 27 | secret scan / gitleaks clean | PASS |
 | 28 | web typecheck / teszt / build PASS | PASS |
-| 29 | DEV smoke PASS | **PO-ra vár** (a migrációk DEV-alkalmazása és a smoke futtatása a PO lépése; várt 61 / 61) |
+| 29 | DEV smoke PASS | PASS (PO, 2026-10-23: 40 migráció, smoke 61 / 61, Phase 6 ellenőrzések 11 / 11; `docs/dev-smoke-20261023-phase6.json`) |
 | 30 | Phase 7 NEM indult | PASS |
 
-Összesítve: 29 / 30 PASS; a 29. kritérium a PO DEV-futtatására vár. **CG6 ajánlás: APPROVED, ha a DEV smoke 61 / 61 PASS** — a döntés a PO-é.
+Összesítve: **30 / 30 PASS. CG6 ajánlás: APPROVED** — a döntés a PO-é.
 
 ## DEV SMOKE STATUS
 
-Még nem futott DEV-en. A PO teendője (a repó gyökeréből, `C:\Users\bdatA\lfhe`, a már ismert környezeti változókkal):
-
-```powershell
-git pull
-python scripts/apply_migrations.py $env:LFHE_DEV_DB_URL
-python scripts/supabase_dev_smoke.py | Out-File -Encoding utf8 dev-smoke-phase6.json
-```
-
-Várt eredmény: **40 migráció** (új: `20261011003800_p6_qa.sql`, `20261011003900_p6_approval_release.sql`), **smoke 61 / 61 PASS** (50 korábbi + 11 Phase 6; a service-role ellenőrzés továbbra is opcionális). A smoke nem futtat QA-t és nem ad ki reportot. Jelszó, token vagy kulcs nem kell; csak a JSON-kimenet.
+**PASS** — a PO 2026-10-23-án alkalmazta a két új migrációt DEV-en és lefuttatta a smoke-ot (`docs/dev-smoke-20261023-phase6.json`):
+- 40 migráció (új: `20261011003800_p6_qa.sql`, `20261011003900_p6_approval_release.sql`);
+- smoke **61 / 61 PASS**, ebből a Phase 6 ellenőrzések **11 / 11** (12 / 12 RLS-es tábla; közvetlen írás egyetlen alkalmazás-szerepkörnek sem; `release_report` EXECUTE csak `authenticated`; Phase 6 jogosultság csak REVIEWER / SECURITY_REVIEWER / RELEASE_AUTHORITY; mind a 7 guard / immutábilis trigger megvan; viewer olvas, anon nem; viewer és ADMIN nem adhat ki / nem hagyhat jóvá; worker-függvények emberre zárva; az eligibility ismeretlen verzióra fail closed);
+- audit hash-lánc ellenőrizve (136 bejegyzés), pg_cron aktív;
+- az opcionális service-role ellenőrzés nem futott (NON-BLOCKING, mint korábban).
 
 ## KNOWN FAILURES
 
@@ -277,7 +273,6 @@ Nincs (CR6: —). Nem találtam olyan valódi ellentmondást, amely bármely ré
 ## OPEN ITEMS
 
 Nem blokkoló (a PO eddigi döntése szerint):
-- DEV: a 3800 / 3900 alkalmazása és a smoke (61 / 61) — PO.
 - `/reports` (most már QA / release nézetekkel) böngészős végigkattintása DEV-en.
 - K-11 / GS-001 Patriot-csapda tesztcsatorna.
 - Valós provider-próba (M07–M10), benne az M10-S detektálási minősége.
@@ -288,8 +283,7 @@ Nem blokkoló (a PO eddigi döntése szerint):
 
 ## RECOMMENDED NEXT ACTION
 
-1. A PO alkalmazza a két új migrációt DEV-en, futtassa a smoke-ot, és küldje vissza a JSON-t (várt: 40 migráció, 61 / 61 PASS).
-2. A PO döntsön az SD6-01 … SD6-19 eltérésekről és a CONTROL GATE 6-ról.
-3. Phase 7 csak egy verziózott Phase 7 baseline és kifejezett PO-felhatalmazás után indulhat (SD-12).
+1. A PO döntsön az SD6-01 … SD6-19 eltérésekről és a CONTROL GATE 6-ról (minden kritérium PASS, DEV-bizonyíték rögzítve).
+2. Phase 7 csak egy verziózott Phase 7 baseline és kifejezett PO-felhatalmazás után indulhat (SD-12).
 
 **STOP — Control Gate 6, PO-döntésre vár.**
