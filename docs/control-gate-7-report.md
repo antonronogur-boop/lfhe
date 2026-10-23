@@ -59,7 +59,7 @@
 - **Phase 1–6 regresszió: 563 / 563 PASS** (változatlan tesztek).
 - Web: **44 / 44** (5 fájl), TypeScript PASS, production build PASS (a Next.js frissítési figyelmeztetés változatlan).
 - Prompt lock: PASS. Secret scan: clean. Gitleaks (git-előzmény): clean.
-- CI: a commit utáni futás azonosítója a PROJECT_STATUS-ban.
+- CI: zöld — run 40009048791, commit `cba45d1` (secret-scan, python-tests, web).
 
 ## DEV SMOKE RESULT
 
