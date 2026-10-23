@@ -87,11 +87,13 @@ def html_to_pdf(html: str, *, path: str | None = None, timeout: int = 120) -> by
                 "--disable-features=Translate,MediaRouter,OptimizationHints", "--mute-audio",
                 f"--user-data-dir={Path(tmp) / 'profile'}", "--no-pdf-header-footer", f"--print-to-pdf={out}",
                 src.as_uri()]
-        if hasattr(os, "geteuid") and os.geteuid() == 0:
-            args.insert(1, "--no-sandbox")          # root containers only; the HTML is our own escaped output
+        if (hasattr(os, "geteuid") and os.geteuid() == 0) or os.environ.get("LFHE_CHROMIUM_NO_SANDBOX") == "1":
+            # root containers / CI runners without user-namespace sandboxing (Ubuntu 24.04 AppArmor);
+            # acceptable here: the input is our own escaped, script-free, offline HTML
+            args.insert(1, "--no-sandbox")
         proc = subprocess.run(args, capture_output=True, text=True, timeout=timeout)
         if not out.exists() or out.stat().st_size == 0:
-            raise PdfRenderError(f"Chromium produced no PDF (exit {proc.returncode})")
+            raise PdfRenderError(f"Chromium produced no PDF (exit {proc.returncode}): {proc.stderr[-400:]}")
         data = out.read_bytes()
     if not data.startswith(b"%PDF-"):
         raise PdfRenderError("Chromium output is not a PDF")

@@ -48,7 +48,11 @@ jobs:
           pip install --no-deps -e .
       - name: prompt artifacts unchanged since locking
         run: python scripts/prompt_registry.py check-lock
+      - name: headless Chromium for the Phase 6 release PDF (preinstalled google-chrome)
+        run: google-chrome --version
       - name: tests (throw-away PostgreSQL cluster)
+        env:
+          LFHE_CHROMIUM_NO_SANDBOX: "1"
         run: python -m pytest -W error::DeprecationWarning
 
   web:
