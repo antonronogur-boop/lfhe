@@ -212,10 +212,10 @@ A §26 lista minden eleme teszttel lefedve (`docs/phase6-test-traceability.md`):
 | 26 | prompt lock PASS | PASS |
 | 27 | secret scan / gitleaks clean | PASS |
 | 28 | web typecheck / teszt / build PASS | PASS |
-| 29 | DEV smoke PASS | Phase 6: PASS (PO, 2026-10-23: 40 migráció, smoke 61 / 61; `docs/dev-smoke-20261023-phase6.json`); **CR6-01 DEV-futtatás a PO-ra vár** (várt: 41 migráció, 62 / 62) |
+| 29 | DEV smoke PASS | Phase 6: PASS (PO, 2026-10-23: 40 migráció, smoke 61 / 61; `docs/dev-smoke-20261023-phase6.json`); **CR6-01: PASS** (PO, 2026-10-23: 41 migráció, smoke 62 / 62, a CR6-01 ellenőrzés PASS, audit hash-lánc 140 bejegyzés OK; `docs/dev-smoke-20261023-cr6-01.json`) |
 | 30 | Phase 7 NEM indult | PASS |
 
-Összesítve: a CR6-01 előtt 30 / 30 PASS volt; a CR6-01 helyben teljesen tesztelve. **CG6 ajánlás: APPROVED, ha a CR6-01 DEV-smoke 62 / 62 PASS** — a döntés a PO-é.
+Összesítve: a CR6-01 előtt 30 / 30 PASS volt; a CR6-01 helyben teljesen tesztelve. A CR6-01 DEV-smoke 62 / 62 PASS (2026-10-23). **CG6 ajánlás: APPROVED** — a döntés a PO-é.
 
 ## DEV SMOKE STATUS
 
@@ -294,7 +294,7 @@ Nem blokkoló (a PO eddigi döntése szerint):
 
 ## RECOMMENDED NEXT ACTION
 
-1. A PO alkalmazza a `20261011004000` migrációt DEV-en, futtassa a smoke-ot (várt: 41 migráció, 62 / 62 PASS), és küldje vissza a JSON-t.
+1. ~~A PO alkalmazza a `20261011004000` migrációt DEV-en~~ — kész (2026-10-23: 41 migráció, smoke 62 / 62 PASS).
 2. A PO hozza meg a végső CONTROL GATE 6 döntést.
 3. Phase 7 csak egy verziózott Phase 7 baseline és kifejezett PO-felhatalmazás után indulhat (SD-12).
 
