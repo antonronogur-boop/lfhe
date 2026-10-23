@@ -1,0 +1,66 @@
+name: pilot-real-provider
+
+# Phase 7 P7-03 / P7-05: real-provider trial (M07 → M08 → M09 → M10-S) and the P7-BM-01 benchmark with the
+# real M10-S, in the throw-away PostgreSQL harness on synthetic 'Northland' material only.
+# Manual trigger only; never part of normal CI. The provider key comes from the repository secret
+# LFHE_ANTHROPIC_API_KEY (added by the Product Owner in GitHub settings) and is never printed or stored.
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: "Anthropic model identifier to trial (explicit; no default)"
+        required: true
+        type: string
+      max_tokens:
+        description: "max_tokens for every module"
+        required: false
+        default: "16000"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  trial:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+      - name: install PostgreSQL 16 binaries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-16 postgresql-contrib-16
+          echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"
+      - name: install locked dependencies (hash-checked)
+        run: |
+          python -m pip install --upgrade pip
+          pip install --require-hashes -r requirements/py313-test.lock
+          pip install --no-deps -e .
+      - name: prompt artifacts unchanged since locking
+        run: python scripts/prompt_registry.py check-lock
+      - name: real-provider trial + benchmark (synthetic material only)
+        env:
+          LFHE_P7_PROVIDER: anthropic
+          LFHE_P7_MODEL: ${{ inputs.model }}
+          LFHE_P7_MAX_TOKENS: ${{ inputs.max_tokens }}
+          LFHE_ANTHROPIC_API_KEY: ${{ secrets.LFHE_ANTHROPIC_API_KEY }}
+          LFHE_P7_TRIAL_OUT: ${{ runner.temp }}/p7-real-provider-trial.json
+          LFHE_P7_BENCHMARK_OUT: ${{ runner.temp }}/p7-bm-01-real-provider.json
+        run: |
+          test -n "$LFHE_ANTHROPIC_API_KEY" || { echo "repository secret LFHE_ANTHROPIC_API_KEY is not set"; exit 1; }
+          python -m pytest -q tests/pilot/test_p7_provider_trial.py::test_real_provider_trial tests/pilot/test_p7_benchmark.py -rA
+      - name: export check (no secrets in the results)
+        if: always()
+        run: |
+          mkdir -p p7-results
+          cp "${{ runner.temp }}"/p7-*.json p7-results/ 2>/dev/null || true
+          python scripts/secret_scan.py p7-results
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p7-real-provider-results
+          path: p7-results/
+          retention-days: 90

@@ -17,7 +17,11 @@ export type Permission =
   | "QA_WARNING_ACKNOWLEDGE"
   | "REPORT_CONTENT_APPROVE"
   | "SECURITY_REVIEW"
-  | "RELEASE_DECIDE";
+  | "RELEASE_DECIDE"
+  | "PILOT_READ"
+  | "PILOT_PARTICIPATE"
+  | "PILOT_MANAGE"
+  | "PILOT_EVALUATE";
 
 export interface Session {
   userId: string;

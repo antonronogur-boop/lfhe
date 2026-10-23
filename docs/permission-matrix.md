@@ -170,3 +170,28 @@ audit log or an error message.
   `SOURCE_CONFIG_INVALID`), checked before any row or audit entry exists.
 - PostgreSQL, Python and TypeScript share the parity fixture
   `tests/fixtures/url_canonicalisation_cases.json`.
+
+## Phase 7 pilot (migration `20261011004100_p7_pilot_instrumentation.sql`) — measurement only
+
+New role **PILOT_LEAD** (no analytical, QA, approval, security or release permission; it also holds
+SOURCE_READ, ARTICLE_READ, CLAIM_READ, SYSTEM_READ for reading the measured chain).
+
+| Permission | Phase | ADMIN | ANALYST | REVIEWER | SECURITY_REVIEWER | RELEASE_AUTHORITY | VIEWER | PILOT_LEAD |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| PILOT_READ | 7 | ✔ | ✔ | ✔ | ✔ | ✔ | | ✔ |
+| PILOT_PARTICIPATE | 7 | | ✔ | ✔ | ✔ | ✔ | | ✔ |
+| PILOT_MANAGE | 7 | | | | | | | ✔ |
+| PILOT_EVALUATE | 7 | | | | | | | ✔ |
+
+| Function | Caller | Permission |
+| --- | --- | --- |
+| `pilot_start_timer`, `pilot_stop_timer`, `pilot_record_workload`, `pilot_record_ux_finding` | human (HUMAN_ONLY) | `PILOT_PARTICIPATE` |
+| `pilot_create_cycle`, `pilot_bind_report`, `pilot_bind_model_runs`, `pilot_record_comparator`, `pilot_close_cycle`, `pilot_dispose_ux_finding`, `pilot_record_cost_assumption`, `pilot_record_provider_price`, `pilot_record_cash_evidence` | human (HUMAN_ONLY) | `PILOT_MANAGE` |
+| `pilot_record_benchmark`, `pilot_record_benchmark_case`, `pilot_record_benchmark_label` | human (HUMAN_ONLY) | `PILOT_EVALUATE` |
+| `pilot_benchmark_outcomes` | `PILOT_EVALUATE` human or `lfhe_evaluator` | — |
+| `pilot_cycle_missing_metrics`, `pilot_report_chain_model_runs` | `authenticated` | — |
+
+Pilot tables are readable with `PILOT_READ` (benchmark cases / labels: `PILOT_EVALUATE` or `lfhe_evaluator`
+only); nobody writes them directly; `lfhe_worker` can neither read them nor call any pilot function.
+The Phase 6 authority assignment (QA_WARNING_ACKNOWLEDGE / REPORT_CONTENT_APPROVE → REVIEWER,
+SECURITY_REVIEW → SECURITY_REVIEWER, RELEASE_DECIDE → RELEASE_AUTHORITY) is unchanged.

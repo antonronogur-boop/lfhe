@@ -335,6 +335,44 @@ def main() -> int:
           r.status_code == 200 and r.json().get("eligible") is False and "VERSION_EXISTS" in r.json().get("failed", []),
           f"HTTP {r.status_code}")
 
+    # Phase 7 (P7-01): pilot instrumentation is measurement only
+    pilot_tables = ["pilot_cycles", "pilot_timing_segments", "pilot_cost_assumptions", "pilot_provider_prices", "pilot_cycle_model_runs",
+                    "pilot_comparators", "pilot_workload_ratings", "pilot_ux_findings", "pilot_ux_finding_dispositions",
+                    "pilot_cash_evidence", "pilot_benchmarks", "pilot_benchmark_cases", "pilot_benchmark_labels"]
+    rls = db.execute("SELECT count(*) AS n FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace "
+                     "WHERE n.nspname = 'lfhe' AND c.relname = ANY(%s) AND c.relrowsecurity", (pilot_tables,)).fetchone()["n"]
+    check("P7: pilot measurement tables present with RLS", rls == len(pilot_tables), f"{rls}/{len(pilot_tables)}")
+    writable = [f"{r['role']}:{r['t']}" for r in db.execute(
+        "SELECT r AS role, t FROM unnest(ARRAY['authenticated','service_role','anon','lfhe_worker']) r, unnest(%s::text[]) t "
+        "WHERE has_table_privilege(r, 'lfhe.' || t, 'INSERT') OR has_table_privilege(r, 'lfhe.' || t, 'UPDATE') "
+        "OR has_table_privilege(r, 'lfhe.' || t, 'DELETE') OR (r = 'lfhe_worker' AND has_table_privilege(r, 'lfhe.' || t, 'SELECT'))",
+        (pilot_tables,))]
+    check("P7: no application role writes a pilot table directly; the worker cannot read pilot data", not writable, str(writable))
+    fns = db.execute(
+        "SELECT count(*) AS n, count(*) FILTER (WHERE has_function_privilege('lfhe_worker', p.oid, 'EXECUTE') "
+        "OR has_function_privilege('service_role', p.oid, 'EXECUTE') OR has_function_privilege('anon', p.oid, 'EXECUTE')) AS bad "
+        "FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace WHERE n.nspname = 'lfhe' AND p.proname LIKE 'pilot\\_%%' "
+        "AND obj_description(p.oid, 'pg_proc') = 'HUMAN_ONLY'").fetchone()
+    check("P7: 16 HUMAN_ONLY pilot functions, none executable by worker / service_role / anon", fns["n"] == 16 and fns["bad"] == 0,
+          f"{fns['n']} functions, {fns['bad']} exposed")
+    cycle = {"p": {"code": "P7C-SMOKE", "pilot_mode": "LIVE", "information_cutoff": "2026-01-01T00:00:00Z", "data_boundary": "SYNTHETIC",
+                   "input_scope": "smoke test probe only", "analyst_user_id": zero, "provider_setup": "none"}}
+    r, r2 = rest.rpc("pilot_create_cycle", cycle, viewer), rest.rpc("pilot_create_cycle", cycle, admin)
+    check("P7: viewer and ADMIN cannot create pilot cycles (HUMAN_ONLY + PILOT_MANAGE)",
+          r.status_code >= 400 and "PILOT_MANAGE" in r.text and r2.status_code >= 400 and "PILOT_MANAGE" in r2.text,
+          f"HTTP {r.status_code}/{r2.status_code}")
+    lead = sorted(r["permission_code"] for r in db.execute(
+        "SELECT permission_code FROM lfhe.role_permissions WHERE role_code = 'PILOT_LEAD' AND permission_code IN "
+        "('CLAIM_REVIEW','EVENT_ACTION','ASSESSMENT_REVIEW','FINAL_CONFIDENCE_SET','REPORT_EDIT','REPORT_CONTENT_APPROVE',"
+        "'QA_WARNING_ACKNOWLEDGE','SECURITY_REVIEW','RELEASE_DECIDE')"))
+    check("P7: PILOT_LEAD holds no analytical / QA / approval / security / release authority", lead == [], str(lead))
+    lock_path = os.path.join(os.path.dirname(__file__), "..", "database", "migrations.lock.json")
+    with open(lock_path, encoding="utf-8") as fh:
+        lock = {m["filename"]: m["sha256"] for m in json.load(fh)["migrations"]}
+    applied = {r["filename"]: r["sha256"] for r in db.execute("SELECT filename, sha256 FROM public.lfhe_schema_migrations")}
+    drift = sorted(f for f, h in lock.items() if applied.get(f) != h)
+    check("P7-00: applied migrations through CG6 match the immutable lock", not drift, f"{len(lock) - len(drift)}/{len(lock)} locked")
+
     # 5. source administration end-to-end
     r = rest.rpc("create_source", payload, admin)
     ok = check("source admin: admin creates source", r.status_code == 200, f"HTTP {r.status_code} {r.text}")

@@ -1,0 +1,359 @@
+{
+ "code": "P7-BM-01",
+ "material": "SYNTHETIC",
+ "description": "Phase 7 controlled benchmark 01: synthetic 'Northland' report versions with seeded errors (mutations of the Phase 6 acceptance corpus). Labels are human-authored seeded-error truth, evaluator-only; never model input. Model-behaviour scripting is excluded: every case is audited by the configured M10-S provider.",
+ "isolation": "Evaluator-only file outside every model-reachable tree; loaded only by the benchmark runner, recorded in evaluator-only tables, scored in aggregate.",
+ "cases": [
+  {
+   "case_code": "BM01-Q01",
+   "mutation": "sound",
+   "write": "base",
+   "class": "sound",
+   "expected_status": "PASS",
+   "labels": []
+  },
+  {
+   "case_code": "BM01-Q02",
+   "mutation": "paraphrase",
+   "write": "edit",
+   "class": "sound",
+   "expected_status": "PASS",
+   "labels": []
+  },
+  {
+   "case_code": "BM01-Q03",
+   "mutation": "scope_all",
+   "write": "edit",
+   "class": "unsupported_fact",
+   "expected_status": "FAIL",
+   "labels": [
+    {
+     "label_kind": "SEEDED_SYNTHETIC_ERROR",
+     "expected_layer": "S",
+     "expected_check_id": "QA-06",
+     "expected_finding_code": "QUANTITY_SCOPE_DISTORTION",
+     "critical": true,
+     "note": "seeded scope_all (unsupported_fact)"
+    }
+   ]
+  },
+  {
+   "case_code": "BM01-Q04",
+   "mutation": "contradiction_neutralised",
+   "write": "edit",
+   "class": "epistemic",
+   "expected_status": "FAIL",
+   "labels": [
+    {
+     "label_kind": "SEEDED_SYNTHETIC_ERROR",
+     "expected_layer": "S",
+     "expected_check_id": "QA-09",
+     "expected_finding_code": "CONTRADICTION_REMOVED",
+     "critical": true,
+     "note": "seeded contradiction_neutralised (epistemic)"
+    }
+   ]
+  },
+  {
+   "case_code": "BM01-Q05",
+   "mutation": "new_number",
+   "write": "unvalidated",
+   "class": "unsupported_fact",
+   "expected_status": "FAIL",
+   "labels": [
+    {
+     "label_kind": "SEEDED_SYNTHETIC_ERROR",
+     "expected_layer": "D",
+     "expected_check_id": "QA-06",
+     "expected_finding_code": "UNSUPPORTED_FACT",
+     "critical": true,
+     "note": "seeded new_number (unsupported_fact)"
+    },
+    {
+     "label_kind": "SEEDED_SYNTHETIC_ERROR",
+     "expected_layer": "S",
+     "expected_check_id": "QA-17",
+     "expected_finding_code": "UNSUPPORTED_FACT",
+     "critical": true,
+     "note": "seeded new_number (unsupported_fact)"
+    }
+   ]
+  },
+  {
+   "case_code": "BM01-Q06",
+   "mutation": "new_causal",
+   "write": "unvalidated",
+   "class": "unsupported_fact",
+   "expected_status": "FAIL",
+   "labels": [
+    {
+     "label_kind": "SEEDED_SYNTHETIC_ERROR",
+     "expected_layer": "S",
+     "expected_check_id": "QA-01",
+     "expected_finding_code": "UNSUPPORTED_CAUSAL_CLAIM",
+     "critical": true,
+     "note": "seeded new_causal (unsupported_fact)"
+    },
+    {
+     "label_kind": "SEEDED_SYNTHETIC_ERROR",
+     "expected_layer": "D",
+     "expected_check_id": "QA-07",
+     "expected_finding_code": "MATERIAL_EPISTEMIC_STRENGTH_INCREASE",
+     "critical": true,
+     "note": "seeded new_causal (unsupported_fact)"
+    }
+   ]
+  },
+  {
+   "case_code": "BM01-Q07",
+   "mutation": "actor_change",
+   "write": "unvalidated",
+   "class": "unsupported_fact",
+   "expected_status": "FAIL",
+   "labels": [
+    {
+     "label_kind": "SEEDED_SYNTHETIC_ERROR",
+     "expected_layer": "S",
+     "expected_check_id": "QA-01",
+     "expected_finding_code": "ACTOR_MISMATCH",
+     "critical": true,
+     "note": "seeded actor_change (unsupported_fact)"
+    }
+   ]
+  },
+  {
+   "case_code": "BM01-Q08",
+   "mutation": "certainty",
+   "write": "unvalidated",
+   "class": "epistemic",
+   "expected_status": "FAIL",
+   "labels": [
+    {
+     "label_kind": "SEEDED_SYNTHETIC_ERROR",
+     "expected_layer": "S",
+     "expected_check_id": "QA-07",
+     "expected_finding_code": "MATERIAL_EPISTEMIC_STRENGTH_INCREASE",
+     "critical": true,
+     "note": "seeded certainty (epistemic)"
+    },
+    {
+     "label_kind": "SEEDED_SYNTHETIC_ERROR",
+     "expected_layer": "D",
+     "expected_check_id": "QA-07",
+     "expected_finding_code": "MATERIAL_EPISTEMIC_STRENGTH_INCREASE",
+     "critical": true,
+     "note": "seeded certainty (epistemic)"
+    }
+   ]
+  },
+  {
+   "case_code": "BM01-Q09",
+   "mutation": "attribution_removed",
+   "write": "unvalidated",
+   "class": "attribution",
+   "expected_status": "FAIL",
+   "labels": [
+    {
+     "label_kind": "SEEDED_SYNTHETIC_ERROR",
+     "expected_layer": "S",
+     "expected_check_id": "S19",
+     "expected_finding_code": "ATTRIBUTION_REMOVED",
+     "critical": true,
+     "note": "seeded attribution_removed (attribution)"
+    },
+    {
+     "label_kind": "SEEDED_SYNTHETIC_ERROR",
+     "expected_layer": "D",
+     "expected_check_id": "D19",
+     "expected_finding_code": "ATTRIBUTION_REMOVED",
+     "critical": true,
+     "note": "seeded attribution_removed (attribution)"
+    },
+    {
+     "label_kind": "SEEDED_SYNTHETIC_ERROR",
+     "expected_layer": "S",
+     "expected_check_id": "QA-07",
+     "expected_finding_code": "EPISTEMIC_STRENGTH_MISMATCH",
+     "critical": true,
+     "note": "seeded attribution_removed (attribution)"
+    }
+   ]
+  },
+  {
+   "case_code": "BM01-Q10",
+   "mutation": "false_independence",
+   "write": "unvalidated",
+   "class": "epistemic",
+   "expected_status": "FAIL",
+   "labels": [
+    {
+     "label_kind": "SEEDED_SYNTHETIC_ERROR",
+     "expected_layer": "S",
+     "expected_check_id": "QA-05",
+     "expected_finding_code": "FALSE_INDEPENDENT_CONFIRMATION",
+     "critical": true,
+     "note": "seeded false_independence (epistemic)"
+    },
+    {
+     "label_kind": "SEEDED_SYNTHETIC_ERROR",
+     "expected_layer": "D",
+     "expected_check_id": "QA-05",
+     "expected_finding_code": "FALSE_INDEPENDENT_CONFIRMATION",
+     "critical": true,
+     "note": "seeded false_independence (epistemic)"
+    }
+   ]
+  },
+  {
+   "case_code": "BM01-Q11",
+   "mutation": "confidence_changed",
+   "write": "unvalidated",
+   "class": "provenance",
+   "expected_status": "FAIL",
+   "labels": [
+    {
+     "label_kind": "SEEDED_SYNTHETIC_ERROR",
+     "expected_layer": "D",
+     "expected_check_id": "QA-08",
+     "expected_finding_code": "UNAUTHORISED_CONFIDENCE_CHANGE",
+     "critical": true,
+     "note": "seeded confidence_changed (provenance)"
+    }
+   ]
+  },
+  {
+   "case_code": "BM01-Q12",
+   "mutation": "likelihood_changed",
+   "write": "unvalidated",
+   "class": "provenance",
+   "expected_status": "FAIL",
+   "labels": [
+    {
+     "label_kind": "SEEDED_SYNTHETIC_ERROR",
+     "expected_layer": "D",
+     "expected_check_id": "QA-08",
+     "expected_finding_code": "UNAUTHORISED_LIKELIHOOD_CHANGE",
+     "critical": true,
+     "note": "seeded likelihood_changed (provenance)"
+    }
+   ]
+  },
+  {
+   "case_code": "BM01-Q13",
+   "mutation": "hindsight",
+   "write": "unvalidated",
+   "class": "unsupported_fact",
+   "expected_status": "FAIL",
+   "labels": [
+    {
+     "label_kind": "SEEDED_SYNTHETIC_ERROR",
+     "expected_layer": "S",
+     "expected_check_id": "QA-17",
+     "expected_finding_code": "UNSUPPORTED_FACT",
+     "critical": true,
+     "note": "seeded hindsight (unsupported_fact)"
+    },
+    {
+     "label_kind": "SEEDED_SYNTHETIC_ERROR",
+     "expected_layer": "D",
+     "expected_check_id": "QA-06",
+     "expected_finding_code": "UNSUPPORTED_FACT",
+     "critical": true,
+     "note": "seeded hindsight (unsupported_fact)"
+    }
+   ]
+  },
+  {
+   "case_code": "BM01-Q14",
+   "mutation": "classified_marking",
+   "write": "unvalidated",
+   "class": "osint",
+   "expected_status": "FAIL",
+   "labels": [
+    {
+     "label_kind": "SEEDED_SYNTHETIC_ERROR",
+     "expected_layer": "D",
+     "expected_check_id": "QA-14",
+     "expected_finding_code": "PROHIBITED_INFORMATION",
+     "critical": true,
+     "note": "seeded classified_marking (osint)"
+    }
+   ]
+  },
+  {
+   "case_code": "BM01-Q16",
+   "mutation": "duplicate_item",
+   "write": "unvalidated",
+   "class": "duplication",
+   "expected_status": "PASS_WITH_WARNINGS",
+   "labels": [
+    {
+     "label_kind": "SEEDED_SYNTHETIC_ERROR",
+     "expected_layer": "D",
+     "expected_check_id": "QA-13",
+     "expected_finding_code": "DUPLICATE_EVENT_REPRESENTATION",
+     "critical": false,
+     "note": "seeded duplicate_item (duplication)"
+    },
+    {
+     "label_kind": "SEEDED_SYNTHETIC_ERROR",
+     "expected_layer": "S",
+     "expected_check_id": "QA-13",
+     "expected_finding_code": "MISLEADING_DUPLICATION",
+     "critical": false,
+     "note": "seeded duplicate_item (duplication)"
+    }
+   ]
+  },
+  {
+   "case_code": "BM01-Q21",
+   "mutation": "sound",
+   "write": "replay_early",
+   "class": "cutoff",
+   "expected_status": "FAIL",
+   "labels": [
+    {
+     "label_kind": "SEEDED_SYNTHETIC_ERROR",
+     "expected_layer": "D",
+     "expected_check_id": "QA-04",
+     "expected_finding_code": "POST_CUTOFF_EVIDENCE",
+     "critical": true,
+     "note": "seeded sound (cutoff)"
+    },
+    {
+     "label_kind": "SEEDED_SYNTHETIC_ERROR",
+     "expected_layer": "D",
+     "expected_check_id": "QA-17",
+     "expected_finding_code": "POST_CUTOFF_EVIDENCE",
+     "critical": true,
+     "note": "seeded sound (cutoff)"
+    }
+   ]
+  },
+  {
+   "case_code": "BM01-Q23",
+   "mutation": "unmapped_statement",
+   "write": "unvalidated",
+   "class": "provenance",
+   "expected_status": "FAIL",
+   "labels": [
+    {
+     "label_kind": "SEEDED_SYNTHETIC_ERROR",
+     "expected_layer": "D",
+     "expected_check_id": "QA-01",
+     "expected_finding_code": "MISSING_REQUIRED_PROVENANCE",
+     "critical": true,
+     "note": "seeded unmapped_statement (provenance)"
+    }
+   ]
+  },
+  {
+   "case_code": "BM01-Q24",
+   "mutation": "sound",
+   "write": "unvalidated",
+   "class": "sound",
+   "expected_status": "PASS",
+   "labels": []
+  }
+ ]
+}

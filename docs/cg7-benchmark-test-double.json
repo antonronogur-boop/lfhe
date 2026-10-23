@@ -1,0 +1,127 @@
+{
+ "evidence_class": "TEST_DOUBLE_REGRESSION",
+ "m10s_model_runs": [
+  "96161044-24fc-447e-9847-da11bd847437",
+  "84d4c938-cd8d-4bb0-babf-d44bf11459b0",
+  "2a8db9a8-6c1f-4863-8fde-259e8f0112e5",
+  "7a1043ee-280b-4df0-bb31-0c1b649361b6",
+  "0e270ad2-c367-40a6-b4b3-ac84c802174a",
+  "6117a2b1-0512-425d-97d6-76a37b22e15f",
+  "1d8640f1-07c0-4271-89de-c6ab8e508eb1",
+  "0598bf21-c4e5-4433-9c72-4a3cb77c22a0",
+  "3a52c9a5-72d3-46b6-9ab7-a56c8cb20689",
+  "9fa8b595-25b6-477a-8bf7-56866199b8ac",
+  "41a2e77e-70df-4daa-a878-521376e564e4",
+  "f087895d-651c-4971-ab33-368d7c3d23e0",
+  "3198c783-f968-4c8a-a0a9-44a56af61ade",
+  "3820dee6-dfdd-4756-94d5-21b4fc3bc0f0",
+  "bf244095-9e03-4788-be9b-a6d4d91549f9",
+  "739310ac-9376-4647-a5d8-0c46b69fcb07",
+  "d3a1370b-6b77-44ff-9924-ad87ce11a4f9",
+  "c80448ae-97af-4d83-868b-bc4a3cee13a3"
+ ],
+ "provider": "TEST_DOUBLE(rule-based M10-S stand-in)",
+ "scores": {
+  "D": {
+   "critical_misses": 0,
+   "false_negatives": 0,
+   "false_positives": 10,
+   "false_positives_on_clean_cases": 0,
+   "findings_produced": 23,
+   "labels": 13,
+   "precision": 0.5652,
+   "recall": 1.0,
+   "true_positives": 13
+  },
+  "S": {
+   "critical_misses": 0,
+   "false_negatives": 0,
+   "false_positives": 2,
+   "false_positives_on_clean_cases": 0,
+   "findings_produced": 13,
+   "labels": 11,
+   "precision": 0.8462,
+   "recall": 1.0,
+   "true_positives": 11
+  },
+  "benchmark": "P7-BM-01",
+  "cases": 18,
+  "cases_without_qa_result": 0,
+  "clean_cases": 3,
+  "fp_note": "unlabelled findings on seeded cases count as false positives (conservative); false_positives_on_clean_cases is the false-alarm rate on unseeded versions"
+ },
+ "statuses": {
+  "BM01-Q01": {
+   "expected": "PASS",
+   "got": "PASS"
+  },
+  "BM01-Q02": {
+   "expected": "PASS",
+   "got": "PASS"
+  },
+  "BM01-Q03": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q04": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q05": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q06": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q07": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q08": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q09": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q10": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q11": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q12": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q13": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q14": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q16": {
+   "expected": "PASS_WITH_WARNINGS",
+   "got": "PASS_WITH_WARNINGS"
+  },
+  "BM01-Q21": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q23": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q24": {
+   "expected": "PASS",
+   "got": "PASS"
+  }
+ }
+}

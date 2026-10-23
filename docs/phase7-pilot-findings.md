@@ -1,0 +1,84 @@
+# LFHÉ — PHASE 7 PILOT FINDINGS & CAPABILITY ASSESSMENT (P7-08)
+
+Állapot: **ELŐZETES — a valós pilot-bizonyíték még nincs összegyűjtve.** Ez a jelentés a módszertant, a mérőrendszert és az
+eddig rendelkezésre álló (automatizált, nem pilot) bizonyítékot rögzíti. Minden empirikus szakasz kitöltése a PO
+által futtatott DEV / pilot lépések eredményéből történik (`docs/runbooks/phase7-pilot.md`); hiányzó mérést nem
+pótolunk becsléssel.
+
+## METHODOLOGY
+
+* Ciklusok: cél 6 teljes ciklus (≥ 2 REPLAY, ≥ 2 LIVE / near-live publikus OSINT, 2 tetszőleges). Egy ciklus
+  akkor teljes, ha a kötött report terminális pilot-állapotban van (RELEASED, RELEASE_REJECTED,
+  SECURITY_REJECTED, CONTENT_REJECTED) és `pilot_cycle_missing_metrics` üres.
+* Analista-idő: kizárólag szerveróra szerinti aktív-idő szegmensek, szakaszonként (`pilot_timing_segments`).
+* Összehasonlítás: ciklusonként rögzített comparator (módszer, időzített / dokumentált alapidő, összevethető
+  terjedelem). Kontrollált csak időzített alapidővel, kontrollált módszerrel és összevethető terjedelemmel;
+  minden más megfigyeléses (§9).
+* Minőség: ciklusonként a végső QA által detektált arányok; valós hibaarány (TP / FP / FN, precision / recall,
+  kritikus kihagyás) csak a P7-BM-01 benchmarkon, D és S réteg külön.
+* AI-végrehajtás: modulonként a kötött model_run-ok (provider, modell, konfiguráció-hash, prompt-verzió / hash,
+  latencia, tokenek, költség csak explicit árral, séma-hibák, javító futások, provider-hibák).
+* Gazdasági számítás: §11 képletek, explicit költség-feltevéssel; kapacitásérték ≠ pénzbeli megtakarítás;
+  pénzbeli hatás csak dokumentált bizonyítékból.
+* UX: valós böngészős végigjárás, strukturált UX-megállapítások (BLOCKING / MAJOR / MINOR / ENHANCEMENT).
+
+## PILOT POPULATION
+
+Nincs még pilot-ciklus (0 / 6). Résztvevők, analista-szerepek és provider-beállítás a ciklusokkal együtt kerül
+rögzítésre.
+
+## LIMITATIONS (ismert, a mérés előtt)
+
+* Egy személyes működés (a PO egyetlen elemzőként): a ciklusok analista-populációja kicsi; a különböző emberi
+  szerepek (ANALYST / REVIEWER / SECURITY_REVIEWER / RELEASE_AUTHORITY) külön DEV-felhasználók, de ugyanaz az
+  ember működtetheti őket — ez a szereptanulási és időmérési eredményeket torzíthatja.
+* A comparator-alapidő sok esetben dokumentált (nem időzített) lesz → megfigyeléses eredmény, nem kontrollált.
+* Elfelejtett időzítő túlszámol; utólagos javítás nincs (SD7-03) — mérési UX-megállapításként kell jelölni.
+* A ciklusonkénti minőségi arány a QA által detektált érték, nem ground truth (SD7-06).
+* A benchmark szintetikus, a Phase 6 elfogadási mutációkra épül; a valós hibaeloszlást nem reprezentálja.
+  A nem címkézett, de jogos másodlagos detekciók FP-ként számolódnak (konzervatív precision).
+* A valós provider valódiságát a rögzített provider-válaszazonosító és a futási környezet igazolja, nem
+  kriptográfiai bizonyíték (SD7-08).
+
+## METRICS / RESULTS
+
+| Terület | Eredmény |
+| --- | --- |
+| Analista aktív idő, ciklusidő, áteresztés, korrekciók | **NOT YET EVIDENCED** (nincs ciklus) |
+| Kapacitás-felszabadítás, FTE, kapacitásérték | **NOT YET EVIDENCED** (nincs ciklus, nincs rögzített költség-feltevés) |
+| Valós provider: M07 / M08 / M09 / M10-S siker, latencia, token, költség | **NOT YET EVIDENCED** (a `pilot-real-provider` workflow / DEV worker még nem futott) |
+| M10-S empirikus minőség (P7-BM-01, valós provider) | **NOT YET EVIDENCED** |
+| P7-BM-01 a szabályalapú tesztdublőrrel (csak a mérőút regressziója) | D: 13 címke, TP 13, FN 0, FP 10 (ebből tiszta eseteken 0), precision 0,5652, recall 1,0, kritikus kihagyás 0. S (tesztdublőr): 11 címke, TP 11, FN 0, FP 2 (tiszta eseteken 0), precision 0,8462, recall 1,0. **Nem a valós M10-S minősége.** |
+| Böngészős UX | **NOT YET EVIDENCED** |
+
+## POSITIVE FINDINGS (eddig, automatizált bizonyíték)
+
+* A teljes mérőlánc működik a meglévő rendszeren a zárt szemantika érintése nélkül (a nem-pilot táblák ujjlenyomata
+  változatlan; audit-lánc ép).
+* A determinisztikus M10-D a benchmark minden címkézett hibáját és minden kritikus esetét jelezte (provider-független).
+* A valós-provider próba teljes folyamata (M07 → M08 → emberi jóváhagyás → M09 → M10-D + M10-S → pilot-kötés →
+  §26-ellenőrzés) a valós Anthropic adapterrel, csonkolt HTTP-vel hibátlanul fut — a valós futás technikailag kész.
+
+## NEGATIVE FINDINGS (eddig)
+
+* A D réteg a szintetikus benchmarkon sok nem címkézett másodlagos jelzést ad (10), ami az elemzői QA-feloldási
+  terhet növelheti; hogy ez valós ciklusban zaj-e, a pilot mutatja meg.
+* Valós provider és valós felhasználói használat nélkül a működési érték egyetlen dimenziója sem igazolt.
+
+## UX FINDINGS / MODEL LIMITATIONS / ANALYTICAL LIMITATIONS / PROVIDER RESULTS / CAPACITY / COST
+
+NOT YET EVIDENCED — a ciklusok és a valós-provider futás után töltendő ki.
+
+## SECURITY OBSERVATIONS
+
+* A pilot csak DEV / localhost környezetben, külső elérés nélkül futhat (Next.js függőség, §29).
+* Provider-input csak szintetikus vagy publikus OSINT; kulcs csak a PO titoktárolóiban (DEV shell / GitHub secret).
+* Benchmark-címkék csak értékelői hozzáféréssel; a worker nem olvas pilot-adatot.
+
+## RECOMMENDED FUTURE CHANGES
+
+Csak a pilot-bizonyíték alapján; jelenleg nincs. Egyik javaslat sem módosíthatja csendben a Phase 1–6 szemantikát.
+
+## CAPABILITY OUTCOME (ajánlás)
+
+**OPERATIONAL VALUE NOT YET VALIDATED** — a mérőrendszer kész, a valós pilot-bizonyíték még hiányzik.

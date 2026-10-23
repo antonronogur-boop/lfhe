@@ -119,3 +119,14 @@ operator/Product Owner; record the JSON output of step 6 in PROJECT_STATUS.
 * Migration `20261011004000_p6_cr6_01_manifest_baseline_ids.sql` (release manifest `baseline_version_ids`) →
   41 migrations in total; the smoke adds one check (release manifest carries and requires
   `baseline_version_ids`). Expected result without the service-role key: **62/62 PASS**.
+
+## Phase 7 additions
+
+* Migration `20261011004100_p7_pilot_instrumentation.sql` (pilot measurement tables, views and HUMAN_ONLY
+  pilot functions; no Phase 1–6 object changed) → **42 migrations** in total.
+* The smoke adds 6 Phase 7 checks: pilot tables present with RLS (13/13); no application role writes a pilot
+  table and the worker cannot read pilot data; 16 HUMAN_ONLY pilot functions not executable by worker /
+  service_role / anon; viewer and ADMIN cannot create pilot cycles (PILOT_MANAGE); PILOT_LEAD holds no
+  analytical / QA / approval / security / release authority; applied migrations 1–41 match
+  `database/migrations.lock.json`. Expected result without the service-role key: **68/68 PASS**. The smoke
+  creates no pilot record. Pilot operation: `docs/runbooks/phase7-pilot.md`.
