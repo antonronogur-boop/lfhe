@@ -13,7 +13,11 @@ export type Permission =
   | "CLAIM_READ"
   | "CLAIM_REVIEW"
   | "ENTITY_MANAGE"
-  | "REPORT_EDIT";
+  | "REPORT_EDIT"
+  | "QA_WARNING_ACKNOWLEDGE"
+  | "REPORT_CONTENT_APPROVE"
+  | "SECURITY_REVIEW"
+  | "RELEASE_DECIDE";
 
 export interface Session {
   userId: string;

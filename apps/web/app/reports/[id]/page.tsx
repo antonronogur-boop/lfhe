@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import {
   decideCandidate, decideRemovals, editStatement, freezeSelection, moveStatement, refreshCandidates, removeStatement,
 } from "../actions";
+import { QaPanel, ReleasePanel } from "./release-panels";
 
 export const dynamic = "force-dynamic";
 
@@ -93,7 +94,7 @@ export default async function ReportWorkspace({
       }
     }
   }
-  const tabs = ["pool", "draft", "versions", "preview"];
+  const tabs = ["pool", "draft", "versions", "preview", "qa", "release"];
   const link = (v: string, extra = "") => `/reports/${id}?view=${v}${current ? `&version=${current.report_version_id}` : ""}${extra}`;
   const hidden = (vs: VersionState) => (
     <>
@@ -292,6 +293,9 @@ export default async function ReportWorkspace({
           {a && b && <VersionCompare a={a} b={b} />}
         </section>
       )}
+
+      {view === "qa" && (current ? <QaPanel reportId={id} v={current} session={session} /> : <p>No version yet.</p>)}
+      {view === "release" && (current ? <ReleasePanel reportId={id} v={current} session={session} /> : <p>No version yet.</p>)}
 
       {view === "preview" && (
         <section>
