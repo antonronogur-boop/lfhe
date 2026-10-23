@@ -38,13 +38,23 @@ def _target(cov: dict) -> str:
     return f' <span class="target">({cov["count"]} of {rng}{escape(note)})</span>'
 
 
-def render_report_html(canonical: dict, report_version_id: str, report_version_hash: str) -> str:
+RELEASE_BANNER = ("OSINT-derived product · release candidate of the exact version below · authoritative only together "
+                  "with its release manifest")
+
+
+def render_report_html(canonical: dict, report_version_id: str, report_version_hash: str, *, variant: str = "PREVIEW") -> str:
+    """variant PREVIEW (Phase 5, byte-identical) or RELEASE (Phase 6 release PDF source: same deterministic
+    body, release banner and title instead of the draft-preview banner; no other content)."""
+    if variant not in ("PREVIEW", "RELEASE"):
+        raise ValueError("unknown render variant")
     rep = canonical["report"]
     cov = {c["section"]: c for c in canonical.get("coverage") or []}
     parts = ['<!doctype html><html lang="en"><head><meta charset="utf-8">',
-             f'<title>{escape(rep["code"])} v{canonical["version_no"]} — DRAFT PREVIEW</title>',
+             f'<title>{escape(rep["code"])} v{canonical["version_no"]} — '
+             f'{"DRAFT PREVIEW" if variant == "PREVIEW" else "RELEASE CANDIDATE"}</title>',
              f'<style>{template_css()}</style></head><body>',
-             '<div class="banner">Draft preview — not QA-approved, not security-reviewed, not released</div>',
+             '<div class="banner">Draft preview — not QA-approved, not security-reviewed, not released</div>' if variant == "PREVIEW"
+             else f'<div class="banner release">{escape(RELEASE_BANNER)}</div>',
              f'<header class="report"><h1>{escape(rep["title"])}</h1><div class="meta">{escape(rep["code"])} · '
              f'{escape(rep["cycle_label"])} · {escape(rep["report_mode"])} · information cutoff {escape(rep["information_cutoff"])}'
              f' · version {canonical["version_no"]} · length {escape(canonical["length_status"])}</div></header>']

@@ -1,0 +1,8 @@
+{
+  "format": "lfhe-prompt-manifest/1",
+  "module_code": "M10_QA_AUDITOR",
+  "semver": "1.0.0",
+  "module_version": "MPP-1.2.2+P6-ADDENDUM-1.0",
+  "test_fixture": false,
+  "description": "M10-S semantic QA auditor (Phase 6): audits one exact report version/hash against its supplied approved analytical sources and evidence. Reports findings only; never repairs, approves or releases."
+}

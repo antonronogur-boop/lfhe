@@ -1,0 +1,239 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "lfhe:M10_QA_AUDITOR:1.0.0:output",
+  "title": "M10_QA_AUDITOR output (global output envelope)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "module",
+    "status",
+    "result",
+    "warnings",
+    "human_review_required"
+  ],
+  "properties": {
+    "module": {
+      "const": "M10_QA_AUDITOR"
+    },
+    "status": {
+      "enum": [
+        "SUCCESS",
+        "INSUFFICIENT_INFORMATION",
+        "FAILED",
+        "HUMAN_REVIEW_REQUIRED"
+      ]
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "report_id",
+        "report_version_id",
+        "report_version_hash",
+        "deterministic_qa_run_id",
+        "qa_status",
+        "findings",
+        "errors",
+        "warnings",
+        "release_blocked"
+      ],
+      "properties": {
+        "report_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "report_version_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "report_version_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "deterministic_qa_run_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "qa_status": {
+          "enum": [
+            "PASS",
+            "PASS_WITH_WARNINGS",
+            "FAIL"
+          ]
+        },
+        "findings": {
+          "type": "array",
+          "maxItems": 300,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "check_id",
+              "status",
+              "severity",
+              "finding_code",
+              "affected_object_id",
+              "affected_statement_id",
+              "details",
+              "evidence_refs",
+              "recommended_action"
+            ],
+            "properties": {
+              "check_id": {
+                "enum": [
+                  "QA-01",
+                  "QA-05",
+                  "QA-06",
+                  "QA-07",
+                  "QA-09",
+                  "QA-13",
+                  "QA-17",
+                  "S18",
+                  "S19",
+                  "S20"
+                ]
+              },
+              "status": {
+                "enum": [
+                  "PASS",
+                  "WARNING",
+                  "FAIL"
+                ]
+              },
+              "severity": {
+                "enum": [
+                  "INFO",
+                  "WARNING",
+                  "MAJOR",
+                  "CRITICAL"
+                ]
+              },
+              "finding_code": {
+                "enum": [
+                  "SEMANTICALLY_SUPPORTED",
+                  "UNSUPPORTED_FACT",
+                  "UNSUPPORTED_CAUSAL_CLAIM",
+                  "ACTOR_MISMATCH",
+                  "ACTION_MISMATCH",
+                  "SCOPE_MISMATCH",
+                  "QUANTITY_SCOPE_DISTORTION",
+                  "TIME_OR_LOCATION_MISMATCH",
+                  "CERTAINTY_STRENGTHENING",
+                  "ATTRIBUTION_REMOVED",
+                  "EPISTEMIC_STRENGTH_MISMATCH",
+                  "MATERIAL_EPISTEMIC_STRENGTH_INCREASE",
+                  "FALSE_INDEPENDENT_CONFIRMATION",
+                  "CONTRADICTION_REMOVED",
+                  "CAVEAT_NEUTRALISED",
+                  "MISLEADING_DUPLICATION",
+                  "TRANSLATION_MATERIAL_MISMATCH",
+                  "REFERENCE_CONTEXT_SCOPE_EXCEEDED",
+                  "FABRICATED_CITATION",
+                  "EMBEDDED_INSTRUCTION_IN_CONTENT",
+                  "OTHER_SEMANTIC_CONCERN"
+                ]
+              },
+              "affected_object_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 100
+              },
+              "affected_statement_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "details": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "evidence_refs": {
+                "type": "array",
+                "maxItems": 20,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "object_type",
+                    "object_id"
+                  ],
+                  "properties": {
+                    "object_type": {
+                      "enum": [
+                        "report_version",
+                        "report_item_statement",
+                        "assessment_statement",
+                        "claim",
+                        "reference_context_version",
+                        "event_relationships"
+                      ]
+                    },
+                    "object_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    }
+                  }
+                }
+              },
+              "recommended_action": {
+                "enum": [
+                  "NO_ACTION",
+                  "RETURN_TO_ANALYST_FOR_REVISION",
+                  "RESTORE_ATTRIBUTION",
+                  "RESTORE_CAVEAT_OR_CONTRADICTION",
+                  "REMOVE_OR_SOURCE_UNSUPPORTED_CONTENT",
+                  "CORRECT_CONFIDENCE_OR_LIKELIHOOD",
+                  "REVIEW_DUPLICATION",
+                  "RE_RUN_QA",
+                  "HUMAN_HANDLING_REVIEW",
+                  "HUMAN_ANALYTICAL_REVIEW",
+                  "RETURN_TO_ANALYTICAL_REVIEW"
+                ]
+              }
+            }
+          }
+        },
+        "errors": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "type": "string",
+            "maxLength": 500
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "type": "string",
+            "maxLength": 500
+          }
+        },
+        "release_blocked": {
+          "type": "boolean"
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "string",
+        "maxLength": 500
+      }
+    },
+    "human_review_required": {
+      "const": true
+    }
+  }
+}

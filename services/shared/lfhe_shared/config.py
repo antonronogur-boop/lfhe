@@ -67,6 +67,7 @@ class Settings(BaseSettings):
     m07_model_configuration_id: str | None = None
     m08_model_configuration_id: str | None = None
     m09_model_configuration_id: str | None = None
+    m10_model_configuration_id: str | None = None
 
     @model_validator(mode="after")
     def _safety_rules(self) -> "Settings":

@@ -22,6 +22,12 @@ Job types
                   version (enqueued only by the HUMAN_ONLY lfhe.freeze_report_selection).
 * RENDER_REPORT   (object: report_version; payload: report_version_hash) → deterministic HTML
                   preview (enqueued by every new report version).
+* RUN_REPORT_QA   (object: report_version; payload: report_version_hash, qa_request_id) → M10-D
+                  (deterministic) → M10-S (semantic, model) → combined QA result computed by the
+                  database (enqueued only by the HUMAN_ONLY lfhe.request_report_qa).
+* RENDER_RELEASE_PDF (object: report_version; payload: report_version_hash, security_review_id) →
+                  release HTML → headless Chromium PDF → write-once storage → release PDF artifact
+                  (enqueued by an APPROVED human security review). Never releases anything.
 
 Model configurations: LFHE_M02_MODEL_CONFIGURATION_ID / LFHE_M03_MODEL_CONFIGURATION_ID
 (registered rows). Provider credentials come only from the secret-managed
@@ -43,6 +49,8 @@ from .assessment_pipeline import run_assessment, run_challenge, run_relevance
 from .event_pipeline import run_event_builder, run_lineage
 from .report_pipeline import run_report_edit
 from .report_render import render_and_record
+from .qa_pipeline import run_report_qa
+from .report_pdf import PdfRenderError, render_release_pdf
 from .providers import Provider
 
 log = logging.getLogger("lfhe.claims.worker")
@@ -51,7 +59,7 @@ log = logging.getLogger("lfhe.claims.worker")
 def make_handlers(conn, queue: JobQueue, provider: Provider, *, m02_config: str | None, m03_config: str | None,
                   worker_id: str, m04_config: str | None = None, m05_config: str | None = None,
                   m06_config: str | None = None, m07_config: str | None = None, m08_config: str | None = None,
-                  m09_config: str | None = None) -> dict:
+                  m09_config: str | None = None, m10_config: str | None = None, store=None) -> dict:
     def extract(job: Job):
         if not m02_config:
             raise PermanentJobError("M02 model configuration is not configured")
@@ -158,8 +166,30 @@ def make_handlers(conn, queue: JobQueue, provider: Provider, *, m02_config: str 
         log.info("RENDER_REPORT %s → %s", job.object_id, out.get("content_sha256"))
         return "SUCCESS"
 
+    def report_qa(job: Job):
+        if not m10_config:
+            raise PermanentJobError("M10 model configuration is not configured")
+        try:
+            out = run_report_qa(conn, job.object_id, job.payload["report_version_hash"], job.payload["qa_request_id"],
+                                model_configuration_id=m10_config, provider=provider, worker_id=worker_id, job_id=job.id)
+        except (InputBuildError, KeyError, ValueError) as exc:
+            raise PermanentJobError(str(exc)) from exc
+        log.info("RUN_REPORT_QA %s → %s", job.object_id, out.status)
+        return "SUCCESS" if out.status == "PASS" else "HUMAN_REVIEW"
+
+    def release_pdf(job: Job):
+        if store is None:
+            raise PermanentJobError("object storage is not configured")
+        try:
+            out = render_release_pdf(conn, job.object_id, job.payload["report_version_hash"], store=store, worker_id=worker_id)
+        except (KeyError, ValueError, PdfRenderError) as exc:
+            raise PermanentJobError(str(exc)) from exc
+        log.info("RENDER_RELEASE_PDF %s → %s", job.object_id, out.get("pdf_sha256"))
+        return "SUCCESS"
+
     review = ("OUTPUT_REJECTED", "HUMAN_REVIEW_REQUIRED", "SCHEMA_VALIDATION_FAILED", "PROPOSALS_RECORDED")
     return {"EDIT_REPORT": phase4(m09_config, "EDIT_REPORT", report_edit), "RENDER_REPORT": render,
+            "RUN_REPORT_QA": report_qa, "RENDER_RELEASE_PDF": release_pdf,
             "EXTRACT_CLAIMS": extract, "CLASSIFY_CLAIMS": classify,
             "ANALYSE_LINEAGE": analysis(m04_config, run_lineage, "ANALYSE_LINEAGE", review),
             "BUILD_EVENTS": analysis(m05_config, run_event_builder, "BUILD_EVENTS", review),
@@ -171,6 +201,7 @@ def make_handlers(conn, queue: JobQueue, provider: Provider, *, m02_config: str 
 def main(argv: list[str] | None = None) -> int:  # pragma: no cover - process entry point
     from lfhe_shared.config import load_settings
     from lfhe_shared.db import connect
+    from lfhe_shared.storage import build_object_store
 
     from .providers import AnthropicProvider
 
@@ -193,7 +224,8 @@ def main(argv: list[str] | None = None) -> int:  # pragma: no cover - process en
                                  m06_config=settings.m06_model_configuration_id,
                                  m07_config=settings.m07_model_configuration_id,
                                  m08_config=settings.m08_model_configuration_id,
-                                 m09_config=settings.m09_model_configuration_id)
+                                 m09_config=settings.m09_model_configuration_id,
+                                 m10_config=settings.m10_model_configuration_id, store=build_object_store(settings))
         while True:
             if args.enqueue:
                 conn.execute("SELECT lfhe.enqueue_pending_claim_extractions(50)")

@@ -31,7 +31,7 @@ def park_report_jobs(pg):
     EDIT_REPORT, new version → RENDER_REPORT) must not be picked up by other modules' workers."""
     with pg.admin() as x:
         x.execute("UPDATE lfhe.processing_jobs SET status='SKIPPED' WHERE status='PENDING' "
-                  "AND job_type IN ('EDIT_REPORT', 'RENDER_REPORT')")
+                  "AND job_type IN ('EDIT_REPORT', 'RENDER_REPORT', 'RUN_REPORT_QA', 'RENDER_RELEASE_PDF')")
 
 
 def approved_assessment(pg, analyst, *, statements=None, conf="LOW", contra=True, indicators=None, extra_claims=()):
