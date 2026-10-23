@@ -11,7 +11,7 @@ import json
 import re
 
 NUM = re.compile(r"\d+(?:[.,]\d+)?")
-NAME = re.compile(r"[^.!?:;\s]\s+([A-Z][A-Za-z]{2,})")
+NAME = re.compile(r"\b([A-Z][A-Za-z]{2,})")
 CAUSAL = re.compile(r"\b(because|due to|caused|causing|led to|leads to|in order to|therefore|as a result|resulting in)\b", re.I)
 CERTAIN = re.compile(r"\b(confirmed|definitely|certainly|undoubtedly|clearly|proves|proven|will|has achieved|achieved)\b", re.I)
 SCOPE = re.compile(r"\b(all|entire|every|whole|always|never|fleet-wide|nationwide)\b", re.I)

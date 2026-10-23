@@ -239,6 +239,15 @@ RETURNS boolean LANGUAGE sql IMMUTABLE SET search_path = pg_catalog, pg_temp AS 
   SELECT coalesce(p, '') ~ '(\mTOP SECRET\M|\mCOSMIC TOP SECRET\M|\mNATO (RESTRICTED|CONFIDENTIAL|SECRET|UNCLASSIFIED)\M|\mNOFORN\M|\mFOUO\M|\mREL TO\M|//[A-Z]|\m(SECRET|CONFIDENTIAL|RESTRICTED|CLASSIFIED)//|\(S\)|\(TS\)|\(C\)\s|\mNEMZETI MINŐSÍTETT\M|\mKORLÁTOZOTT TERJESZTÉSŰ\M|\mTITKOS!)'
 $$;
 
+-- instruction-like text addressed to an AI (mirror of lfhe_orchestrator.fidelity.instruction_like, plus
+-- workflow-directed phrases); in a report statement it is content that must go back to a human
+CREATE OR REPLACE FUNCTION lfhe.p6_instruction_like(p text)
+RETURNS boolean LANGUAGE sql IMMUTABLE SET search_path = pg_catalog, pg_temp AS $$
+  SELECT pg_catalog.normalize(coalesce(p, ''), 'NFKC') ~* ('\y(ignore|disregard|forget)\y.{0,40}\y(previous|prior|above|earlier|all)\y.{0,20}\y(instructions?|prompts?|rules)\y'
+    || '|\ynew instructions?\y|\yyou are now\y|</?\s*lfhe_task_envelope|\y(admin|developer|jailbreak)\s+mode\y|\yas an (ai|llm|language model)\y'
+    || '|\yprompt injection\y|\ymark (the )?qa (as )?pass\y|\yapprove (the )?release\y|\yhagyd figyelmen kívül')
+$$;
+
 CREATE OR REPLACE FUNCTION lfhe.p6_finding(p_check text, p_status text, p_severity text, p_code text, p_object text,
                                            p_statement uuid, p_details text, p_refs jsonb, p_action text)
 RETURNS jsonb LANGUAGE sql IMMUTABLE SET search_path = pg_catalog, pg_temp AS $$
@@ -657,6 +666,12 @@ BEGIN
                                       || v_ind::text, '[]', 'HUMAN_ANALYTICAL_REVIEW');
       END IF;
     END IF;
+    -- instruction-like content in report text (untrusted-data boundary)
+    IF lfhe.p6_instruction_like(v_txt) THEN
+      v_f := v_f || lfhe.p6_finding('STRUCTURE', 'FAIL', 'CRITICAL', 'EMBEDDED_INSTRUCTION_IN_CONTENT', s.report_statement_local_id, s.id,
+                                    'report text contains instruction-like content addressed to an AI; returned to a human', '[]',
+                                    'RETURN_TO_ANALYST_FOR_REVISION');
+    END IF;
     -- QA-14: prohibited markings in report text
     IF lfhe.p6_prohibited_marking(v_txt) THEN
       v_f := v_f || lfhe.p6_finding('QA-14', 'FAIL', 'CRITICAL', 'PROHIBITED_INFORMATION', s.report_statement_local_id, s.id,
@@ -835,8 +850,9 @@ BEGIN
 END $$;
 
 -- ---------------------------------------------------------------------------
--- M10-S ingestion (worker). p: {model_run_id, output_status, human_review_required, warnings,
--- repair_of_model_run_id, qa_request_id, deterministic_qa_run_id, result}
+-- M10-S ingestion (worker). p: {model_run_id, repair_of_model_run_id, qa_request_id, deterministic_qa_run_id,
+-- result?}. The audited result is ALWAYS the stored parsed output of the model run; a different
+-- caller-supplied result is itself a rejection reason (RESULT_NOT_FROM_MODEL_RUN).
 -- An output that is malformed in content (unknown evidence ref, foreign statement, wrong version,
 -- inconsistent severity, repair attempt, ...) is rejected as a whole: the S run is INVALID and its
 -- findings are not stored. An INVALID run makes the combined result FAIL.
@@ -847,7 +863,7 @@ DECLARE
   v_run     lfhe.model_runs%ROWTYPE;
   d         lfhe.qa_runs;
   v         lfhe.report_versions;
-  v_r       jsonb := p -> 'result';
+  v_r       jsonb;                     -- authoritative: the stored parsed output of the model run
   v_reasons text[] := '{}';
   v_f       jsonb;
   v_ref     jsonb;
@@ -860,6 +876,7 @@ BEGIN
     RAISE EXCEPTION 'model run % is not a finished M10_QA_AUDITOR run', p ->> 'model_run_id'
       USING ERRCODE = 'object_not_in_prerequisite_state';
   END IF;
+  v_r := v_run.parsed_output -> 'result';
   SELECT * INTO d FROM lfhe.qa_runs WHERE id = (p ->> 'deterministic_qa_run_id')::uuid AND kind = 'D';
   IF NOT FOUND OR d.qa_request_id IS DISTINCT FROM (p ->> 'qa_request_id')::uuid THEN
     RAISE EXCEPTION 'QA_RUN_PAIRING_INVALID: deterministic run % / request %', p ->> 'deterministic_qa_run_id', p ->> 'qa_request_id'
@@ -870,10 +887,13 @@ BEGIN
   IF NOT lfhe.run_has_object(v_run.id, 'input', 'report_version', v.id::text) THEN
     v_reasons := v_reasons || 'REPORT_VERSION_NOT_SUPPLIED'::text;
   END IF;
+  IF v_run.status = 'SUCCEEDED' AND (p ? 'result') AND (p -> 'result') IS DISTINCT FROM v_r AND (p -> 'result') <> 'null'::jsonb THEN
+    v_reasons := v_reasons || 'RESULT_NOT_FROM_MODEL_RUN'::text;
+  END IF;
   IF v_run.status <> 'SUCCEEDED' THEN
     v_reasons := v_reasons || ('MODEL_RUN_' || v_run.status::text);
-  ELSIF (p ->> 'output_status') IS DISTINCT FROM 'SUCCESS' OR v_r IS NULL THEN
-    v_reasons := v_reasons || ('MODEL_OUTPUT_STATUS_' || coalesce(p ->> 'output_status', 'NULL'));
+  ELSIF (v_run.parsed_output ->> 'status') IS DISTINCT FROM 'SUCCESS' OR v_r IS NULL THEN
+    v_reasons := v_reasons || ('MODEL_OUTPUT_STATUS_' || coalesce(v_run.parsed_output ->> 'status', 'NULL'));
   ELSE
     IF v_r ?| ARRAY['revised_text', 'corrected_statements', 'repaired_report', 'report_content', 'final_analytic_confidence',
                     'likelihood_term', 'approve', 'content_approved', 'security_review', 'release', 'released',
@@ -920,7 +940,7 @@ BEGIN
     model_release_blocked, repair_of_model_run_id)
   VALUES (v.report_id, v.id, v.report_version_hash, d.qa_request_id, 'S',
     CASE WHEN cardinality(v_reasons) > 0 THEN 'INVALID' ELSE 'COMPLETED' END, v_run.id, v_run.prompt_version_id, d.id, v_diag,
-    v_reasons, p ->> 'output_status', v_r ->> 'qa_status', (v_r ->> 'release_blocked')::boolean,
+    v_reasons, v_run.parsed_output ->> 'status', v_r ->> 'qa_status', (v_r ->> 'release_blocked')::boolean,
     (p ->> 'repair_of_model_run_id')::uuid)
   RETURNING id INTO v_id;
   IF cardinality(v_reasons) = 0 THEN
@@ -1093,7 +1113,7 @@ REVOKE ALL ON FUNCTION lfhe.run_m10d(uuid, text, uuid), lfhe.ingest_qa_semantic(
 GRANT EXECUTE ON FUNCTION lfhe.run_m10d(uuid, text, uuid), lfhe.ingest_qa_semantic(jsonb), lfhe.record_qa_result(uuid, uuid)
   TO lfhe_worker;
 REVOKE ALL ON FUNCTION lfhe.p6_autofail_codes(), lfhe.p6_recommended_actions(), lfhe.p6_is_latest_version(uuid),
-  lfhe.p6_current_qa_result(uuid), lfhe.p6_unacknowledged_warnings(uuid), lfhe.p6_prohibited_marking(text),
+  lfhe.p6_current_qa_result(uuid), lfhe.p6_unacknowledged_warnings(uuid), lfhe.p6_prohibited_marking(text), lfhe.p6_instruction_like(text),
   lfhe.p6_finding(text, text, text, text, text, uuid, text, jsonb, text), lfhe.p6_ref(text, text), lfhe.p6_validator_finding(text)
   FROM PUBLIC, anon, authenticated, service_role, lfhe_worker, lfhe_evaluator, lfhe_registrar;
 GRANT EXECUTE ON FUNCTION lfhe.p6_autofail_codes(), lfhe.p6_recommended_actions(), lfhe.p6_prohibited_marking(text)

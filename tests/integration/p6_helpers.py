@@ -110,7 +110,7 @@ def make_pdf(pg, rv, objstore):
 def release(pg, user, rv, pdf_id, rationale="all release conditions verified; release approved"):
     with pg.as_user(user) as h:
         return h.execute("SELECT lfhe.release_report(%s, %s, %s, %s) r",
-                         (str(rv["id"]), rv["report_version_hash"], str(pdf_id), rationale)).fetchone()["r"]
+                         (str(rv["id"]), rv["report_version_hash"], str(pdf_id) if pdf_id else None, rationale)).fetchone()["r"]
 
 
 def eligibility(pg, user, rv, pdf_id=None):

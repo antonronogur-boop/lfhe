@@ -281,6 +281,9 @@ BEGIN
   sr := CASE WHEN ca.id IS NULL THEN NULL ELSE lfhe.p6_current_security_review(ca.id) END;
   v_ck := v_ck || pg_catalog.jsonb_build_object('code', 'SECURITY_APPROVED', 'ok', sr.status IS NOT DISTINCT FROM 'APPROVED'
                                                 AND sr.report_version_hash = p_hash, 'security_review_id', sr.id);
+  v_ck := v_ck || pg_catalog.jsonb_build_object('code', 'NOT_RETURNED_OR_REJECTED', 'ok', NOT EXISTS (
+            SELECT 1 FROM lfhe.release_decisions x WHERE x.report_version_id = p_version AND x.security_review_id = sr.id
+              AND x.decision IN ('RETURN_FOR_REVISION', 'REJECT_RELEASE')));
   SELECT * INTO f FROM lfhe.release_pdf_artifacts WHERE id = p_pdf;
   v_ck := v_ck || pg_catalog.jsonb_build_object('code', 'PDF_EXISTS', 'ok', f.id IS NOT NULL, 'pdf_artifact_id', f.id);
   v_ck := v_ck || pg_catalog.jsonb_build_object('code', 'PDF_BOUND_TO_VERSION', 'ok', f.report_version_id IS NOT DISTINCT FROM p_version
@@ -618,6 +621,10 @@ BEGIN
   IF (v_ck -> 'refs' ->> 'security_review_id') IS NULL
      OR (SELECT status FROM lfhe.security_reviews WHERE id = (v_ck -> 'refs' ->> 'security_review_id')::uuid) <> 'APPROVED' THEN
     RAISE EXCEPTION 'NO_RELEASE_CANDIDATE: version % has no current approved security review', v.id USING ERRCODE = 'check_violation';
+  END IF;
+  IF EXISTS (SELECT 1 FROM lfhe.release_decisions x WHERE x.report_version_id = v.id
+             AND x.security_review_id = (v_ck -> 'refs' ->> 'security_review_id')::uuid) THEN
+    RAISE EXCEPTION 'RELEASE_ALREADY_DECIDED for this release candidate' USING ERRCODE = 'unique_violation';
   END IF;
   INSERT INTO lfhe.release_decisions (report_id, report_version_id, report_version_hash, decision, qa_result_id,
     deterministic_qa_run_id, semantic_qa_run_id, qa_status, warning_acknowledgement_ids, content_approval_id, security_review_id,
