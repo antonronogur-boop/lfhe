@@ -1,0 +1,202 @@
+{
+ "evidence_class": "REAL_PROVIDER_RUNS_FAILED \u2014 not a measurement of M10-S quality",
+ "m10s_model_runs": [
+  "240d7eaa-0171-4713-af1b-0c336d72af7c",
+  "ad890885-72a8-4f62-8261-bb94882cc7d0",
+  "31e05963-31bf-4b96-b79a-c1be5185b220",
+  "b43187f7-3bfe-488b-acdd-3039e473358f",
+  "a163e506-ba28-41da-b14a-4684171c954f",
+  "6bce13d4-bf82-4dbe-a320-8e472879c61f",
+  "bd0c5175-941b-472e-b87c-d635a824b9ba",
+  "ae1c3723-4460-4302-ae38-340a9abea491",
+  "e3864dca-4a79-4d71-9f35-35c840ffc135",
+  "5a04bace-a2a8-46df-8cfe-190ef75d69a9",
+  "d5d68fbd-2c29-47b9-82e2-244c6d382450",
+  "f0b4d151-5155-49e1-a32a-317eb5d60bf5",
+  "1f4fddc7-6385-449c-8d98-0253d5c5ab09",
+  "e250c6c4-4b71-4619-8c08-b5491e504a78",
+  "bb03519d-58bd-4d07-af90-c9701ca28032",
+  "07976cca-d27f-4c01-bce9-a41d287a43e0",
+  "60a4d5cf-fe15-46c7-b51b-40679e926fa4",
+  "f5d960a5-7795-40ab-bf61-112a1d94f9e4"
+ ],
+ "m10s_run_status_counts": {
+  "SCHEMA_VALIDATION_FAILED": 18
+ },
+ "provider": "anthropic/claude-sonnet-5-5",
+ "scores": {
+  "D": {
+   "critical_misses": 0,
+   "false_negatives": 0,
+   "false_positives": 10,
+   "false_positives_on_clean_cases": 0,
+   "findings_produced": 23,
+   "labels": 13,
+   "precision": 0.5652,
+   "recall": 1.0,
+   "true_positives": 13
+  },
+  "S": {
+   "critical_misses": 10,
+   "false_negatives": 11,
+   "false_positives": 0,
+   "false_positives_on_clean_cases": 0,
+   "findings_produced": 0,
+   "labels": 11,
+   "precision": null,
+   "recall": 0.0,
+   "true_positives": 0
+  },
+  "benchmark": "P7-BM-01",
+  "cases": 18,
+  "cases_without_qa_result": 0,
+  "clean_cases": 3,
+  "fp_note": "unlabelled findings on seeded cases count as false positives (conservative); false_positives_on_clean_cases is the false-alarm rate on unseeded versions"
+ },
+ "statuses": {
+  "BM01-Q01": {
+   "expected": "PASS",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": "SCHEMA_VALIDATION_FAILED",
+    "status": "SCHEMA_VALIDATION_FAILED"
+   }
+  },
+  "BM01-Q02": {
+   "expected": "PASS",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": "SCHEMA_VALIDATION_FAILED",
+    "status": "SCHEMA_VALIDATION_FAILED"
+   }
+  },
+  "BM01-Q03": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": "SCHEMA_VALIDATION_FAILED",
+    "status": "SCHEMA_VALIDATION_FAILED"
+   }
+  },
+  "BM01-Q04": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": "SCHEMA_VALIDATION_FAILED",
+    "status": "SCHEMA_VALIDATION_FAILED"
+   }
+  },
+  "BM01-Q05": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": "SCHEMA_VALIDATION_FAILED",
+    "status": "SCHEMA_VALIDATION_FAILED"
+   }
+  },
+  "BM01-Q06": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": "SCHEMA_VALIDATION_FAILED",
+    "status": "SCHEMA_VALIDATION_FAILED"
+   }
+  },
+  "BM01-Q07": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": "SCHEMA_VALIDATION_FAILED",
+    "status": "SCHEMA_VALIDATION_FAILED"
+   }
+  },
+  "BM01-Q08": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": "SCHEMA_VALIDATION_FAILED",
+    "status": "SCHEMA_VALIDATION_FAILED"
+   }
+  },
+  "BM01-Q09": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": "SCHEMA_VALIDATION_FAILED",
+    "status": "SCHEMA_VALIDATION_FAILED"
+   }
+  },
+  "BM01-Q10": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": "SCHEMA_VALIDATION_FAILED",
+    "status": "SCHEMA_VALIDATION_FAILED"
+   }
+  },
+  "BM01-Q11": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": "SCHEMA_VALIDATION_FAILED",
+    "status": "SCHEMA_VALIDATION_FAILED"
+   }
+  },
+  "BM01-Q12": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": "SCHEMA_VALIDATION_FAILED",
+    "status": "SCHEMA_VALIDATION_FAILED"
+   }
+  },
+  "BM01-Q13": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": "SCHEMA_VALIDATION_FAILED",
+    "status": "SCHEMA_VALIDATION_FAILED"
+   }
+  },
+  "BM01-Q14": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": "SCHEMA_VALIDATION_FAILED",
+    "status": "SCHEMA_VALIDATION_FAILED"
+   }
+  },
+  "BM01-Q16": {
+   "expected": "PASS_WITH_WARNINGS",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": "SCHEMA_VALIDATION_FAILED",
+    "status": "SCHEMA_VALIDATION_FAILED"
+   }
+  },
+  "BM01-Q21": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": "SCHEMA_VALIDATION_FAILED",
+    "status": "SCHEMA_VALIDATION_FAILED"
+   }
+  },
+  "BM01-Q23": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": "SCHEMA_VALIDATION_FAILED",
+    "status": "SCHEMA_VALIDATION_FAILED"
+   }
+  },
+  "BM01-Q24": {
+   "expected": "PASS",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": "SCHEMA_VALIDATION_FAILED",
+    "status": "SCHEMA_VALIDATION_FAILED"
+   }
+  }
+ }
+}

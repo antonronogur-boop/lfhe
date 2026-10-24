@@ -22,6 +22,12 @@ on:
         default: "provider_fixed"
         type: choice
         options: [provider_fixed, temperature_0]
+      scope:
+        description: "trial_only (cheap, ~2-10 calls) or trial_and_benchmark (+18 M10-S calls)"
+        required: false
+        default: "trial_and_benchmark"
+        type: choice
+        options: [trial_and_benchmark, trial_only]
 
 permissions:
   contents: read
@@ -66,7 +72,9 @@ jobs:
           LFHE_P7_BENCHMARK_OUT: ${{ runner.temp }}/p7-bm-01-real-provider.json
         run: |
           test -n "$LFHE_ANTHROPIC_API_KEY" || { echo "repository secret LFHE_ANTHROPIC_API_KEY is not set"; exit 1; }
-          python -m pytest -q tests/pilot/test_p7_provider_trial.py::test_real_provider_trial tests/pilot/test_p7_benchmark.py -rA
+          TESTS="tests/pilot/test_p7_provider_trial.py::test_real_provider_trial"
+          if [ "${{ inputs.scope }}" = "trial_and_benchmark" ]; then TESTS="$TESTS tests/pilot/test_p7_benchmark.py"; fi
+          python -m pytest -q $TESTS -rA
       - name: export check (no secrets in the results)
         if: always()
         run: |

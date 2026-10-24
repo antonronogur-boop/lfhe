@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 import psycopg
 import pytest
 
-from p7_support import ROOT, provider_and_config, provider_label, real_provider_requested, write_json
+from p7_support import ROOT, output_diagnostics, provider_and_config, provider_label, real_provider_requested, write_json
 from lfhe_orchestrator.qa_pipeline import run_report_qa
 from lfhe_pilot.export import benchmark_scores, export_problems
 from p5_helpers import content_of, edit, new_report
@@ -119,7 +119,9 @@ def test_p7_bm_01(pg, p7, make_user):
         evidence = "REAL_PROVIDER"
     else:
         evidence = "REAL_PROVIDER_RUNS_FAILED — not a measurement of M10-S quality"   # failures stay failures (§26)
+    diagnostics = [d for d in (output_diagnostics(pg, r) for r in runs[:3]) if d]
     write_json("LFHE_P7_BENCHMARK_OUT", {"provider": provider_label(), "scores": scores, "statuses": statuses,
+                                         "schema_failure_diagnostics": diagnostics,
                                          "m10s_model_runs": runs, "m10s_run_status_counts":
                                          {s: run_states.count(s) for s in sorted(set(map(str, run_states)))},
                                          "evidence_class": evidence})

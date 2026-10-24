@@ -67,6 +67,18 @@ def provider_and_config(pg, *, stand_in=None):
     return Recorder(FakeProvider(stand_in or auditor())), model_configuration(pg)
 
 
+def output_diagnostics(pg, run_id: str) -> dict | None:
+    """For a run whose output failed schema validation: the recorded validation errors and the head / tail
+    of the raw model output (synthetic material only; no envelope, prompt or credential)."""
+    with pg.admin() as x:
+        r = x.execute("SELECT status::text s, validation_errors v, raw_output o FROM lfhe.model_runs WHERE id=%s", (run_id,)).fetchone()
+    if r is None or r["s"] != "SCHEMA_VALIDATION_FAILED":
+        return None
+    raw = r["o"] or ""
+    return {"model_run_id": run_id, "validation_errors": (r["v"] or [])[:8], "output_chars": len(raw),
+            "output_head": raw[:300], "output_tail": raw[-300:] if len(raw) > 300 else ""}
+
+
 def write_json(env_var: str, doc: dict) -> None:
     out = os.environ.get(env_var)
     if out:

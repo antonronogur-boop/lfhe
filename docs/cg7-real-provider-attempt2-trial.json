@@ -1,0 +1,97 @@
+{
+ "github_run": "40105881022",
+ "metrics": {
+  "modules": {
+   "M07_INTELLIGENCE_ASSESSOR": {
+    "cost": null,
+    "cost_unknown_runs": 2,
+    "currencies": [],
+    "error_codes": {
+     "SCHEMA_VALIDATION_FAILED": 2
+    },
+    "input_tokens": 7912,
+    "latency_ms_max": 27086,
+    "latency_ms_median": 26882.5,
+    "model_config_hashes": [
+     "e285d39a793b1fd70dcd04f7da6c0db5ffa6d2b25ededd523862ee5135b60e8b"
+    ],
+    "models": [
+     "claude-sonnet-5-5"
+    ],
+    "output_tokens": 8324,
+    "prompt_versions": [
+     "1.0.0@3341707b15b5"
+    ],
+    "provider_errors": 0,
+    "providers": [
+     "anthropic"
+    ],
+    "repair_runs": 1,
+    "runs": 2,
+    "schema_validation_failed": 2,
+    "structured_output_success_rate": 0.0,
+    "succeeded": 0,
+    "tokens_unknown_runs": 0
+   }
+  },
+  "real_provider_runs": 2,
+  "runs_bound": 2
+ },
+ "provider": "anthropic/claude-sonnet-5-5",
+ "runs": [
+  {
+   "admissible": true,
+   "error_code": "SCHEMA_VALIDATION_FAILED",
+   "ingestion_outcome": "SCHEMA_VALIDATION_FAILED",
+   "input_tokens": 3837,
+   "latency_ms": 27086,
+   "model": "claude-sonnet-5-5",
+   "model_config_hash": "e285d39a793b1fd70dcd04f7da6c0db5ffa6d2b25ededd523862ee5135b60e8b",
+   "model_run_id": "04fa67c0-623a-4a5a-9648-6de7f381dc72",
+   "module_code": "M07_INTELLIGENCE_ASSESSOR",
+   "output_tokens": 4059,
+   "problems": [],
+   "prompt_content_hash": "3341707b15b52d5bc65755f109b912a638382f5d7f300a12e6d9455b73d8afa8",
+   "prompt_semver": "1.0.0",
+   "provider": "anthropic",
+   "provider_model": "claude-sonnet-5-5",
+   "repair_of_model_run_id": null,
+   "settings": {
+    "max_tokens": 16000,
+    "provider_fixed_sampling": true,
+    "timeout_seconds": 300
+   },
+   "status": "SCHEMA_VALIDATION_FAILED"
+  },
+  {
+   "admissible": true,
+   "error_code": "SCHEMA_VALIDATION_FAILED",
+   "ingestion_outcome": "SCHEMA_VALIDATION_FAILED",
+   "input_tokens": 4075,
+   "latency_ms": 26679,
+   "model": "claude-sonnet-5-5",
+   "model_config_hash": "e285d39a793b1fd70dcd04f7da6c0db5ffa6d2b25ededd523862ee5135b60e8b",
+   "model_run_id": "95c96121-859b-4580-85c8-a23fd3507a4e",
+   "module_code": "M07_INTELLIGENCE_ASSESSOR",
+   "output_tokens": 4265,
+   "problems": [],
+   "prompt_content_hash": "3341707b15b52d5bc65755f109b912a638382f5d7f300a12e6d9455b73d8afa8",
+   "prompt_semver": "1.0.0",
+   "provider": "anthropic",
+   "provider_model": "claude-sonnet-5-5",
+   "repair_of_model_run_id": "04fa67c0-623a-4a5a-9648-6de7f381dc72",
+   "settings": {
+    "max_tokens": 16000,
+    "provider_fixed_sampling": true,
+    "timeout_seconds": 300
+   },
+   "status": "SCHEMA_VALIDATION_FAILED"
+  }
+ ],
+ "steps": {
+  "M07": {
+   "outcome": "SCHEMA_VALIDATION_FAILED",
+   "rejections": []
+  }
+ }
+}

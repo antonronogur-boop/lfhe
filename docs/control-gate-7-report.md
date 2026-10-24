@@ -84,6 +84,17 @@ zárolással). Audit hash-lánc: PASS, 161 bejegyzés; pg_cron aktív. `docs/dev
   `p7-preflight.json` az artifactban). A benchmark-kimenet esetenként rögzíti az M10-S futás státuszát, és sikertelen
   futásoknál `REAL_PROVIDER_RUNS_FAILED` evidencia-osztályt ad.
 
+**2. kísérlet (CR7-01 után, 2026-10-24, run 40105881022, `claude-sonnet-5-5`, `provider_fixed_sampling`;
+`docs/cg7-real-provider-attempt2-*.json`):**
+- Preflight: HTTP 200 — a CR7-01 a provider-elutasítást megszüntette.
+- Próba: M07 valós hívások (eredeti + 1 javító futás), egyenként ~27 s, ~3,8–4,1 ezer input- és ~4,1–4,3 ezer output-token;
+  mindkét kimenet `SCHEMA_VALIDATION_FAILED` → a lánc ott megállt (helyes viselkedés: a hibás kimenet nem került be).
+- Benchmark: mind a 18 M10-S kimenet `SCHEMA_VALIDATION_FAILED` → minden eset FAIL (fail closed); **nem minőségmérés**.
+- Az ok még nem ismert: a sémahiba részleteit a harness nem exportálta. Pilot-eszköz bővítve: a kimenetek
+  `schema_failure_diagnostics` mezőt kapnak (validációs hibák + a modellkimenet eleje / vége, csak szintetikus anyag), és a
+  workflow `scope = trial_only` olcsó diagnosztikai futást tesz lehetővé. A javítás (ha a lezárt kimenet-feldolgozást
+  érinti) PO-döntés.
+
 Árak csak rögzített `pilot_provider_prices` mellett; nélküle a költség „ismeretlen”.
 
 ## BROWSER UX VALIDATION RESULT
@@ -96,7 +107,7 @@ zárolással). Audit hash-lánc: PASS, 161 bejegyzés; pg_cron aktív. `docs/dev
 
 ## BENCHMARK RESULT / M10-S EMPIRICAL QUALITY
 
-- Valós M10-S: **NOT YET EVIDENCED** (1. kísérlet: minden M10-S hívás elutasítva — nem minőségmérés; S recall 0 / 11 itt nem a modell teljesítménye).
+- Valós M10-S: **NOT YET EVIDENCED** (1. kísérlet: minden hívás elutasítva; 2. kísérlet: minden kimenet sémahibás — egyik sem minőségmérés; az S recall 0 / 11 nem a modell teljesítménye).
 - Tesztdublőrrel (csak a mérőút regressziója, `docs/cg7-benchmark-test-double.json`): D — 13 címke, TP 13, FN 0, FP 10
   (tiszta eseteken 0), precision 0,5652, recall 1,0, kritikus kihagyás 0; S (szabályalapú stand-in) — 11 címke, TP 11,
   FN 0, FP 2 (tiszta eseteken 0), precision 0,8462, recall 1,0. A D réteg provider-független, így a D-eredmény a valós
@@ -167,8 +178,8 @@ kontrollált eredményből, a ciklus cutoffja = a report cutoffja).
 | 13 | Kapacitás-metrikák reprodukálhatók | NOT YET EVIDENCED | §11 számítás tesztelve; pilot-adat nincs |
 | 14 | Kapacitásérték és pénzbeli megtakarítás nincs összemosva | PASS | külön mezők / tábla; teszt 13 |
 | 15 | Költség-feltevések explicitek | PASS | nincs alapérték; kötelező explicit input; teszt 11 |
-| 16 | Valós-provider futás megtörtént | NOT YET EVIDENCED | workflow / DEV worker kész |
-| 17 | Valós-provider modell / konfig / prompt nyomonkövetés teljes | NOT YET EVIDENCED | §26 ellenőrzés kész, csonkolt adapterrel tesztelve |
+| 16 | Valós-provider futás megtörtént | PASS | run 40105881022: valódi M07 és M10-S hívások (provider-válaszazonosító, tokenek, latencia); a kimenetek sémahibásak — a minőség külön kritérium (19) |
+| 17 | Valós-provider modell / konfig / prompt nyomonkövetés teljes | PASS | §26 ellenőrzés minden valós futásra admissible: modell, konfiguráció-hash (benne `provider_fixed_sampling`), prompt 1.0.0 + hash, ingestion, repair-link |
 | 18 | Provider-hibák és javító futások megőrizve | PASS | valós provider-hiba (HTTP 400) `PROVIDER_ERROR`-ként rögzítve, nem lett siker; QA fail closed (run 40102872833); repair-link tesztelve |
 | 19 | M10-S valós minősége empirikusan mérve | NOT YET EVIDENCED | P7-BM-01 futtató kész |
 | 20 | D és S QA külön mérhető | PASS | benchmark és ciklus-metrikák rétegenként |
@@ -193,7 +204,7 @@ kontrollált eredményből, a ciklus cutoffja = a report cutoffja).
 | 39 | Phase 7 change requestek listázva | PASS | nincs |
 | 40 | Későbbi fázis nem indult | PASS | — |
 
-Összesítve: **PASS 26, FAIL 0, NOT YET EVIDENCED 14.**
+Összesítve: **PASS 28, FAIL 0, NOT YET EVIDENCED 12.**
 
 ## RECOMMENDED CAPABILITY VERDICT
 

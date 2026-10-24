@@ -1,6 +1,6 @@
 # CR7-01 — Modellek, amelyek nem fogadják el a `temperature` paramétert
 
-Állapot: **IMPLEMENTED (B változat) — PO-utasítás alapján; a valós futás igazolása a PO-ra vár.**
+Állapot: **IMPLEMENTED (B változat) — PO-utasítás alapján; igazolva: run 40105881022 preflight HTTP 200, a provider minden hívást elfogadott.**
 
 PO-utasítás (2026-10-24 16:51, szó szerint): „Ez sem ment jobban, most már találj erre egy olyan megoldást, amely biztosan
 működtetni fogja!!!!” — a Haiku 5.5 preflight ugyanazzal a hibával utasítva el (request_id `req_011CgMFRkDWFB1626DoEayML`).

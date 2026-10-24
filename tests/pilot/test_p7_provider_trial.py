@@ -13,7 +13,7 @@ import os
 import httpx
 import pytest
 
-from p7_support import provider_and_config, provider_label, real_provider_requested, write_json
+from p7_support import output_diagnostics, provider_and_config, provider_label, real_provider_requested, write_json
 from lfhe_orchestrator.assessment_pipeline import run_assessment, run_challenge
 from lfhe_orchestrator.providers import AnthropicProvider
 from lfhe_orchestrator.qa_pipeline import run_report_qa
@@ -114,6 +114,7 @@ def test_real_provider_trial(pg, p7, make_user):
         bound = [str(r["model_run_id"]) for r in x.execute("SELECT model_run_id FROM lfhe.pilot_cycle_model_runs WHERE cycle_id=%s", (cid,))]
         out["runs"] = [run_checks(x, r) for r in sorted(bound)]
         out["metrics"] = provider_metrics(x, cid)
+    out["schema_failure_diagnostics"] = [d for d in (output_diagnostics(pg, r) for r in sorted(bound)) if d]
     out["github_run"] = os.environ.get("GITHUB_RUN_ID")
     write_json("LFHE_P7_TRIAL_OUT", out)
     assert out["runs"] and all("TEST_DOUBLE_PROVIDER" not in r["problems"] for r in out["runs"])
