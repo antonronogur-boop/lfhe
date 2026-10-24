@@ -90,7 +90,10 @@ zárolással). Audit hash-lánc: PASS, 161 bejegyzés; pg_cron aktív. `docs/dev
 - Próba: M07 valós hívások (eredeti + 1 javító futás), egyenként ~27 s, ~3,8–4,1 ezer input- és ~4,1–4,3 ezer output-token;
   mindkét kimenet `SCHEMA_VALIDATION_FAILED` → a lánc ott megállt (helyes viselkedés: a hibás kimenet nem került be).
 - Benchmark: mind a 18 M10-S kimenet `SCHEMA_VALIDATION_FAILED` → minden eset FAIL (fail closed); **nem minőségmérés**.
-- Az ok még nem ismert: a sémahiba részleteit a harness nem exportálta. Pilot-eszköz bővítve: a kimenetek
+- Az ok (3. futás, run 40111028306, `trial_only`, diagnosztikával): a modell **nem kapja meg a kimeneti sémát** — a lezárt
+  kérés-összeállítás az `output_schema.json`-t nem küldi, így a modell a mezőneveket / azonosító-mintákat kitalálja → **CR7-02
+  PROPOSED** (`docs/cr7-02-proposal.md`; javítás a `cr7-02` ágon, `main` változatlan).
+- (2. futás:) a sémahiba részleteit a harness akkor még nem exportálta. Pilot-eszköz bővítve: a kimenetek
   `schema_failure_diagnostics` mezőt kapnak (validációs hibák + a modellkimenet eleje / vége, csak szintetikus anyag), és a
   workflow `scope = trial_only` olcsó diagnosztikai futást tesz lehetővé. A javítás (ha a lezárt kimenet-feldolgozást
   érinti) PO-döntés.
@@ -141,7 +144,8 @@ kontrollált eredményből, a ciklus cutoffja = a report cutoffja).
 
 ## CHANGE REQUESTS
 
-- **CR7-01 — IMPLEMENTED (B), PO-utasítás 2026-10-24 alapján; valós futás igazolása a PO-ra vár** (migráció `20261011004200`, `provider_fixed_sampling`): a `claude-sonnet-5-5` a `temperature` paramétert elavultnak jelöli (preflight: HTTP 400 `invalid_request_error`, "`temperature` is deprecated for this model."), a lezárt low-variance szabály (explicit `temperature ≤ 0,2`, M02–M10) pedig mindig küldi. Opciók: A) régebbi, `temperature`-t elfogadó modell kódváltozás nélkül; B) „provider által vezérelt mintavétel” konfiguráció (zárt szemantika változik); C) mindkettő. Részletek: `docs/cr7-01-proposal.md`.
+- **CR7-01 — IMPLEMENTED (B), PO-utasítás 2026-10-24 alapján; valós futás igazolása a PO-ra vár** (migráció `20261011004200`, `provider_fixed_sampling`) — **igazolva**: a provider minden hívást elfogadott (runs 40105881022, 40111028306): a `claude-sonnet-5-5` a `temperature` paramétert elavultnak jelöli (preflight: HTTP 400 `invalid_request_error`, "`temperature` is deprecated for this model."), a lezárt low-variance szabály (explicit `temperature ≤ 0,2`, M02–M10) pedig mindig küldi. Opciók: A) régebbi, `temperature`-t elfogadó modell kódváltozás nélkül; B) „provider által vezérelt mintavétel” konfiguráció (zárt szemantika változik); C) mindkettő. Részletek: `docs/cr7-01-proposal.md`.
+- **CR7-02 — PROPOSED** (2026-10-24): a lezárt Phase 2 kérés-összeállítás a regisztrált `output_schema.json`-t nem küldi a modellnek; valós modellel minden modul kimenete sémahibás lesz (M07 diagnózis: kitalált mezőnevek, `S1` az `AS1` minta helyett, hiányzó burok). Javaslat: a séma a kérés része (trusted blokk az untrusted adat előtt), a prompt-csomagok és hashek változatlanok. Megvalósítás és tesztek a `cr7-02` ágon (teljes készlet 581 passed + 1 skipped); a `main` a PO-döntésig változatlan. Részletek: `docs/cr7-02-proposal.md`.
 
 ## KNOWN FAILURES
 
