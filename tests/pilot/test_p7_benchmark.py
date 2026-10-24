@@ -78,6 +78,9 @@ def test_p7_bm_01(pg, p7, make_user):
             mr = x.execute("SELECT model_run_id FROM lfhe.qa_runs WHERE id=%s", (str(q.semantic_qa_run_id),)).fetchone()
         if mr and mr["model_run_id"]:
             runs.append(str(mr["model_run_id"]))
+            with pg.admin() as x:
+                st = x.execute("SELECT status::text s, error_code e FROM lfhe.model_runs WHERE id=%s", (mr["model_run_id"],)).fetchone()
+            statuses[case["case_code"]]["m10s_run"] = {"status": st["s"], "error_code": st["e"]}
 
     # test 10: model / deterministic findings can never be recorded as benchmark truth
     any_case = call(pg, ev, "SELECT id FROM lfhe.pilot_benchmark_cases WHERE benchmark_id=%s LIMIT 1", (bid,))["id"]
@@ -109,6 +112,14 @@ def test_p7_bm_01(pg, p7, make_user):
     assert scores["D"]["critical_misses"] == 0                                               # deterministic layer is provider-independent
     if not real_provider_requested():
         assert scores["S"]["false_negatives"] == 0                                          # stand-in regression only
+    run_states = [v.get("m10s_run", {}).get("status") for v in statuses.values()]
+    if not real_provider_requested():
+        evidence = "TEST_DOUBLE_REGRESSION"
+    elif all(s == "SUCCEEDED" for s in run_states):
+        evidence = "REAL_PROVIDER"
+    else:
+        evidence = "REAL_PROVIDER_RUNS_FAILED — not a measurement of M10-S quality"   # failures stay failures (§26)
     write_json("LFHE_P7_BENCHMARK_OUT", {"provider": provider_label(), "scores": scores, "statuses": statuses,
-                                         "m10s_model_runs": runs, "evidence_class":
-                                         "REAL_PROVIDER" if real_provider_requested() else "TEST_DOUBLE_REGRESSION"})
+                                         "m10s_model_runs": runs, "m10s_run_status_counts":
+                                         {s: run_states.count(s) for s in sorted(set(map(str, run_states)))},
+                                         "evidence_class": evidence})

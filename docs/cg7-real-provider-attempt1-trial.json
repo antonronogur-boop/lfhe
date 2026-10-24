@@ -1,0 +1,73 @@
+{
+ "github_run": "40102872833",
+ "metrics": {
+  "modules": {
+   "M07_INTELLIGENCE_ASSESSOR": {
+    "cost": null,
+    "cost_unknown_runs": 1,
+    "currencies": [],
+    "error_codes": {
+     "PROVIDER_REQUEST_REJECTED": 1
+    },
+    "input_tokens": 0,
+    "latency_ms_max": 479,
+    "latency_ms_median": 479,
+    "model_config_hashes": [
+     "dd04decfc032ed568fbb7973859bd7273f5d8c07d01424cda7bafc2bac98cd3a"
+    ],
+    "models": [
+     "claude-sonnet-5-5"
+    ],
+    "output_tokens": 0,
+    "prompt_versions": [
+     "1.0.0@3341707b15b5"
+    ],
+    "provider_errors": 1,
+    "providers": [
+     "anthropic"
+    ],
+    "repair_runs": 0,
+    "runs": 1,
+    "schema_validation_failed": 0,
+    "structured_output_success_rate": 0.0,
+    "succeeded": 0,
+    "tokens_unknown_runs": 1
+   }
+  },
+  "real_provider_runs": 1,
+  "runs_bound": 1
+ },
+ "provider": "anthropic/claude-sonnet-5-5",
+ "runs": [
+  {
+   "admissible": true,
+   "error_code": "PROVIDER_REQUEST_REJECTED",
+   "ingestion_outcome": "PROVIDER_ERROR",
+   "input_tokens": null,
+   "latency_ms": 479,
+   "model": "claude-sonnet-5-5",
+   "model_config_hash": "dd04decfc032ed568fbb7973859bd7273f5d8c07d01424cda7bafc2bac98cd3a",
+   "model_run_id": "7da2ee23-a553-4637-aec6-a0080a323d86",
+   "module_code": "M07_INTELLIGENCE_ASSESSOR",
+   "output_tokens": null,
+   "problems": [],
+   "prompt_content_hash": "3341707b15b52d5bc65755f109b912a638382f5d7f300a12e6d9455b73d8afa8",
+   "prompt_semver": "1.0.0",
+   "provider": "anthropic",
+   "provider_model": null,
+   "repair_of_model_run_id": null,
+   "settings": {
+    "max_tokens": 16000,
+    "temperature": 0,
+    "timeout_seconds": 300
+   },
+   "status": "PROVIDER_ERROR"
+  }
+ ],
+ "steps": {
+  "M07": {
+   "outcome": "PROVIDER_ERROR",
+   "rejections": []
+  }
+ }
+}

@@ -70,9 +70,22 @@ zárolással). Audit hash-lánc: PASS, 161 bejegyzés; pg_cron aktív. `docs/dev
 
 ## REAL-PROVIDER TRIAL RESULT / PROVIDER COST & LATENCY
 
-**NOT YET EVIDENCED.** Indítás: GitHub Actions → `pilot-real-provider` (modellazonosító megadásával; a
-`LFHE_ANTHROPIC_API_KEY` repository secretet a PO állítja be) és / vagy DEV worker a pilot-ciklusokban. Árak csak
-rögzített `pilot_provider_prices` mellett; nélküle a költség „ismeretlen”.
+**NOT YET EVIDENCED — 1. kísérlet: a provider minden hívást elutasított** (PO, 2026-10-24, GitHub run 40102872833,
+`anthropic/claude-sonnet-5-5`; `docs/cg7-real-provider-attempt1-trial.json`, `…-benchmark.json`).
+
+- Próba: az M07 hívás `PROVIDER_ERROR` / `PROVIDER_REQUEST_REJECTED` (HTTP 400, 479 ms, token nélkül); a lánc ott
+  megállt. Benchmark: mind a 18 M10-S hívás eredménytelen (0 finding), minden eset FAIL.
+- Értelmezés: **konfigurációs probléma (CONFIGURATION_PROBLEM), nem modellminőség.** Az adapter a 400-as válasz okát nem
+  rögzíti (zárt Phase 2 viselkedés, nem módosítva); lehetséges okok: nem elérhető modellazonosító, a fiók nincs feltöltve /
+  nincs keret, vagy a kérés egy paraméterét (pl. `max_tokens` / `temperature`) a modell nem fogadja el.
+- Pozitív biztonsági bizonyíték: a provider-hiba hibaként maradt (§26), a QA fail closed lett (egyetlen hibás modell-kimenet
+  sem lett PASS), a futás §26 szerint nyomon követhető (provider, modell, konfiguráció-hash, prompt-hash, ingestion).
+- Javítás a pilot-eszközökben (nem zárt kód): `scripts/provider_preflight.py` — a workflow a próba előtt egyetlen, az
+  adapterrel azonos alakú kérést küld, és kiírja a HTTP-státuszt, a provider hibatípusát és -üzenetét (kulcs nélkül;
+  `p7-preflight.json` az artifactban). A benchmark-kimenet esetenként rögzíti az M10-S futás státuszát, és sikertelen
+  futásoknál `REAL_PROVIDER_RUNS_FAILED` evidencia-osztályt ad.
+
+Árak csak rögzített `pilot_provider_prices` mellett; nélküle a költség „ismeretlen”.
 
 ## BROWSER UX VALIDATION RESULT
 
@@ -84,7 +97,7 @@ rögzített `pilot_provider_prices` mellett; nélküle a költség „ismeretlen
 
 ## BENCHMARK RESULT / M10-S EMPIRICAL QUALITY
 
-- Valós M10-S: **NOT YET EVIDENCED.**
+- Valós M10-S: **NOT YET EVIDENCED** (1. kísérlet: minden M10-S hívás elutasítva — nem minőségmérés; S recall 0 / 11 itt nem a modell teljesítménye).
 - Tesztdublőrrel (csak a mérőút regressziója, `docs/cg7-benchmark-test-double.json`): D — 13 címke, TP 13, FN 0, FP 10
   (tiszta eseteken 0), precision 0,5652, recall 1,0, kritikus kihagyás 0; S (szabályalapú stand-in) — 11 címke, TP 11,
   FN 0, FP 2 (tiszta eseteken 0), precision 0,8462, recall 1,0. A D réteg provider-független, így a D-eredmény a valós
@@ -157,7 +170,7 @@ Nincs (CR7: —). Lezárt Phase 1–6 viselkedésben nem találtam olyan hibát,
 | 15 | Költség-feltevések explicitek | PASS | nincs alapérték; kötelező explicit input; teszt 11 |
 | 16 | Valós-provider futás megtörtént | NOT YET EVIDENCED | workflow / DEV worker kész |
 | 17 | Valós-provider modell / konfig / prompt nyomonkövetés teljes | NOT YET EVIDENCED | §26 ellenőrzés kész, csonkolt adapterrel tesztelve |
-| 18 | Provider-hibák és javító futások megőrizve | NOT YET EVIDENCED | mechanizmus tesztelve (repair-link, PROVIDER_ERROR); valós futás nincs |
+| 18 | Provider-hibák és javító futások megőrizve | PASS | valós provider-hiba (HTTP 400) `PROVIDER_ERROR`-ként rögzítve, nem lett siker; QA fail closed (run 40102872833); repair-link tesztelve |
 | 19 | M10-S valós minősége empirikusan mérve | NOT YET EVIDENCED | P7-BM-01 futtató kész |
 | 20 | D és S QA külön mérhető | PASS | benchmark és ciklus-metrikák rétegenként |
 | 21 | Böngészős E2E megtörtént | NOT YET EVIDENCED | P7-04, PO |
@@ -165,7 +178,7 @@ Nincs (CR7: —). Lezárt Phase 1–6 viselkedésben nem találtam olyan hibát,
 | 23 | BLOCKING UX-hibák megoldva vagy az út használhatatlannak nyilvánítva | NOT YET EVIDENCED | lezárási szabály kikényszerítve |
 | 24 | Benchmark-címkék izolálva | PASS | értékelői táblák / fájl; teszt 9, 19 |
 | 25 | K-11 / GS izoláció ép | PASS | GS-izolációs tesztek változatlanul zöldek |
-| 26 | Tiltott adat nem jutott providerhez | PASS | Phase 7-ben eddig nem történt provider-hívás; a próba csak szintetikus anyagot küld — a pilot után újra megerősítendő |
+| 26 | Tiltott adat nem jutott providerhez | PASS | az eddigi provider-hívások csak szintetikus 'Northland' anyagot vittek (run 40102872833) — a DEV-pilot után újra megerősítendő |
 | 27 | Emberi analitikai hatáskör ép | PASS | RBAC-teszt; PILOT_LEAD jogai |
 | 28 | Emberi biztonsági hatáskör ép | PASS | Phase 6 hatáskör-kiosztás változatlan (teszt) |
 | 29 | Emberi kiadási hatáskör ép | PASS | ugyanaz; worker / service_role / anon elutasítva |
@@ -181,7 +194,7 @@ Nincs (CR7: —). Lezárt Phase 1–6 viselkedésben nem találtam olyan hibát,
 | 39 | Phase 7 change requestek listázva | PASS | nincs |
 | 40 | Későbbi fázis nem indult | PASS | — |
 
-Összesítve: **PASS 25, FAIL 0, NOT YET EVIDENCED 15.**
+Összesítve: **PASS 26, FAIL 0, NOT YET EVIDENCED 14.**
 
 ## RECOMMENDED CAPABILITY VERDICT
 

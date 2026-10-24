@@ -46,7 +46,7 @@ rögzítésre.
 | --- | --- |
 | Analista aktív idő, ciklusidő, áteresztés, korrekciók | **NOT YET EVIDENCED** (nincs ciklus) |
 | Kapacitás-felszabadítás, FTE, kapacitásérték | **NOT YET EVIDENCED** (nincs ciklus, nincs rögzített költség-feltevés) |
-| Valós provider: M07 / M08 / M09 / M10-S siker, latencia, token, költség | **NOT YET EVIDENCED** (a `pilot-real-provider` workflow / DEV worker még nem futott) |
+| Valós provider: M07 / M08 / M09 / M10-S siker, latencia, token, költség | **NOT YET EVIDENCED** — 1. kísérlet (2026-10-24, run 40102872833): minden hívás HTTP 400 elutasítás (konfigurációs probléma); a hiba hibaként maradt, a QA fail closed |
 | M10-S empirikus minőség (P7-BM-01, valós provider) | **NOT YET EVIDENCED** |
 | P7-BM-01 a szabályalapú tesztdublőrrel (csak a mérőút regressziója) | D: 13 címke, TP 13, FN 0, FP 10 (ebből tiszta eseteken 0), precision 0,5652, recall 1,0, kritikus kihagyás 0. S (tesztdublőr): 11 címke, TP 11, FN 0, FP 2 (tiszta eseteken 0), precision 0,8462, recall 1,0. **Nem a valós M10-S minősége.** |
 | Böngészős UX | **NOT YET EVIDENCED** |
@@ -60,6 +60,9 @@ rögzítésre.
   §26-ellenőrzés) a valós Anthropic adapterrel, csonkolt HTTP-vel hibátlanul fut — a valós futás technikailag kész.
 
 ## NEGATIVE FINDINGS (eddig)
+
+* CONFIGURATION_PROBLEM (2026-10-24): az első valós-provider kísérletben a provider minden kérést HTTP 400-zal utasított el; a
+  rögzített `PROVIDER_REQUEST_REJECTED` kód az okot nem mutatja, ezért a diagnózishoz preflight lépés került a workflow-ba.
 
 * A D réteg a szintetikus benchmarkon sok nem címkézett másodlagos jelzést ad (10), ami az elemzői QA-feloldási
   terhet növelheti; hogy ez valós ciklusban zaj-e, a pilot mutatja meg.

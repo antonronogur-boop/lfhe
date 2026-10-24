@@ -1,0 +1,127 @@
+{
+ "evidence_class": "REAL_PROVIDER",
+ "m10s_model_runs": [
+  "08ed94a6-3dfd-44bd-999d-d964b40453d2",
+  "0ca27897-80a8-4fdd-bae7-43536a243679",
+  "e4be69d9-367f-4835-84fb-1efcf27fe2f6",
+  "92355c49-ef05-4bd7-8668-a91960779b10",
+  "b79d5799-7bf4-47eb-b776-f339a847c006",
+  "933a09ae-04a6-47fe-a320-88690620a3de",
+  "28571c07-e7f3-40ab-89a0-d167a690aa0b",
+  "5e46ad46-5cd1-440b-90fc-bbe5b2e07634",
+  "f6b287a3-3a86-4eb1-9306-0d5c1c61df07",
+  "38ca4a0e-7f7e-454c-a9fb-92fd20669775",
+  "99b495f3-4f8a-4219-95cb-613be22f63ec",
+  "ed6f7a11-92ab-4d29-a0cf-dcda8cb59f25",
+  "3206ba4b-76c9-441f-99a0-25de8a4a8345",
+  "dd2833eb-d8dd-450a-b970-76465de281dc",
+  "f498ecaa-d2a1-4516-872c-1b08f2285254",
+  "576fc9fe-7c65-47c9-bc23-6779e86401d4",
+  "a45eb22a-ba34-4e71-8cfe-a83cc7f2d108",
+  "60a5038f-a92b-4a86-a0b1-4ad37509fc50"
+ ],
+ "provider": "anthropic/claude-sonnet-5-5",
+ "scores": {
+  "D": {
+   "critical_misses": 0,
+   "false_negatives": 0,
+   "false_positives": 10,
+   "false_positives_on_clean_cases": 0,
+   "findings_produced": 23,
+   "labels": 13,
+   "precision": 0.5652,
+   "recall": 1.0,
+   "true_positives": 13
+  },
+  "S": {
+   "critical_misses": 10,
+   "false_negatives": 11,
+   "false_positives": 0,
+   "false_positives_on_clean_cases": 0,
+   "findings_produced": 0,
+   "labels": 11,
+   "precision": null,
+   "recall": 0.0,
+   "true_positives": 0
+  },
+  "benchmark": "P7-BM-01",
+  "cases": 18,
+  "cases_without_qa_result": 0,
+  "clean_cases": 3,
+  "fp_note": "unlabelled findings on seeded cases count as false positives (conservative); false_positives_on_clean_cases is the false-alarm rate on unseeded versions"
+ },
+ "statuses": {
+  "BM01-Q01": {
+   "expected": "PASS",
+   "got": "FAIL"
+  },
+  "BM01-Q02": {
+   "expected": "PASS",
+   "got": "FAIL"
+  },
+  "BM01-Q03": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q04": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q05": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q06": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q07": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q08": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q09": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q10": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q11": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q12": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q13": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q14": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q16": {
+   "expected": "PASS_WITH_WARNINGS",
+   "got": "FAIL"
+  },
+  "BM01-Q21": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q23": {
+   "expected": "FAIL",
+   "got": "FAIL"
+  },
+  "BM01-Q24": {
+   "expected": "PASS",
+   "got": "FAIL"
+  }
+ }
+}

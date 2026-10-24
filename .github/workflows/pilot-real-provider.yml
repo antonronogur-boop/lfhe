@@ -41,6 +41,13 @@ jobs:
           pip install --no-deps -e .
       - name: prompt artifacts unchanged since locking
         run: python scripts/prompt_registry.py check-lock
+      - name: provider preflight (same request shape; prints status / error type only)
+        env:
+          LFHE_P7_MODEL: ${{ inputs.model }}
+          LFHE_P7_MAX_TOKENS: ${{ inputs.max_tokens }}
+          LFHE_ANTHROPIC_API_KEY: ${{ secrets.LFHE_ANTHROPIC_API_KEY }}
+          LFHE_P7_PREFLIGHT_OUT: ${{ runner.temp }}/p7-preflight.json
+        run: python scripts/provider_preflight.py
       - name: real-provider trial + benchmark (synthetic material only)
         env:
           LFHE_P7_PROVIDER: anthropic
