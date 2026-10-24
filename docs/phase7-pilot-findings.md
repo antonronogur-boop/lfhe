@@ -62,7 +62,8 @@ rögzítésre.
 ## NEGATIVE FINDINGS (eddig)
 
 * CONFIGURATION_PROBLEM (2026-10-24): az első valós-provider kísérletben a provider minden kérést HTTP 400-zal utasított el; a
-  rögzített `PROVIDER_REQUEST_REJECTED` kód az okot nem mutatja, ezért a diagnózishoz preflight lépés került a workflow-ba.
+  preflight szerint az ok: a `claude-sonnet-5-5` a `temperature` paramétert elavultnak jelöli, a lezárt low-variance szabály
+  viszont explicit `temperature ≤ 0,2`-t küld → CR7-01 (PROPOSED, `docs/cr7-01-proposal.md`).
 
 * A D réteg a szintetikus benchmarkon sok nem címkézett másodlagos jelzést ad (10), ami az elemzői QA-feloldási
   terhet növelheti; hogy ez valós ciklusban zaj-e, a pilot mutatja meg.

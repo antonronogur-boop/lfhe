@@ -18,7 +18,7 @@
 | P7-00 Baseline + PO authorisation stored verbatim (docs/specs, SPEC_INDEX 26–27); CG1–CG6 confirmed CLOSED; 41 applied migrations locked (`database/migrations.lock.json`, `tests/unit/test_migration_lock.py`; DEV runner rejects modified applied files); work on `main` | done |
 | P7-01 Pilot data model & instrumentation (migration 4100; `pilot_*` tables / views / 16 HUMAN_ONLY functions; PILOT_LEAD) | done |
 | P7-02 Pilot workspace (`/pilot`, `/pilot/[id]`) | done |
-| P7-03 Real provider trial (DEV worker + `pilot-real-provider` workflow; §26 checks; preflight) | attempt 1 (run 40102872833): all calls HTTP 400 rejected — configuration problem; **rerun with preflight pending (PO)** |
+| P7-03 Real provider trial (DEV worker + `pilot-real-provider` workflow; §26 checks; preflight) | attempt 1 (run 40102872833): all calls HTTP 400 rejected; preflight: `temperature` deprecated for claude-sonnet-5-5 → **CR7-01 PROPOSED (docs/cr7-01-proposal.md), PO decision pending** |
 | P7-04 Browser end-to-end validation | checklist done — **human run pending (PO)** |
 | P7-05 Controlled benchmark P7-BM-01 (18 cases, 24 labels; evaluator-only) | done (test-double regression); **real M10-S run pending** |
 | P7-06 Operational pilot cycles | instrumentation done — **0 / 6 cycles (PO, calendar time)** |

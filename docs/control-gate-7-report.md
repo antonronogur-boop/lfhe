@@ -75,9 +75,8 @@ zárolással). Audit hash-lánc: PASS, 161 bejegyzés; pg_cron aktív. `docs/dev
 
 - Próba: az M07 hívás `PROVIDER_ERROR` / `PROVIDER_REQUEST_REJECTED` (HTTP 400, 479 ms, token nélkül); a lánc ott
   megállt. Benchmark: mind a 18 M10-S hívás eredménytelen (0 finding), minden eset FAIL.
-- Értelmezés: **konfigurációs probléma (CONFIGURATION_PROBLEM), nem modellminőség.** Az adapter a 400-as válasz okát nem
-  rögzíti (zárt Phase 2 viselkedés, nem módosítva); lehetséges okok: nem elérhető modellazonosító, a fiók nincs feltöltve /
-  nincs keret, vagy a kérés egy paraméterét (pl. `max_tokens` / `temperature`) a modell nem fogadja el.
+- Értelmezés: **konfigurációs probléma (CONFIGURATION_PROBLEM), nem modellminőség.** A 2. futás preflightja szerint az ok:
+  `temperature` is deprecated for this model (HTTP 400 `invalid_request_error`) → CR7-01 (PROPOSED).
 - Pozitív biztonsági bizonyíték: a provider-hiba hibaként maradt (§26), a QA fail closed lett (egyetlen hibás modell-kimenet
   sem lett PASS), a futás §26 szerint nyomon követhető (provider, modell, konfiguráció-hash, prompt-hash, ingestion).
 - Javítás a pilot-eszközökben (nem zárt kód): `scripts/provider_preflight.py` — a workflow a próba előtt egyetlen, az
@@ -131,7 +130,7 @@ kontrollált eredményből, a ciklus cutoffja = a report cutoffja).
 
 ## CHANGE REQUESTS
 
-Nincs (CR7: —). Lezárt Phase 1–6 viselkedésben nem találtam olyan hibát, amely change requestet igényelne.
+- **CR7-01 — PROPOSED** (2026-10-24): a `claude-sonnet-5-5` a `temperature` paramétert elavultnak jelöli (preflight: HTTP 400 `invalid_request_error`, "`temperature` is deprecated for this model."), a lezárt low-variance szabály (explicit `temperature ≤ 0,2`, M02–M10) pedig mindig küldi. Opciók: A) régebbi, `temperature`-t elfogadó modell kódváltozás nélkül; B) „provider által vezérelt mintavétel” konfiguráció (zárt szemantika változik); C) mindkettő. Részletek: `docs/cr7-01-proposal.md`. Az érintett pilot-út a PO-döntésig áll.
 
 ## KNOWN FAILURES
 
