@@ -93,6 +93,10 @@ zárolással). Audit hash-lánc: PASS, 161 bejegyzés; pg_cron aktív. `docs/dev
 - Az ok (3. futás, run 40111028306, `trial_only`, diagnosztikával): a modell **nem kapja meg a kimeneti sémát** — a lezárt
   kérés-összeállítás az `output_schema.json`-t nem küldi, így a modell a mezőneveket / azonosító-mintákat kitalálja → **CR7-02
   PROPOSED** (`docs/cr7-02-proposal.md`; javítás a `cr7-02` ágon, `main` változatlan).
+- **4. futás a `cr7-02` ágról** (run 40112066517, `trial_only`; `docs/cg7-real-provider-attempt4-cr7-02-branch-trial.json`): a teljes
+  szintetikus lánc valós `claude-sonnet-5-5`-tel lefutott — M07 `ASSESSMENT_RECORDED` (30 s), M08 `CHALLENGE_RECORDED` (54 s), emberi
+  jóváhagyás, M09 `REPORT_VERSION_RECORDED` (18 s), M10-D + M10-S → `PASS_WITH_WARNINGS` (48 s); 4 / 4 futás sémahelyes, javító futás
+  nélkül, mind §26 szerint admissible. Össz. ~37,7 ezer input- és ~22,8 ezer output-token. A `main` a CR7-02 PO-döntéséig változatlan.
 - (2. futás:) a sémahiba részleteit a harness akkor még nem exportálta. Pilot-eszköz bővítve: a kimenetek
   `schema_failure_diagnostics` mezőt kapnak (validációs hibák + a modellkimenet eleje / vége, csak szintetikus anyag), és a
   workflow `scope = trial_only` olcsó diagnosztikai futást tesz lehetővé. A javítás (ha a lezárt kimenet-feldolgozást

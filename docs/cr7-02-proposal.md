@@ -1,6 +1,6 @@
 # CR7-02 (JAVASLAT) — A modell nem kapja meg a kötelező kimeneti sémát
 
-Állapot: **PROPOSED — PO-döntésre vár.** Megvalósítás előkészítve a `cr7-02` ágon (a `main` változatlan); a PO a
+Állapot: **PROPOSED — PO-döntésre vár; az ágon igazolva** (run 40112066517: M07 → M08 → M09 → M10-S valós modellel, 4 / 4 sémahelyes, QA PASS_WITH_WARNINGS). Megvalósítás előkészítve a `cr7-02` ágon (a `main` változatlan); a PO a
 `pilot-real-provider` workflow-t erről az ágról futtathatja a döntés előtt (bizonyíték a döntéshez).
 
 ## Megállapítás (2026-10-24, run 40111028306, `claude-sonnet-5-5`, `provider_fixed_sampling`)
