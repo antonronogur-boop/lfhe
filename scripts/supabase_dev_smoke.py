@@ -373,6 +373,13 @@ def main() -> int:
     drift = sorted(f for f, h in lock.items() if applied.get(f) != h)
     check("P7-00: applied migrations through CG6 match the immutable lock", not drift, f"{len(lock) - len(drift)}/{len(lock)} locked")
 
+    ok_fixed = db.execute("SELECT lfhe.model_settings_problems('anthropic', 'claude-sonnet-5-5', "
+                          "'{\"provider_fixed_sampling\": true, \"max_tokens\": 16000}'::jsonb) AS p").fetchone()["p"]
+    bad_mix = db.execute("SELECT lfhe.model_settings_problems('anthropic', 'claude-sonnet-5-5', "
+                         "'{\"provider_fixed_sampling\": true, \"temperature\": 0}'::jsonb) AS p").fetchone()["p"]
+    check("CR7-01: provider_fixed_sampling allowed for anthropic, never combined with temperature",
+          ok_fixed == [] and bad_mix == ["$.provider_fixed_sampling (CONFLICTS_WITH_SAMPLING_PARAMETER)"], f"{ok_fixed} / {bad_mix}")
+
     # 5. source administration end-to-end
     r = rest.rpc("create_source", payload, admin)
     ok = check("source admin: admin creates source", r.status_code == 200, f"HTTP {r.status_code} {r.text}")

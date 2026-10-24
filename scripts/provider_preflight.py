@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Phase 7 provider preflight (pilot tooling): one minimal request with the SAME request shape the
-AnthropicProvider sends (model, max_tokens, temperature, system, one user message), so a rejected
+AnthropicProvider sends (model, max_tokens, sampling per LFHE_P7_SAMPLING, system, one user message), so a rejected
 configuration is diagnosed before any trial run.
 
     LFHE_ANTHROPIC_API_KEY (secret-managed env) + LFHE_P7_MODEL [+ LFHE_P7_MAX_TOKENS]
@@ -32,8 +32,11 @@ def main() -> int:
     if not key or not model:
         print("PREFLIGHT: LFHE_ANTHROPIC_API_KEY and LFHE_P7_MODEL must be set")
         return 1
-    body = {"model": model, "max_tokens": int(os.environ.get("LFHE_P7_MAX_TOKENS", "16000")), "temperature": 0,
+    body = {"model": model, "max_tokens": int(os.environ.get("LFHE_P7_MAX_TOKENS", "16000")),
             "system": "Answer with exactly one JSON object.", "messages": [{"role": "user", "content": "Return {\"ok\": true}."}]}
+    sampling = os.environ.get("LFHE_P7_SAMPLING", "provider_fixed")
+    if sampling != "provider_fixed":
+        body["temperature"] = 0                      # same shape as AnthropicProvider.render_request (CR7-01)
     try:
         r = httpx.post(URL, json=body, timeout=60, headers={"x-api-key": key, "anthropic-version": "2023-06-01",
                                                             "content-type": "application/json"})
@@ -47,12 +50,12 @@ def main() -> int:
         data = {}
     if r.status_code == 200:
         report(f"PREFLIGHT: OK model={data.get('model')} stop_reason={data.get('stop_reason')} usage={json.dumps(data.get('usage'))} "
-               f"request_id={rid}", True, http_status=200, model=data.get("model"), request_id=rid)
+               f"request_id={rid} sampling={sampling}", True, http_status=200, model=data.get("model"), request_id=rid, sampling=sampling)
         return 0
     err = data.get("error") or {}
     msg = str(err.get("message", ""))[:400].replace(key, "***")
-    report(f"PREFLIGHT: REJECTED HTTP {r.status_code} type={err.get('type')} message={msg!r} request_id={rid}", False,
-           http_status=r.status_code, error_type=err.get("type"), error_message=msg, request_id=rid, model_requested=model)
+    report(f"PREFLIGHT: REJECTED HTTP {r.status_code} type={err.get('type')} message={msg!r} request_id={rid} sampling={sampling}", False,
+           http_status=r.status_code, error_type=err.get("type"), error_message=msg, request_id=rid, model_requested=model, sampling=sampling)
     return 1
 
 

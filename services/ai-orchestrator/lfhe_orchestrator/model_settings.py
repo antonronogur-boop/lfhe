@@ -12,8 +12,10 @@ _MODEL = re.compile(r"^[a-z0-9][a-z0-9._:-]{1,99}$")
 _RULES = {
     "fake": {"temperature": (0, 1, False), "max_tokens": (1, 64000, True)},
     "anthropic": {"temperature": (0, 1, False), "max_tokens": (1, 64000, True),
-                  "top_p": (0, 1, False), "timeout_seconds": (1, 600, False)},
+                  "top_p": (0, 1, False), "timeout_seconds": (1, 600, False), "provider_fixed_sampling": None},
 }
+# CR7-01: explicit marker for models that reject sampling parameters; the adapter then sends none.
+PROVIDER_FIXED_SAMPLING = "provider_fixed_sampling"
 # Low-variance requirement for extraction / classification modules (addendum §14).
 LOW_VARIANCE_MAX_TEMPERATURE = 0.2
 LOW_VARIANCE_MODULES = ("M02_CLAIM_EXTRACTOR", "M03_CLASSIFIER", "M04_LINEAGE", "M05_EVENT_BUILDER",
@@ -33,6 +35,12 @@ def model_settings_problems(provider: str, model: str, settings) -> list[str]:
         if key not in rules:
             out.append(f"$.{key} (SETTING_NOT_ALLOWED_FOR_PROVIDER)")
             continue
+        if key == PROVIDER_FIXED_SAMPLING:
+            if value is not True:
+                out.append(f"$.{key} (MUST_BE_TRUE)")
+            elif "temperature" in settings or "top_p" in settings:
+                out.append(f"$.{key} (CONFLICTS_WITH_SAMPLING_PARAMETER)")
+            continue
         if isinstance(value, bool) or not isinstance(value, (int, float)):
             out.append(f"$.{key} (NOT_A_NUMBER)")
             continue
@@ -46,9 +54,12 @@ def model_settings_problems(provider: str, model: str, settings) -> list[str]:
 
 
 def low_variance_problem(module_code: str, settings: dict) -> str | None:
-    """M02/M03 must run with low-variance settings (temperature ≤ 0.2, explicit)."""
+    """M02–M10 must run with low-variance settings: an explicit temperature ≤ 0.2, or (CR7-01) the explicit
+    provider_fixed_sampling marker for a model that rejects sampling parameters."""
     if module_code not in LOW_VARIANCE_MODULES:
         return None
+    if settings.get(PROVIDER_FIXED_SAMPLING) is True and "temperature" not in settings and "top_p" not in settings:
+        return None   # CR7-01: sampling fixed by the provider for this model; recorded in the configuration hash
     temperature = settings.get("temperature")
     if temperature is None or temperature > LOW_VARIANCE_MAX_TEMPERATURE:
         return (f"{module_code} requires an explicit temperature ≤ {LOW_VARIANCE_MAX_TEMPERATURE} "

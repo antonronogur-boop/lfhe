@@ -133,7 +133,10 @@ class AnthropicProvider:
         system, messages = render_messages(module, envelope)
         settings = model_config.settings
         body = {"model": model_config.model, "max_tokens": int(settings.get("max_tokens", 4096)),
-                "temperature": settings["temperature"], "system": system, "messages": messages}
+                "system": system, "messages": messages}
+        if settings.get("provider_fixed_sampling") is True:
+            return body           # CR7-01: the model rejects sampling parameters; none is sent
+        body["temperature"] = settings["temperature"]
         if "top_p" in settings:
             body["top_p"] = settings["top_p"]
         return body

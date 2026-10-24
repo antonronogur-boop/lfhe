@@ -130,3 +130,8 @@ operator/Product Owner; record the JSON output of step 6 in PROJECT_STATUS.
   analytical / QA / approval / security / release authority; applied migrations 1–41 match
   `database/migrations.lock.json`. Expected result without the service-role key: **68/68 PASS**. The smoke
   creates no pilot record. Pilot operation: `docs/runbooks/phase7-pilot.md`.
+
+### CR7-01 addition
+
+* Migration `20261011004200_cr7_01_provider_fixed_sampling.sql` → **43 migrations**; the smoke adds one check
+  (`provider_fixed_sampling` allowed for anthropic and never combined with temperature). Expected: **69/69 PASS**.

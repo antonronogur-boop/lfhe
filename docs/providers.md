@@ -3,7 +3,7 @@
 | Provider | Adapter | Allow-listed settings (non-secret) | Credential |
 | --- | --- | --- | --- |
 | `fake` | `FakeProvider` (tests) | temperature [0,1], max_tokens [1,64000] | none |
-| `anthropic` | `AnthropicProvider` (Messages API) | temperature [0,1], max_tokens [1,64000], top_p (0,1], timeout_seconds [1,600] | `LFHE_ANTHROPIC_API_KEY` env var, injected by the platform secret manager |
+| `anthropic` | `AnthropicProvider` (Messages API) | temperature [0,1], max_tokens [1,64000], top_p (0,1], timeout_seconds [1,600], provider_fixed_sampling (`true` only; never with temperature / top_p — CR7-01) | `LFHE_ANTHROPIC_API_KEY` env var, injected by the platform secret manager |
 
 * The allow-list is enforced by the database (`lfhe.model_settings_problems`,
   trigger `model_configurations_validate_settings`, CHECK backstop) and mirrored in
@@ -36,3 +36,10 @@ LFHE_ANTHROPIC_API_KEY=<from the secret manager> python -m lfhe_orchestrator.wor
 Model configurations are registered by the registrar (`lfhe.register_model_configuration('anthropic',
 '<model>', '{"temperature": 0, "max_tokens": 8000}')`); M02/M03 require an explicit temperature ≤ 0.2.
 M02/M03 prompt versions must be activated by a human (`PROMPT_ACTIVATE`).
+
+## CR7-01 — models that reject `temperature`
+
+Current Anthropic models (the 5.5 family) answer HTTP 400 "`temperature` is deprecated for this model". Register such a
+model with `{"provider_fixed_sampling": true, "max_tokens": 16000, "timeout_seconds": 300}`: the adapter then sends no
+sampling parameter, the low-variance rule accepts the explicit marker, and the marker is part of the configuration hash of
+every model run. Models that still accept `temperature` keep the original configuration (`temperature ≤ 0.2`).

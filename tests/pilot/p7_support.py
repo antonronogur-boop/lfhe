@@ -47,14 +47,19 @@ class Recorder:
 
 
 def provider_and_config(pg, *, stand_in=None):
-    """(provider, model_configuration_id). The real provider gets a registered anthropic configuration
-    with temperature 0 (low-variance modules) and explicit max_tokens / timeout."""
+    """(provider, model_configuration_id). The real provider gets a registered anthropic configuration with
+    explicit max_tokens / timeout and either provider_fixed_sampling (CR7-01, default; for models that reject
+    `temperature`) or temperature 0 (LFHE_P7_SAMPLING=temperature_0)."""
     if real_provider_requested():
         model = os.environ["LFHE_P7_MODEL"]
-        key = f"anthropic:{model}"
+        key = f"anthropic:{model}:{os.environ.get('LFHE_P7_SAMPLING', 'provider_fixed')}"
         if key not in _CONFIGS:
-            settings = {"temperature": 0, "max_tokens": int(os.environ.get("LFHE_P7_MAX_TOKENS", "16000")),
+            settings = {"max_tokens": int(os.environ.get("LFHE_P7_MAX_TOKENS", "16000")),
                         "timeout_seconds": int(os.environ.get("LFHE_P7_TIMEOUT_SECONDS", "300"))}
+            if os.environ.get("LFHE_P7_SAMPLING", "provider_fixed") == "provider_fixed":
+                settings["provider_fixed_sampling"] = True          # CR7-01: model rejects temperature
+            else:
+                settings["temperature"] = 0
             with pg.registrar() as c:
                 _CONFIGS[key] = str(c.execute("SELECT lfhe.register_model_configuration('anthropic', %s, %s::jsonb) id",
                                               (model, Jsonb(settings))).fetchone()["id"])

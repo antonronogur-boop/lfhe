@@ -16,6 +16,12 @@ on:
         required: false
         default: "16000"
         type: string
+      sampling:
+        description: "provider_fixed (CR7-01; models that reject temperature, e.g. the 5.5 family) or temperature_0"
+        required: false
+        default: "provider_fixed"
+        type: choice
+        options: [provider_fixed, temperature_0]
 
 permissions:
   contents: read
@@ -45,6 +51,7 @@ jobs:
         env:
           LFHE_P7_MODEL: ${{ inputs.model }}
           LFHE_P7_MAX_TOKENS: ${{ inputs.max_tokens }}
+          LFHE_P7_SAMPLING: ${{ inputs.sampling }}
           LFHE_ANTHROPIC_API_KEY: ${{ secrets.LFHE_ANTHROPIC_API_KEY }}
           LFHE_P7_PREFLIGHT_OUT: ${{ runner.temp }}/p7-preflight.json
         run: python scripts/provider_preflight.py
@@ -53,6 +60,7 @@ jobs:
           LFHE_P7_PROVIDER: anthropic
           LFHE_P7_MODEL: ${{ inputs.model }}
           LFHE_P7_MAX_TOKENS: ${{ inputs.max_tokens }}
+          LFHE_P7_SAMPLING: ${{ inputs.sampling }}
           LFHE_ANTHROPIC_API_KEY: ${{ secrets.LFHE_ANTHROPIC_API_KEY }}
           LFHE_P7_TRIAL_OUT: ${{ runner.temp }}/p7-real-provider-trial.json
           LFHE_P7_BENCHMARK_OUT: ${{ runner.temp }}/p7-bm-01-real-provider.json

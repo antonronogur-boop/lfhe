@@ -47,8 +47,8 @@ model, currency, input / output cost per million tokens, effective from, source)
 1. Register the M07–M10 prompt bundles (registrar login, `LFHE_REGISTRAR_DATABASE_URL` in your shell):
    `python scripts/prompt_registry.py register packages/prompts/M07_INTELLIGENCE_ASSESSOR/1.0.0 …`
    (M02–M10 as needed), then an ADMIN human activates each (`lfhe.activate_prompt_version`).
-2. Register one model configuration per module (registrar):
-   `SELECT lfhe.register_model_configuration('anthropic', '<model id>', '{"temperature": 0, "max_tokens": 16000, "timeout_seconds": 300}');`
+2. Register one model configuration per module (registrar). For the 5.5 models (they reject `temperature`, CR7-01):
+   `SELECT lfhe.register_model_configuration('anthropic', '<model id>', '{"provider_fixed_sampling": true, "max_tokens": 16000, "timeout_seconds": 300}');`
 3. Run the worker on your machine with the key from your secret manager (never typed into a file):
    ```powershell
    $env:LFHE_ENV="DEV"; $env:LFHE_DATABASE_URL=<worker login from your password manager>

@@ -1,7 +1,19 @@
-# CR7-01 (JAVASLAT) — Modellek, amelyek nem fogadják el a `temperature` paramétert
+# CR7-01 — Modellek, amelyek nem fogadják el a `temperature` paramétert
 
-Állapot: **PROPOSED — PO-döntésre vár.** Az érintett pilot-út (valós provider `claude-sonnet-5-5`-tel) a döntésig áll
-(PO-felhatalmazás „Closed phase protection”: record → classify → propose CR → STOP → PO decision). Kód nem változott.
+Állapot: **IMPLEMENTED (B változat) — PO-utasítás alapján; a valós futás igazolása a PO-ra vár.**
+
+PO-utasítás (2026-10-24 16:51, szó szerint): „Ez sem ment jobban, most már találj erre egy olyan megoldást, amely biztosan
+működtetni fogja!!!!” — a Haiku 5.5 preflight ugyanazzal a hibával utasítva el (request_id `req_011CgMFRkDWFB1626DoEayML`).
+Mivel a Console-ban elérhető összes modell (Fable 5.1, Opus 5.5, Sonnet 5.5, Haiku 5.5) ugyanabba a generációba tartozik,
+az A változat nem járható; az utasítást a **B változat jóváhagyásaként** értelmeztem.
+
+Megvalósítás: migráció `20261011004200_cr7_01_provider_fixed_sampling.sql` (új, előrefelé; a korábbiak változatlanok) —
+új explicit anthropic-beállítás `provider_fixed_sampling: true` (csak `true`; `temperature` / `top_p` mellett tilos; csak
+anthropic). Python-tükör `model_settings.py`; `low_variance_problem` ezt a jelölőt elfogadja; az `AnthropicProvider` ilyenkor
+nem küld mintavételi paramétert, egyébként a kérés változatlan. A beállítás a konfiguráció-hash része, így minden model_run-on
+látszik. Pilot-eszközök: workflow `sampling` bemenet (alapértelmezés `provider_fixed`), preflight azonos kérésalakkal.
+Tesztek: `tests/unit/test_cr7_01_sampling.py`, `tests/integration/test_model_settings.py` (SQL / Python paritás, regisztráció),
+`tests/pilot/test_p7_trial_flow.py` (a kérésben nincs `temperature`); DEV smoke +1 ellenőrzés.
 
 ## Megállapítás (2026-10-24)
 

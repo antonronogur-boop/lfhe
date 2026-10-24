@@ -21,6 +21,7 @@ CLAIMS: list = []
 
 def handler(req: httpx.Request) -> httpx.Response:
     body = json.loads(req.content)
+    assert "temperature" not in body and "top_p" not in body          # CR7-01 default: provider-fixed sampling
     env = json.loads(body["messages"][0]["content"].split("<lfhe_task_envelope>\n", 1)[1].rsplit("\n</lfhe_task_envelope>", 1)[0])
     text = {"M07_INTELLIGENCE_ASSESSOR": lambda: m07_out(env, None, claims=CLAIMS[-1]), "M08_CHALLENGER": lambda: chal(env),
             "M09_EXECUTIVE_EDITOR": lambda: m09(env), "M10_QA_AUDITOR": lambda: auditor()(None, env)}[env["module_code"]]()
