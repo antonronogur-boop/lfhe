@@ -75,9 +75,26 @@ def envelope_block(envelope: dict) -> str:
     return f"<lfhe_task_envelope>\n{body}\n</lfhe_task_envelope>"
 
 
+OUTPUT_CONTRACT_NOTICE = (
+    "OUTPUT CONTRACT: your answer must be exactly one JSON object that validates against the JSON Schema in the "
+    "lfhe_output_schema block below (draft 2020-12; additionalProperties false where stated; every required property "
+    "present; identifiers matching the stated patterns). Do not wrap the JSON in markdown and do not add any text."
+)
+
+
+def schema_block(schema: dict) -> str:
+    """CR7-02: the registered, hash-verified output_schema.json of the prompt version, canonical and escaped
+    like the envelope so it cannot open or close a tag."""
+    body = json.dumps(schema, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    body = body.replace("&", "\\u0026").replace("<", "\\u003c").replace(">", "\\u003e")
+    return f"<lfhe_output_schema>\n{body}\n</lfhe_output_schema>"
+
+
 def render_messages(module: "PromptModule", envelope: dict) -> tuple[str, list[dict]]:
-    """(system, messages) exactly as sent to a chat-style provider."""
-    user = f"{module.task}\n\n{UNTRUSTED_DATA_NOTICE}\n\n{envelope_block(envelope)}"
+    """(system, messages) exactly as sent to a chat-style provider. CR7-02: the trusted output contract (the
+    registered output schema) precedes the untrusted-data notice and the envelope."""
+    user = (f"{module.task}\n\n{OUTPUT_CONTRACT_NOTICE}\n\n{schema_block(module.output_schema)}\n\n"
+            f"{UNTRUSTED_DATA_NOTICE}\n\n{envelope_block(envelope)}")
     return module.system, [{"role": "user", "content": user}]
 
 
@@ -172,4 +189,4 @@ class AnthropicProvider:
                          "stop_reason": data.get("stop_reason"), "rendered_request_sha256": request_sha}})
 
 
-__all__ = ["AnthropicProvider", "render_messages", "envelope_block", "FakeProvider", "ModelConfig", "PromptModule", "Provider", "ProviderError", "ProviderResponse", "Any"]
+__all__ = ["AnthropicProvider", "OUTPUT_CONTRACT_NOTICE", "render_messages", "schema_block", "envelope_block", "FakeProvider", "ModelConfig", "PromptModule", "Provider", "ProviderError", "ProviderResponse", "Any"]
