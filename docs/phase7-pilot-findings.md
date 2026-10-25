@@ -47,7 +47,7 @@ rögzítésre.
 | Analista aktív idő, ciklusidő, áteresztés, korrekciók | **NOT YET EVIDENCED** (nincs ciklus) |
 | Kapacitás-felszabadítás, FTE, kapacitásérték | **NOT YET EVIDENCED** (nincs ciklus, nincs rögzített költség-feltevés) |
 | Valós provider: M07 / M08 / M09 / M10-S siker, latencia, token, költség | **MÉRVE (szintetikus lánc)** — run 40203842179: M07 26,5 s, M08 36,7 s, M09 16,3 s, M10 43,3 s; 4 / 4 sémahelyes, 0 javító futás; ~36 ezer input / ~19 ezer output token a láncra; költség: ár nincs rögzítve → ismeretlen. Előzmény: CR7-01 (`temperature`), CR7-02 (séma a kérésben) |
-| M10-S empirikus minőség (P7-BM-01, valós provider) | **MÉRVE** (run 40203842179, `claude-sonnet-5-5`): S recall 0,91 (10 / 11), precision 0,08, 1 kritikus kihagyás, 20 téves jelzés a 3 tiszta esetén → mind a 18 eset FAIL. D: recall 1,0, tiszta eseteken 0 téves jelzés |
+| M10-S empirikus minőség (P7-BM-01, valós provider) | **RÉSZBEN MÉRVE**: S recall 0,91 / 1,0 (runs 40203842179 / 40206473436); a téves riasztás a P7-BM-01 hibás alapverziója miatt érvénytelen (a jelzések nagy része a bázis valódi hibáira vonatkozik) → P7-BM-02. D: recall 1,0 |
 | P7-BM-01 a szabályalapú tesztdublőrrel (csak a mérőút regressziója) | D: 13 címke, TP 13, FN 0, FP 10 (ebből tiszta eseteken 0), precision 0,5652, recall 1,0, kritikus kihagyás 0. S (tesztdublőr): 11 címke, TP 11, FN 0, FP 2 (tiszta eseteken 0), precision 0,8462, recall 1,0. **Nem a valós M10-S minősége.** |
 | Böngészős UX | **NOT YET EVIDENCED** |
 
@@ -61,9 +61,13 @@ rögzítésre.
 
 ## NEGATIVE FINDINGS (eddig)
 
-* MODEL_PERFORMANCE_LIMITATION (2026-10-25): a valós M10-S (Sonnet 5.5) jelenlegi kalibrációjában **túlriaszt** — a 3 tiszta
-  benchmark-verzión 20 jelzés, mind FAIL; precision 0,08. Működésben ez minden reportot blokkolna, és az emberi QA-feloldási
-  terhet erősen növelné. Emellett 1 kritikus seedelt hibát kihagyott. Kalibrálás csak külön CR-rel.
+* MEASUREMENT (2026-10-25, helyesbítve): a P7-BM-01 „tiszta” alapverziója valódi hibákat tartalmaz (attribúció-eltérés a claimhez képest,
+  claimből nem következő állítás, `contested=false` cáfolt alapon). A valós M10-S ezeket helyesen jelezte; a benchmark téves-riasztás
+  mérése ezért érvénytelen → P7-BM-02. A korábbi „túlriaszt” értelmezés visszavonva.
+* ANALYTICAL / TESZT-KORLÁT: ugyanez a szintetikus anyag a Phase 4–6 elfogadási korpuszokban a determinisztikus rétegen és a
+  tesztdublőrön átment; csak a valós M10-S vette észre.
+* MODEL_PERFORMANCE_LIMITATION: futásonkénti szóródás — M07 egy futásban kihagyta a kötelező attribúciót (ingestion elutasította);
+  M10-S recall 0,91 és 1,0 két futásban.
 
 * CONFIGURATION_PROBLEM (2026-10-24): az első valós-provider kísérletben a provider minden kérést HTTP 400-zal utasított el; a
   preflight szerint az ok: a `claude-sonnet-5-5` a `temperature` paramétert elavultnak jelöli, a lezárt low-variance szabály

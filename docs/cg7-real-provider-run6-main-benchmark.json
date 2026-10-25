@@ -1,0 +1,1343 @@
+{
+ "evidence_class": "REAL_PROVIDER",
+ "m10s_model_runs": [
+  "911a4940-57ff-4825-9c6b-decaf6d7051e",
+  "b7eb94a9-1513-46cb-b23c-5fc5ca9c755c",
+  "c8888af7-d471-4295-b1b9-d469ada5828d",
+  "20748b5a-4cc5-4522-b6e4-fe6f21abf722",
+  "4d49b9b3-e544-496c-875e-1983ef3c436f",
+  "41242789-372c-45f3-838c-19bf5a3bb250",
+  "af50ef84-437e-4083-a405-ef52e34f8c67",
+  "154c1aef-70ec-4ed6-ae29-fe4a1ac6aabc",
+  "fec32b9c-ad74-45f6-9b10-f4ac57ea9467",
+  "d5ae0cd8-8ca5-468c-9773-7637b084b03f",
+  "f4fc505f-b079-4100-97aa-d019a234c317",
+  "daf3c135-ae10-42a8-b147-c90d3b40034f",
+  "d312f3e6-8e1e-4642-847a-8ebcd9b0659c",
+  "0f4c5749-c5c1-4d2e-8bae-338264e19ad4",
+  "3fa96314-eb8f-498e-8895-094f50cd2ea9",
+  "e75fa788-deea-4b49-8dd4-7c428716ed01",
+  "8970f09c-b967-408e-9b4a-1752087d4ecd",
+  "de087213-424b-4cfd-9554-74a6e010d9e1"
+ ],
+ "m10s_run_status_counts": {
+  "SUCCEEDED": 18
+ },
+ "per_case": {
+  "BM01-Q01": {
+   "counts": {
+    "S:FALSE_POSITIVE": 7
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS1 matches AS1 verbatim, but AS1's only supporting claim (fc0f4bb9) attributes '4 tanker aircraft arrived at Fort Aster' to 'the ministry'. No supplied evidence names the air force as the reporting actor, so the actor in the attribution is",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "S19",
+     "details": "Required attribution is present in form ('The air force reported'). Its content does not match the upstream claim attribution ('the ministry'), so the original source attribution is not preserved with the same meaning. The same actor mismat",
+     "finding_code": "ATTRIBUTION_REMOVED",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS2 is entailed in content: the denial claim (1a35d99c) supports 'may not have happened'. However, AS2 lists the arrival claim (fc0f4bb9) as supporting evidence and the denial claim as contradicting evidence. The evidence polarity looks inv",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS3 says Northland is 'probably expanding air-refuelling support'. Its only evidence is one UNVERIFIED, source-reported claim of 4 tankers arriving, and that claim is denied by another claim. The claim text does not mention Northland, expan",
+     "finding_code": "CERTAINTY_STRENGTHENING",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-09",
+     "details": "RS3 is marked contested=false, and AS3 lists no contradicting evidence. Its sole basis (fc0f4bb9) is directly denied by claim 1a35d99c. The denial appears only in a separate caveat statement (RS2), not as a qualifier on the judgment.",
+     "finding_code": "CAVEAT_NEUTRALISED",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "The actor 'Northland' and the proposition of expanding support are not found in the supplied claim text or spans, and no reference context was supplied. They are carried by the approved assessment only. Human review should confirm that the ",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "S19",
+     "details": "RS2 attributes the denial to 'a spokesman', while the claim attributes it to 'the ministry'. The difference is minor, but it is not an exact match to the source attribution.",
+     "finding_code": "ATTRIBUTION_REMOVED",
+     "severity": "WARNING",
+     "status": "WARNING"
+    }
+   ]
+  },
+  "BM01-Q02": {
+   "counts": {
+    "S:FALSE_POSITIVE": 4
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS1 is verbatim from AS1 and attributes the report of the 4-tanker arrival to 'The air force'. The only supporting claim (fc0f4bb9) gives the attribution as 'the ministry'. No supplied material equates the ministry with the air force. The r",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS3 is a paraphrase of AS3 ('its' added, no material change). AS3's sole support is one UNVERIFIED claim that 4 tankers arrived. That claim says nothing about expansion of support, a baseline, or a trend, and a denial claim contradicts the ",
+     "finding_code": "SCOPE_MISMATCH",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-09",
+     "details": "RS3 builds on the arrival claim but is flagged contested=false, and AS3 lists no contradicting evidence, even though the ministry denial contradicts its premise. The caveat RS2 is in the same item, so the contradiction is not erased, but RS",
+     "finding_code": "CAVEAT_NEUTRALISED",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "The supplied claims do not name 'Northland' as the actor, and they do not name 'air-refuelling support' or any expansion beyond the arrival of 4 tankers. No eligible reference context was supplied to bridge this. The actor identification an",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "WARNING",
+     "status": "WARNING"
+    }
+   ]
+  },
+  "BM01-Q03": {
+   "counts": {
+    "S:FALSE_POSITIVE": 6,
+    "S:TRUE_POSITIVE": 1
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS1 says 'all 4 tanker aircraft arrived'. The cited AS1 and the claim say only '4 tanker aircraft arrived'. The word 'all' implies completeness of the arrival (for example that no aircraft were missing or delayed), and no source states this",
+     "finding_code": "SCOPE_MISMATCH",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-06",
+     "details": "The figure '4' is correctly sourced. The added quantifier 'all' changes the relationship of the number to its source: the source reports 4 arrivals, not that the full set of 4 arrived. No other numbers appear in the report.",
+     "finding_code": "QUANTITY_SCOPE_DISTORTION",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS3 matches AS3 verbatim. AS3 rests only on one unverified claim that 4 tanker aircraft arrived. That claim does not name Northland and says nothing about expanding air-refuelling support. The inferential step is analytic and not directly e",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-07",
+     "details": "AS1 is categorised FACT / KNOWN_FACT, but its only claim is UNVERIFIED, single-source and of unknown lineage. RS1 keeps the attribution 'The air force reported', so the report does not raise the class beyond the approved statement. The FACT",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-09",
+     "details": "The denial is preserved in the same item as RS2, with contested=true, so it is not erased. However, RS3 is a KEY_JUDGMENT marked contested=false. AS3 relies on the arrival claim, which the denial claim contradicts, and AS3 lists no contradi",
+     "finding_code": "CAVEAT_NEUTRALISED",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "The supplied evidence does not name 'Northland' as an actor or mention any expansion of refuelling support. RS3's actor and trend proposition depend on the analyst's inference or on unsupplied context. No reference context was supplied. Thi",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "S19",
+     "details": "AS1 and RS1 attribute the arrival report to 'the air force'. The supporting claim records its attribution as 'the ministry'. The denial claim is also attributed to 'the ministry', while RS2 and AS2 say 'a spokesman'. The supplied data does ",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "WARNING",
+     "status": "WARNING"
+    }
+   ]
+  },
+  "BM01-Q04": {
+   "counts": {
+    "S:FALSE_POSITIVE": 7,
+    "S:TRUE_POSITIVE": 1
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS2 states that the arrival is \"undisputed\". Its only cited source, AS2, says the arrival may not have happened and that a spokesman denied it. Claim 1a35d99c records the denial that any tanker aircraft arrived. The arrival claim itself is ",
+     "finding_code": "UNSUPPORTED_FACT",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-07",
+     "details": "AS2 is an ALTERNATIVE_EXPLANATION with LOW confidence: the arrival may not have happened. The PARAPHRASE in RS2 turns it into \"undisputed\", which is stronger than the unverified, denied underlying claim. This is a material epistemic strengt",
+     "finding_code": "MATERIAL_EPISTEMIC_STRENGTH_INCREASE",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-09",
+     "details": "The denial (claim 1a35d99c) and AS2's alternative explanation are the report's only contradiction and caveat about the arrival. RS2 is the sole vehicle for them, and it neutralises them by asserting the opposite. Elsewhere, RS1 and RS3 carr",
+     "finding_code": "CONTRADICTION_REMOVED",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "S19",
+     "details": "The upstream denial attribution (\"a spokesman denied it\" in AS2, \"the ministry\" in the claim) is absent from RS2. The statement is rendered as an unattributed assertion of fact with the opposite meaning.",
+     "finding_code": "ATTRIBUTION_REMOVED",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS1 and AS1 attribute the report to \"the air force\". The only supporting claim (fc0f4bb9) is attributed to \"the ministry\", and its original span (\"4 tanker aircraft arrived at Fort Aster\") names no reporting actor. The supplied material doe",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS3 reproduces AS3 verbatim, but AS3 rests on a single claim: an unverified arrival of 4 tankers. That claim does not establish a baseline, so it does not establish \"expanding\" support. It also does not establish that Northland is the actor",
+     "finding_code": "SCOPE_MISMATCH",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-09",
+     "details": "RS3, a KEY_JUDGMENT, rests on the contested arrival. It presents the expansion judgment without the denial, and the denial is also missing from AS3's contradicting evidence. The associated caveat, RS2, is inverted.",
+     "finding_code": "CAVEAT_NEUTRALISED",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "The supplied evidence does not support the proposition that Northland is the actor. It also does not support an existing air-refuelling baseline that would make the support \"expanding\". These elements rest on the approved assessment alone, ",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    }
+   ]
+  },
+  "BM01-Q05": {
+   "counts": {
+    "D:FALSE_POSITIVE": 1,
+    "D:TRUE_POSITIVE": 1,
+    "S:FALSE_POSITIVE": 5,
+    "S:TRUE_POSITIVE": 1
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS3 adds \"with 12 more aircraft\" to AS3 (\"Northland is probably expanding air-refuelling support at Fort Aster\"). Neither AS3 nor its supporting claim (\"4 tanker aircraft arrived at Fort Aster\") contains a figure of 12 or any additional-air",
+     "finding_code": "UNSUPPORTED_FACT",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-06",
+     "details": "The number \"12\" in RS3 (\"12 more aircraft\") has no source in the approved assessment statements or their claims. The only quantity in the evidence is 4 tanker aircraft arrived. The figure is also given a different relationship (additional a",
+     "finding_code": "UNSUPPORTED_FACT",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "The proposition that 12 more aircraft are involved in the expansion has no support in the supplied eligible evidence. No reference context was supplied or used. It is an unsupported new fact, as the deterministic M10-D and Phase 5 validator",
+     "finding_code": "UNSUPPORTED_FACT",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS1 repeats AS1 verbatim (\"The air force reported...\"). The only supporting claim fc0f4bb9 carries the attribution \"the ministry\", not \"the air force\". The supplied evidence does not show that the air force is the reporting actor. The 4-air",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-09",
+     "details": "RS3 rests on claim fc0f4bb9, whose arrival is denied by claim 1a35d99c, and the claim status is UNVERIFIED. RS3 is marked contested=false and states the expansion with no inline caveat. RS2 gives the denial in the same item, so the contradi",
+     "finding_code": "CAVEAT_NEUTRALISED",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "S19",
+     "details": "RS1 keeps the required attribution \"The air force reported\", with the same epistemic meaning as AS1, so no attribution is stripped from the report. The upstream claim attribution is \"the ministry\", so the attributed actor differs between th",
+     "finding_code": "ATTRIBUTION_REMOVED",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    }
+   ]
+  },
+  "BM01-Q06": {
+   "counts": {
+    "D:TRUE_POSITIVE": 1,
+    "S:FALSE_POSITIVE": 6,
+    "S:TRUE_POSITIVE": 1
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS1 is verbatim from AS1 and attributes the arrival report to 'The air force'. The only supporting claim (fc0f4bb9) is attributed to 'the ministry', and the exact original span '4 tanker aircraft arrived at Fort Aster' names no air force. T",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS3 is a PARAPHRASE of AS3 ('Northland is probably expanding air-refuelling support at Fort Aster') with an added cause, 'because of the exercise'. AS3 states no cause. Its only supporting claim says that 4 tanker aircraft arrived, and no s",
+     "finding_code": "UNSUPPORTED_CAUSAL_CLAIM",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-07",
+     "details": "This is consistent with the deterministic M10-D finding (UNSUPPORTED_NEW_JUDGMENT:RS3). The paraphrase adds a causal assertion that is not part of the approved ASSESSMENT AS3. An unapproved judgment is presented under AS3's approval and con",
+     "finding_code": "EPISTEMIC_STRENGTH_MISMATCH",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "RS3 introduces 'the exercise' as a definite, existing event and as the cause of the activity. Nothing in the supplied evidence, assessment statements or reference context supports that an exercise exists or is linked to Fort Aster. No refer",
+     "finding_code": "UNSUPPORTED_FACT",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "S19",
+     "details": "Attribution is present in RS1 ('The air force reported'), as AS1 requires. However, the upstream claim attribution is 'the ministry', so the attributed source changes from ministry to air force. RS2 similarly shifts the denial from 'the min",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS2 says 'a spokesman denied it'. The denial claim (1a35d99c) is attributed to 'the ministry', and its span does not mention a spokesman. The denial itself (no tanker aircraft arrived) is supported. The speaker description is not. Separatel",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-09",
+     "details": "RS1 is a KEY_JUDGMENT flagged contested=false, even though the arrival claim is UNVERIFIED and directly denied (claim 1a35d99c). RS3 is also contested=false and rests on the same disputed arrival claim. The denial appears only as a separate",
+     "finding_code": "CAVEAT_NEUTRALISED",
+     "severity": "WARNING",
+     "status": "WARNING"
+    }
+   ]
+  },
+  "BM01-Q07": {
+   "counts": {
+    "S:FALSE_POSITIVE": 7,
+    "S:TRUE_POSITIVE": 1
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS3 (PARAPHRASE) names 'Southland' as the actor. The cited approved statement AS3 names 'Northland'. The paraphrase changes the actor and is not entailed by its source. Southland appears nowhere in the supplied assessment or evidence.",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS1 matches AS1 verbatim and attributes the report to 'The air force'. The only supporting claim (fc0f4bb9) is attributed to 'the ministry'. Nothing in the supplied evidence supports the air force as the reporting actor, so the reported act",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "RS3 introduces 'Southland' as the actor behind the air-refuelling expansion. No supplied evidence, assessment statement or reference context supports Southland. The proposition is unsupported by eligible material.",
+     "finding_code": "UNSUPPORTED_FACT",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "S19",
+     "details": "The required attribution 'The air force reported' does not match the attribution on the underlying claim, which is 'the ministry'. The attribution is present but names a different source entity than the evidence records.",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS2 faithfully reflects the denial claim (1a35d99c). However, in AS2 the denial claim is recorded as contradicting evidence, while the arrival claim (fc0f4bb9) is recorded as supporting evidence. The evidence linkage for this alternative ex",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "AS3 rests solely on the claim that 4 tanker aircraft arrived, which is unverified and denied. That claim does not name the actor or establish 'expanding' support; the step is analytic inference. Confidence is LOW and the wording is hedged, ",
+     "finding_code": "SCOPE_MISMATCH",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-07",
+     "details": "AS1 is classed as epistemic category FACT / KNOWN_FACT, but its supporting claim is source-reported, UNVERIFIED as of the cutoff, and denied elsewhere. RS1 keeps the 'reported that' framing, so the report text does not strengthen the claim.",
+     "finding_code": "EPISTEMIC_STRENGTH_MISMATCH",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-09",
+     "details": "The denial is preserved in RS2 (contested=true) and the duration gap in RS4. However, RS3 depends only on the arrival claim, which is denied, yet carries contested=false and no link to the denial. RS1 is also not flagged contested. A reader",
+     "finding_code": "CAVEAT_NEUTRALISED",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "S19",
+     "details": "RS2 attributes the denial to 'a spokesman', while the claim attribution is 'the ministry'. This is probably compatible (a ministry spokesman), but the supplied data does not confirm the spokesman's affiliation. The denial is not attributed ",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "WARNING",
+     "status": "WARNING"
+    }
+   ]
+  },
+  "BM01-Q08": {
+   "counts": {
+    "D:TRUE_POSITIVE": 1,
+    "S:FALSE_POSITIVE": 5,
+    "S:TRUE_POSITIVE": 1
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS3 says materially more than AS3 ('certainly' vs 'probably'). AS3's only supporting claim is the unverified, single-source, denied claim that 4 tanker aircraft arrived. That claim does not mention Northland or any expansion of air-refuelli",
+     "finding_code": "CERTAINTY_STRENGTHENING",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS1 (verbatim of AS1) says 'The air force reported' that 4 tankers arrived. The only supporting claim has attribution 'the ministry', and its original-language span ('4 tanker aircraft arrived at Fort Aster') names no air force. The number ",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-07",
+     "details": "RS3 (PARAPHRASE) says Northland is 'certainly' expanding air-refuelling support. Source AS3 is an ASSESSMENT at LOW confidence worded 'probably'. The edit turns a hedged low-confidence judgment into a statement of certainty, which also cont",
+     "finding_code": "MATERIAL_EPISTEMIC_STRENGTH_INCREASE",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS2 states the denial content correctly ('may not have happened', denial). It says 'a spokesman' denied it, whereas the denial claim is attributed to 'the ministry'. In AS2 the denial claim is listed as contradicting evidence, although it i",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-09",
+     "details": "RS3's 'certainly' wording sits beside the denial caveat (RS2) and the unverified status of the arrival claim, and it removes the original hedge. AS3 lists no contradicting evidence although its supporting claim is denied. The caveat is pres",
+     "finding_code": "CAVEAT_NEUTRALISED",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "S19",
+     "details": "RS1 keeps the attribution required by AS1 ('The air force reported') and presents the arrival as reported, not verified. However, the upstream claim attributes the statement to 'the ministry', so the preserved attribution does not match the",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    }
+   ]
+  },
+  "BM01-Q09": {
+   "counts": {
+    "D:TRUE_POSITIVE": 1,
+    "S:FALSE_POSITIVE": 8,
+    "S:TRUE_POSITIVE": 2
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS1 states 'Four tanker aircraft arrived at Fort Aster' as an unqualified fact. The cited AS1 only entails that the air force reported the arrival. The underlying claim is UNVERIFIED, single-source with unknown lineage, and denied by anothe",
+     "finding_code": "CERTAINTY_STRENGTHENING",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-07",
+     "details": "AS1 is a source-reported claim ('The air force reported...') with attribution required, and its claim is UNVERIFIED. The paraphrase in RS1 asserts it as an unqualified fact under the KEY_JUDGMENT role. This upgrades source-reported to estab",
+     "finding_code": "MATERIAL_EPISTEMIC_STRENGTH_INCREASE",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "S19",
+     "details": "AS1 requires the attribution 'The air force reported'. The RS1 paraphrase drops it, which confirms the deterministic D19 failure. The upstream source-reported meaning is lost.",
+     "finding_code": "ATTRIBUTION_REMOVED",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS2 matches AS2 verbatim. In AS2 the arrival claim is listed as supporting evidence and the denial claim as contradicting evidence, which appears inverted relative to the statement's content. The denial claim span contains no 'spokesman' wo",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS3 is a verbatim copy of AS3, but its only supporting evidence is the claim that 4 tankers arrived. That claim says nothing about Northland as actor or about 'expanding' support, which implies a prior baseline. It is also UNVERIFIED and co",
+     "finding_code": "SCOPE_MISMATCH",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-06",
+     "details": "The figure '4 tanker aircraft' matches the claim span numerically. In RS1 it is presented as an established, unattributed count, although it is only a reported and unverified figure. The number's relationship to its source has been lost.",
+     "finding_code": "QUANTITY_SCOPE_DISTORTION",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-07",
+     "details": "RS3 is a verbatim ASSESSMENT with LOW confidence and no likelihood term, while the text uses the word 'probably'. The wording implies a likelihood judgment that is not recorded. RS3 is also placed as a KEY_JUDGMENT resting on an unverified,",
+     "finding_code": "EPISTEMIC_STRENGTH_MISMATCH",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-09",
+     "details": "RS1 and RS3 are flagged contested=false, and AS1 and AS3 list no contradicting evidence, even though the denial claim directly contradicts the arrival that RS1 and RS3 rely on. The contradiction is carried only by RS2. Read alone, RS1 and R",
+     "finding_code": "CAVEAT_NEUTRALISED",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "RS3 contains propositions not found in the supplied evidence or reference context: that Northland is the responsible actor, and that air-refuelling support already existed at Fort Aster (the baseline implied by 'expanding'). The supplied cl",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "S19",
+     "details": "AS1 attributes the arrival report to 'the air force', but the supporting claim's attribution is 'the ministry'. The denial claim is also attributed to 'the ministry'. The source of the report is therefore inconsistent across the chain, and ",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    }
+   ]
+  },
+  "BM01-Q10": {
+   "counts": {
+    "D:FALSE_POSITIVE": 2,
+    "D:TRUE_POSITIVE": 1,
+    "S:FALSE_POSITIVE": 7,
+    "S:TRUE_POSITIVE": 1
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS1 adds 'independently confirmed' to a statement whose source AS1 only says the air force reported the arrival. The only supporting claim is a single source-reported claim with claim_status_asof UNVERIFIED and unknown lineage. It is also c",
+     "finding_code": "CERTAINTY_STRENGTHENING",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-05",
+     "details": "The independence wording in RS1 conflicts with the supplied lineage state. There is one claim, lineage_known is false, and its independence group is its own claim id as an upper bound only. Independence is not established and no second orig",
+     "finding_code": "FALSE_INDEPENDENT_CONFIRMATION",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-07",
+     "details": "AS1 is attributed, source-reported material (claim UNVERIFIED, FACT_REPORTED_BY_SOURCE) at LOW confidence. RS1 raises it to an independently confirmed, corroborated-type statement through editing (editorial_transform PARAPHRASE). This is a ",
+     "finding_code": "MATERIAL_EPISTEMIC_STRENGTH_INCREASE",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS2 matches AS2 verbatim, and the denial claim ('denied that any tanker aircraft arrived at Fort Aster') supports its content. However, AS2 lists the arrival claim as supporting evidence and the denial claim as contradicting evidence, which",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS3 matches AS3 verbatim, but AS3's sole supporting evidence is one claim that 4 tankers arrived at Fort Aster. That claim is UNVERIFIED, of unknown lineage, and denied by another claim; the denial is not listed as contradicting AS3. The cl",
+     "finding_code": "SCOPE_MISMATCH",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-09",
+     "details": "A denial claim exists that the arrival happened (recorded as contradicting AS2). RS1 is marked contested=false and presents the arrival as 'independently confirmed', which neutralises that contradiction at statement level. The denial is pre",
+     "finding_code": "CAVEAT_NEUTRALISED",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "The actor 'Northland' and the proposition of expanding air-refuelling support are not stated in any supplied claim or span, and no reference context was supplied. The pinned event version content was not supplied, so these cannot be verifie",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "S19",
+     "details": "RS1 and AS1 attribute the arrival report to 'the air force'. The only supporting claim is attributed to 'the ministry', and the span carries no actor. The supplied evidence does not show that the air force was the reporting source. The repo",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    }
+   ]
+  },
+  "BM01-Q11": {
+   "counts": {
+    "D:TRUE_POSITIVE": 1,
+    "S:FALSE_POSITIVE": 7
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS3 matches AS3 textually, but its evidence base is thin. The only supporting evidence is claim fc0f4bb9: an unverified report that 4 tanker aircraft arrived at Fort Aster. That claim names no actor 'Northland' and gives no baseline or tren",
+     "finding_code": "SCOPE_MISMATCH",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-07",
+     "details": "RS3 carries final_analytic_confidence HIGH, but its only source AS3 is an ASSESSMENT with approved confidence LOW. The edited statement presents a judgment resting on a single unverified, contested claim with far more certainty than approve",
+     "finding_code": "MATERIAL_EPISTEMIC_STRENGTH_INCREASE",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-09",
+     "details": "RS3 rests solely on claim fc0f4bb9, which is denied by claim 1a35d99c and treated as contested in RS2. RS3 is nonetheless marked contested=false, and AS3 records no contradicting evidence. The denial and the caveat are not carried into this",
+     "finding_code": "CONTRADICTION_REMOVED",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS1 matches AS1 verbatim. The quantity (4), action (arrived) and location (Fort Aster) match claim fc0f4bb9 and its original-language span. The reporting actor does not match: RS1 and AS1 say 'The air force reported', but the claim attribut",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "The proposition that 'Northland' is the actor and that its air-refuelling support is 'expanding' is not stated in any supplied claim. The claim says only that tanker aircraft arrived at Fort Aster. No reference context was supplied to suppo",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "S19",
+     "details": "RS1 keeps the approved attribution 'The air force reported' from AS1. The underlying claim fc0f4bb9 attributes the statement to 'the ministry'. The attribution chain is therefore inconsistent between the approved assessment and the claim, a",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "S19",
+     "details": "RS2 says 'a spokesman denied it', whereas denial claim 1a35d99c is attributed to 'the ministry'. This is a minor difference in attribution granularity. The denial remains attributed and is not presented as fact.",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "WARNING",
+     "status": "WARNING"
+    }
+   ]
+  },
+  "BM01-Q12": {
+   "counts": {
+    "D:TRUE_POSITIVE": 1,
+    "S:FALSE_POSITIVE": 7
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS1 matches AS1 verbatim, and the content of 4 tankers arriving at Fort Aster matches claim fc0f4bb9. But the reporting actor is 'The air force', while the only supporting claim is attributed to 'the ministry'. The evidence span ('4 tanker ",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS3 states likelihood ALMOST_CERTAIN, but AS3 has no likelihood term (null) and LOW confidence. The wording 'probably' is also inconsistent with ALMOST_CERTAIN. The only support is one unverified, attributed arrival claim (4 tankers) that i",
+     "finding_code": "CERTAINTY_STRENGTHENING",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS2 is verbatim AS2. It says 'a spokesman denied it', but the denial claim 1a35d99c is attributed to 'the ministry' and its span names no spokesman. The denial content is otherwise faithful. In AS2 the arrival claim is listed as supporting ",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-07",
+     "details": "AS1 is categorised FACT, but its only evidence is an UNVERIFIED claim (FACT_REPORTED_BY_SOURCE) that is denied. The report text keeps the 'reported that' framing, so no stronger wording was introduced in the report. The upstream FACT label ",
+     "finding_code": "EPISTEMIC_STRENGTH_MISMATCH",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-09",
+     "details": "RS3 is not marked contested and AS3 lists no contradicting evidence, although its sole supporting claim (arrival of 4 tankers) is denied by claim 1a35d99c. The denial appears only in a separate caveat statement. Combined with the unapproved",
+     "finding_code": "CAVEAT_NEUTRALISED",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "The evidence supplied states only that 4 tankers arrived at Fort Aster. It says nothing of Northland as the actor or of expansion of air-refuelling support over time. This is analytic inference in an approved ASSESSMENT with LOW confidence,",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "S19",
+     "details": "RS1 keeps the attribution phrase from AS1 ('The air force reported'), but the upstream claim attribution is 'the ministry'. Attribution is present and the reported-not-verified meaning is preserved, but the named attributing party differs f",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    }
+   ]
+  },
+  "BM01-Q13": {
+   "counts": {
+    "D:FALSE_POSITIVE": 1,
+    "D:TRUE_POSITIVE": 1,
+    "S:FALSE_POSITIVE": 7,
+    "S:TRUE_POSITIVE": 1
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS3 adds \"as later shown in 2027\" to AS3 (\"Northland is probably expanding air-refuelling support at Fort Aster\"). Neither AS3 nor its supporting claim contains any 2027 event or later confirmation. The date is after the information cutoff ",
+     "finding_code": "UNSUPPORTED_FACT",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS1 is verbatim AS1 and attributes the arrival report to \"the air force\". The only supporting claim (fc0f4bb9...) attributes the statement to \"the ministry\". Nothing in the supplied evidence names the air force as the reporting actor. The q",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-06",
+     "details": "The number \"2027\" in RS3 appears in none of the approved sources or their evidence. It is a post-cutoff date presented as a fact. This confirms the deterministic QA-06 failure.",
+     "finding_code": "UNSUPPORTED_FACT",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-07",
+     "details": "AS3 is a LOW-confidence ASSESSMENT (\"probably expanding\"). The phrase \"as later shown\" in RS3 presents it as subsequently confirmed, which raises the epistemic class from assessment to demonstrated fact. No approved basis for the change exi",
+     "finding_code": "MATERIAL_EPISTEMIC_STRENGTH_INCREASE",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "The proposition that the expansion was \"later shown in 2027\" is not supported by any supplied eligible evidence. No reference context was supplied. It lies after the information cutoff of 2026-10-25 and is hindsight knowledge in a LIVE repo",
+     "finding_code": "UNSUPPORTED_FACT",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS2 is verbatim AS2. In AS2 the arrival claim (fc0f4bb9...) is listed as supporting evidence and the denial claim (1a35d99c...) as contradicting evidence. That is the reverse of what AS2's text implies (\"may not have happened; a spokesman d",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-09",
+     "details": "RS3 is KEY_JUDGMENT with contested=false. Its only supporting claim (arrival of the tankers) is directly denied by claim 1a35d99c..., and AS3 lists no contradicting evidence. The \"later shown\" wording makes the denial look irrelevant. The i",
+     "finding_code": "CAVEAT_NEUTRALISED",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "S19",
+     "details": "The required attribution \"The air force reported\" is present in RS1, but the evidence attributes the claim to \"the ministry\". The attribution therefore no longer has the same meaning as the upstream source attribution. The same applies to t",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    }
+   ]
+  },
+  "BM01-Q14": {
+   "counts": {
+    "D:FALSE_POSITIVE": 1,
+    "D:TRUE_POSITIVE": 1,
+    "S:FALSE_POSITIVE": 7
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS1 matches AS1 verbatim, with the attribution 'The air force reported'. The only supporting claim, fc0f4bb9, is attributed to 'the ministry'; its span '4 tanker aircraft arrived at Fort Aster' names no air force. The reporting actor is the",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS3 prefixes the AS3 text with 'NATO SECRET:'. This marking is not in AS3 or in any claim, and it contradicts the OSINT-only nature of the product. The transform is labelled PARAPHRASE but adds a classification assertion. Separately, AS3 ('",
+     "finding_code": "UNSUPPORTED_FACT",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "The classification marking 'NATO SECRET' in RS3 is a factual proposition (a classification level) that no eligible evidence or reference context supports. This is consistent with the M10-D findings UNSUPPORTED_NEW_FACT:RS3:SECRET and PROHIB",
+     "finding_code": "UNSUPPORTED_FACT",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS2 matches AS2 verbatim: 'a spokesman denied it'. The denial claim 1a35d99c is attributed to 'the ministry', not a spokesman. The denial content is faithful. The unclear relationship between the denying body and the body behind the arrival",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-09",
+     "details": "RS3 is a key judgment about 'expanding' support, with contested=false and no contradicting evidence on AS3. It is based on the same arrival claim that is denied, which RS2 mentions only in a separate caveat. The judgment could read as uncon",
+     "finding_code": "CAVEAT_NEUTRALISED",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "S19",
+     "details": "RS1 keeps the required attribution text 'The air force reported'. That attribution conflicts with the claim-level attribution 'the ministry', so the preserved attribution does not match the evidence-recorded source.",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "S19",
+     "details": "RS2 attributes the denial to 'a spokesman', while the denial claim is attributed to 'the ministry'. The denial itself is retained and the difference is minor, but the attribution is not identical.",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "WARNING",
+     "status": "WARNING"
+    }
+   ]
+  },
+  "BM01-Q16": {
+   "counts": {
+    "D:TRUE_POSITIVE": 1,
+    "S:FALSE_POSITIVE": 12,
+    "S:TRUE_POSITIVE": 1
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS3 matches AS3 verbatim, but the evidence behind AS3 does not support it. AS3 rests on one claim, that 4 tankers arrived at Fort Aster. That claim is UNVERIFIED, attributed to 'the ministry' and denied by another claim. No evidence shows a",
+     "finding_code": "SCOPE_MISMATCH",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS92 repeats RS3 (AS3). 'Expanding air-refuelling support' and 'Northland' as actor go beyond the single UNVERIFIED, denied arrival claim. See the RS3 finding.",
+     "finding_code": "SCOPE_MISMATCH",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS1 matches AS1 verbatim, and the number (4 tankers, Fort Aster) matches the claim. AS1 and RS1 name 'the air force' as the reporting actor. The only supporting claim (fc0f4bb9) is attributed to 'the ministry', and the span '4 tanker aircra",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS2 matches AS2 verbatim. The denial claim (1a35d99c) is attributed to 'the ministry' and its span does not mention a spokesman, so 'a spokesman' is not in the evidence. The AS2 evidence linkage looks inverted: the arrival claim is listed a",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS90 repeats RS1 (AS1). It names 'the air force' as the reporter, while the supporting claim fc0f4bb9 is attributed to 'the ministry'. Same actor discrepancy as RS1.",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS91 repeats RS2 (AS2). 'A spokesman' is not in the denial claim, which is attributed to 'the ministry'. The AS2 supporting/contradicting linkage looks inverted.",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-09",
+     "details": "RS3 is a KEY_JUDGMENT with contested=false, and AS3 lists no contradicting evidence. Its only basis is the arrival claim, which is denied by another claim. The denial appears only as a separate caveat statement (RS2), not on RS3.",
+     "finding_code": "CAVEAT_NEUTRALISED",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-09",
+     "details": "RS92 repeats RS3: contested=false although it depends on the denied arrival claim. The denial appears only as a separate caveat statement (RS91).",
+     "finding_code": "CAVEAT_NEUTRALISED",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-13",
+     "details": "Items IT1 and KJDUP share one source candidate, one event version and one pinned assessment version, and carry four identical statements (RS1-RS4 = RS90-RS93). The same event and the same information origin thus appear as two KEY_JUDGMENT i",
+     "finding_code": "MISLEADING_DUPLICATION",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "The supplied evidence and context do not support the actor 'Northland' or the proposition of an expansion; no baseline or reference context was supplied. The statement is an approved hedged assessment rather than a stated fact, so this is r",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "RS92 repeats RS3. 'Northland' as actor and 'expanding' are not supported by the supplied evidence, and no reference context was supplied.",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "S19",
+     "details": "Attribution is retained in form ('The air force reported'), but the actor differs from the claim's recorded attribution ('the ministry'). The attribution therefore does not faithfully reproduce the upstream source actor.",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "S19",
+     "details": "RS90 repeats RS1. The attribution names 'the air force', while claim fc0f4bb9 is attributed to 'the ministry'.",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    }
+   ]
+  },
+  "BM01-Q21": {
+   "counts": {
+    "D:FALSE_POSITIVE": 4,
+    "D:TRUE_POSITIVE": 2,
+    "S:FALSE_POSITIVE": 8
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS1 (verbatim AS1) says 'The air force reported'. The only supporting claim (fc0f4bb9) is attributed to 'the ministry', and its span '4 tanker aircraft arrived at Fort Aster' names no reporting actor. The actor in the statement is not suppo",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "The sole claim behind RS1 has cutoff_eligible=false for the REPLAY cutoff 2026-01-05, so the arrival proposition has no supporting evidence that is eligible at the cutoff. This is consistent with the M10-D POST_CUTOFF_EVIDENCE failures. No ",
+     "finding_code": "UNSUPPORTED_FACT",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "The denial claim behind RS2 has cutoff_eligible=false, so there is no eligible evidence at the cutoff for the denial. Consistent with the M10-D post-cutoff failures.",
+     "finding_code": "UNSUPPORTED_FACT",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "RS3 depends only on the cutoff-ineligible claim fc0f4bb9. The premises of the judgment, including Northland as actor and the 'expansion', have no eligible supporting evidence or reference context.",
+     "finding_code": "UNSUPPORTED_FACT",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS3 judges that Northland is 'probably expanding air-refuelling support'. Its only evidence is one unverified claim that 4 tankers arrived at Fort Aster, which names no country, shows no baseline and no 'expansion', and is denied by another",
+     "finding_code": "SCOPE_MISMATCH",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS2 matches AS2, but AS2's evidence links look inverted. The arrival claim (fc0f4bb9) is listed as supporting 'the arrival may not have happened', and the denial claim (1a35d99c) as contradicting it. Both claims are attributed to 'the minis",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-07",
+     "details": "AS1 is labelled epistemic_category FACT, but its claim is FACT_REPORTED_BY_SOURCE with claim_status_asof UNVERIFIED, which is source-reported. RS1 keeps the 'reported' framing, so the report text itself does not strengthen it. The upstream ",
+     "finding_code": "EPISTEMIC_STRENGTH_MISMATCH",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "S19",
+     "details": "RS2 attributes the denial to 'a spokesman'. The denial claim is attributed to 'the ministry', and no spokesman appears in the claim or span. The attribution differs from the evidence. RS1's 'air force' versus the 'ministry' on the arrival c",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    }
+   ]
+  },
+  "BM01-Q23": {
+   "counts": {
+    "D:FALSE_POSITIVE": 1,
+    "D:TRUE_POSITIVE": 1,
+    "S:FALSE_POSITIVE": 9
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS1 says 'The air force reported' that 4 tankers arrived. The only supporting claim (fc0f4bb9) is attributed to 'the ministry', and its span '4 tanker aircraft arrived at Fort Aster' names no speaker. Nothing in the supplied evidence establ",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS3 states that Northland is probably expanding air-refuelling support at Fort Aster. Its sole evidence (claim fc0f4bb9) is an unverified report that 4 tanker aircraft arrived, which is denied by a second claim. The claim does not identify ",
+     "finding_code": "SCOPE_MISMATCH",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "RS3 contains factual propositions with no support in the supplied eligible evidence and no reference context: that the actor is 'Northland', that there is an existing air-refuelling support posture to be 'expanded', and that the arrival ref",
+     "finding_code": "UNSUPPORTED_FACT",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS2 ('a spokesman denied it') is supported in substance by the denial claim 1a35d99c ('denied that any tanker aircraft arrived'). In AS2 that denial claim is listed as CONTRADICTING evidence, and the arrival claim fc0f4bb9 as SUPPORTING evi",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS4 is a legitimate information gap and needs no evidence. 'The aircraft will remain' presupposes that the arrival occurred, which RS2 says is contested. This is a minor tension in framing.",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "M10-D reports a report statement (f6b30983-429d-43eb-9911-6895c2792741) with no approved assessment mapping, and a canonical JSON/table mismatch. That statement is not in the supplied canonical content, so its entailment cannot be assessed ",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-07",
+     "details": "AS1 is classed KNOWN_FACT / FACT, but its only evidence is an UNVERIFIED claim (FACT_REPORTED_BY_SOURCE) that is denied elsewhere. That is a source-reported claim, not an established fact. RS1's wording ('reported that') preserves the repor",
+     "finding_code": "EPISTEMIC_STRENGTH_MISMATCH",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-09",
+     "details": "RS3 is marked contested=false and AS3 records no contradicting evidence, although its only premise (the arrival) is explicitly denied (claim 1a35d99c; RS2). The denial appears only in an adjacent caveat, not in RS3 or its assessment linkage",
+     "finding_code": "CAVEAT_NEUTRALISED",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "S19",
+     "details": "Required attribution is present in RS1 ('The air force reported'), but the attributed source differs from the claim attribution ('the ministry'). The attribution has the right epistemic form (reported, not fact) but may name the wrong origi",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    }
+   ]
+  },
+  "BM01-Q24": {
+   "counts": {
+    "S:FALSE_POSITIVE": 7
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS1 says 'The air force reported' that 4 tanker aircraft arrived. The only supporting claim (fc0f4bb9) carries the attribution 'the ministry'. Its evidence span ('4 tanker aircraft arrived at Fort Aster') does not name the air force. The re",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS3 says Northland is 'expanding air-refuelling support' at Fort Aster. The only cited evidence is one unverified claim that 4 tanker aircraft arrived. Nothing supplied identifies Northland as the actor, shows a prior baseline for 'expandin",
+     "finding_code": "SCOPE_MISMATCH",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-01",
+     "details": "RS2 says 'a spokesman denied it'. The denial claim (1a35d99c) is attributed to 'the ministry'; the span does not mention a spokesman. In AS2 the denial claim is listed as contradicting evidence, while the supporting evidence is the arrival ",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-07",
+     "details": "RS3 uses 'probably' although AS3 has no likelihood_term and only LOW confidence. It rests on a single unverified, denied claim, so the wording may overstate the certainty. The category stays ASSESSMENT, so no class upgrade occurred.",
+     "finding_code": "CERTAINTY_STRENGTHENING",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-09",
+     "details": "RS3 is a KEY_JUDGMENT marked contested=false. AS3 lists no contradicting evidence, although its sole premise (the arrival) is denied by claim 1a35d99c. Presented alone, it neutralises the contradiction. The denial appears only in a separate",
+     "finding_code": "CAVEAT_NEUTRALISED",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "Several propositions are not supported by the supplied evidence or reference context. These are 'Northland' as the actor, 'expanding' (a change over time) and 'air-refuelling support' as a function. The claims only state that tanker aircraf",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "S19",
+     "details": "The required attribution wording ('The air force reported') is kept in RS1. However, the upstream claim attribution is 'the ministry', so the attribution differs from that of the evidence. The same applies to 'a spokesman' vs 'the ministry'",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "MAJOR",
+     "status": "WARNING"
+    }
+   ]
+  }
+ },
+ "provider": "anthropic/claude-sonnet-5-5",
+ "schema_failure_diagnostics": [],
+ "scores": {
+  "D": {
+   "critical_misses": 0,
+   "false_negatives": 0,
+   "false_positives": 10,
+   "false_positives_on_clean_cases": 0,
+   "findings_produced": 23,
+   "labels": 13,
+   "precision": 0.5652,
+   "recall": 1.0,
+   "true_positives": 13
+  },
+  "S": {
+   "critical_misses": 0,
+   "false_negatives": 0,
+   "false_positives": 126,
+   "false_positives_on_clean_cases": 18,
+   "findings_produced": 137,
+   "labels": 11,
+   "precision": 0.0803,
+   "recall": 1.0,
+   "true_positives": 11
+  },
+  "benchmark": "P7-BM-01",
+  "cases": 18,
+  "cases_without_qa_result": 0,
+  "clean_cases": 3,
+  "fp_note": "unlabelled findings on seeded cases count as false positives (conservative); false_positives_on_clean_cases is the false-alarm rate on unseeded versions"
+ },
+ "statuses": {
+  "BM01-Q01": {
+   "expected": "PASS",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q02": {
+   "expected": "PASS",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q03": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q04": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q05": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q06": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q07": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q08": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q09": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q10": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q11": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q12": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q13": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q14": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q16": {
+   "expected": "PASS_WITH_WARNINGS",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q21": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q23": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q24": {
+   "expected": "PASS",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  }
+ }
+}

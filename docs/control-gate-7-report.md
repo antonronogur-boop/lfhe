@@ -131,6 +131,22 @@ zárolással). Audit hash-lánc: PASS, 161 bejegyzés; pg_cron aktív. `docs/dev
   megfigyelés a szintetikus anyagon (konzervatív FP-számítás); ennek szétválasztásához a benchmark-kimenet mostantól esetenkénti
   bontást ad (`per_case`: kihagyott címkék, a modell nem-PASS S-jelzései rövidítve).
 - Kalibrálás (prompt / küszöb) a lezárt Phase 6 szemantikát érintené → csak külön CR-rel, a pilot bizonyítéka alapján (§4).
+
+**Helyesbítés — 6. futás esetenkénti bontással (run 40206473436, 2026-10-25; `docs/cg7-real-provider-run6-main-*.json`):**
+- S: 11 / 11 címke megtalálva (recall 1,0; kritikus kihagyás 0) — az előző futás 10 / 11-ével együtt: **recall 0,91–1,0, futásonként szóródik**.
+- A „tiszta” esetek jelzéseit elolvasva: **a P7-BM-01 alapverziója nem tiszta.** A szintetikus fixture claim-attribúciója „the ministry”,
+  a report viszont „The air force reported” / „a spokesman denied” szöveget ad; az AS3 (Northland, „expanding”) nem következik a
+  claimekből; a KJ `contested=false`, holott alapja cáfolt; a „probably” likelihood-term nélkül áll. A valós M10-S ezeket **helyesen**
+  jelezte (QA-01 ACTOR_MISMATCH, S19, QA-09, QA-17, QA-07).
+- Következmény: a P7-BM-01 **precision / téves-riasztás értéke érvénytelen** (a címkekészlet a bázis valódi hibáit nem tartalmazza);
+  a 2026-10-25-i „túlriaszt” értelmezést visszavonom. A detekciós (recall) mérés érvényes.
+- Mellékmegállapítás: ugyanez a szintetikus anyag a Phase 4–6 elfogadási korpuszokban is szerepel; a determinisztikus réteg (D19 a
+  kötelező attribúció **meglétét** ellenőrzi, nem a claim-attribúcióval való egyezését) és a szabályalapú tesztdublőr ezt nem jelezte —
+  a valós M10-S igen. Ez a tesztdublőr-alapú elfogadási bizonyíték korlátja; lezárt viselkedést nem érint.
+- Változékonyság: a 6. futás próbájában az M07 kimenetét az ingestion `OUTPUT_REJECTED`-del elutasította (`ATTRIBUTION_MISSING` AS1, AS2),
+  a lánc ott megállt; a korábbi két futásban ugyanez sikeres volt (M07: 2 / 3 elfogadva). A lezárt védelem működött.
+- Következő lépés: **P7-BM-02** — konzisztens, valóban hibamentes szintetikus alapverzió (emberi értékelői ellenőrzéssel), ugyanazokkal a
+  seedelt hibákkal; ebből mérhető érvényesen a téves riasztás.
 - Korábbi kísérletek (nem minőségmérés): 1. — minden hívás elutasítva (`temperature`, CR7-01); 2.–3. — sémahibás kimenetek (a séma nem jutott el a modellhez, CR7-02).
 - Tesztdublőrrel (csak a mérőút regressziója, `docs/cg7-benchmark-test-double.json`): D — 13 címke, TP 13, FN 0, FP 10
   (tiszta eseteken 0), precision 0,5652, recall 1,0, kritikus kihagyás 0; S (szabályalapú stand-in) — 11 címke, TP 11,
@@ -206,7 +222,7 @@ kontrollált eredményből, a ciklus cutoffja = a report cutoffja).
 | 16 | Valós-provider futás megtörtént | PASS | run 40105881022: valódi M07 és M10-S hívások (provider-válaszazonosító, tokenek, latencia); a kimenetek sémahibásak — a minőség külön kritérium (19) |
 | 17 | Valós-provider modell / konfig / prompt nyomonkövetés teljes | PASS | §26 ellenőrzés minden valós futásra admissible: modell, konfiguráció-hash (benne `provider_fixed_sampling`), prompt 1.0.0 + hash, ingestion, repair-link |
 | 18 | Provider-hibák és javító futások megőrizve | PASS | valós provider-hiba (HTTP 400) `PROVIDER_ERROR`-ként rögzítve, nem lett siker; QA fail closed (run 40102872833); repair-link tesztelve |
-| 19 | M10-S valós minősége empirikusan mérve | PASS | teljes valós P7-BM-01, run 40203842179 (`main`): 18 / 18 sikeres M10-S futás; S recall 0,91, precision 0,08, 1 kritikus kihagyás, 20 téves jelzés a 3 tiszta esetén — a **mérés** PASS, az eredmény negatív minőségi megállapítás |
+| 19 | M10-S valós minősége empirikusan mérve | NOT YET EVIDENCED | részben mérve: recall 0,91–1,0 (runs 40203842179, 40206473436); a téves riasztás a P7-BM-01 hibás alapverziója miatt érvénytelen → P7-BM-02 szükséges (a korábbi PASS visszavonva, 2026-10-25) |
 | 20 | D és S QA külön mérhető | PASS | benchmark és ciklus-metrikák rétegenként |
 | 21 | Böngészős E2E megtörtént | NOT YET EVIDENCED | P7-04, PO |
 | 22 | UX-megállapítások rögzítve | NOT YET EVIDENCED | rögzítő felület kész |
@@ -229,7 +245,7 @@ kontrollált eredményből, a ciklus cutoffja = a report cutoffja).
 | 39 | Phase 7 change requestek listázva | PASS | nincs |
 | 40 | Későbbi fázis nem indult | PASS | — |
 
-Összesítve: **PASS 29, FAIL 0, NOT YET EVIDENCED 11.**
+Összesítve: **PASS 28, FAIL 0, NOT YET EVIDENCED 12.**
 
 ## RECOMMENDED CAPABILITY VERDICT
 

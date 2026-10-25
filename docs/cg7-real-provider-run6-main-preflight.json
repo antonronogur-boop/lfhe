@@ -1,0 +1,7 @@
+{
+ "http_status": 200,
+ "model": "claude-sonnet-5-5",
+ "ok": true,
+ "request_id": "req_011CgPBXpWvnd59TKEwHP4Hn",
+ "sampling": "provider_fixed"
+}
