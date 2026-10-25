@@ -151,6 +151,11 @@ zárolással). Audit hash-lánc: PASS, 161 bejegyzés; pg_cron aktív. `docs/dev
   véglegesen jóváhagyta és saját szöveggel rögzítette (`docs/specs/PO_Decision_2026-10-25_P7-BM-02_Clean_Baseline.md`, SPEC_INDEX 29);
   a fixture erre átírva, minden eset újragenerálva; valós futás: workflow `scope = benchmark_02_only` (a jóváhagyott alap
   commitja után indított futás számít; a korábbi alappal indított futás csak előzmény).
+- **7. futás (run 40210889526, `2daa9f6`, `benchmark_02_only`; `docs/cg7-real-provider-run7-bm02-superseded-base*.json`) — CSAK ELŐZMÉNY:**
+  a PO-jóváhagyás előtti (felváltott) BM-02 alappal futott (a kimenetben a régi szövegek: „4 tanker”, „the two official Northland
+  statements conflict”, AS2 cáfoló bizonyíték nélkül). Nyers számok: D recall 1,0, kritikus kihagyás 0, tiszta FP 0; S recall 0,82
+  (Q03 hatókör, Q09 QA-07 kihagyva), tiszta FP 2 (Q01 „FACT” kategória; Q24 az AS2 aszimmetrikus `contested` jelzése — ez a felváltott
+  alap valódi hibája volt). A 19. kritérium bizonyítékaként **nem** használható; az `1b87d19` utáni futás szükséges.
 - Korábbi kísérletek (nem minőségmérés): 1. — minden hívás elutasítva (`temperature`, CR7-01); 2.–3. — sémahibás kimenetek (a séma nem jutott el a modellhez, CR7-02).
 - Tesztdublőrrel (csak a mérőút regressziója, `docs/cg7-benchmark-test-double.json`): D — 13 címke, TP 13, FN 0, FP 10
   (tiszta eseteken 0), precision 0,5652, recall 1,0, kritikus kihagyás 0; S (szabályalapú stand-in) — 11 címke, TP 11,
