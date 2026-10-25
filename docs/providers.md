@@ -43,3 +43,10 @@ Current Anthropic models (the 5.5 family) answer HTTP 400 "`temperature` is depr
 model with `{"provider_fixed_sampling": true, "max_tokens": 16000, "timeout_seconds": 300}`: the adapter then sends no
 sampling parameter, the low-variance rule accepts the explicit marker, and the marker is part of the configuration hash of
 every model run. Models that still accept `temperature` keep the original configuration (`temperature ≤ 0.2`).
+
+## CR7-02 — output contract in every request (PO decision 2026-10-25)
+
+`render_messages` sends, after `task.md`, an OUTPUT CONTRACT instruction and the prompt version's registered, hash-verified
+`output_schema.json` in an `<lfhe_output_schema>` block (canonical JSON, escaped like the envelope), then the untrusted-data
+notice and the envelope (still last). Prompt bundles, versions and hashes are unchanged; validation, ingestion, QA and human
+authority are unchanged.

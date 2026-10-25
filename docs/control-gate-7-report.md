@@ -96,7 +96,7 @@ zárolással). Audit hash-lánc: PASS, 161 bejegyzés; pg_cron aktív. `docs/dev
 - **4. futás a `cr7-02` ágról** (run 40112066517, `trial_only`; `docs/cg7-real-provider-attempt4-cr7-02-branch-trial.json`): a teljes
   szintetikus lánc valós `claude-sonnet-5-5`-tel lefutott — M07 `ASSESSMENT_RECORDED` (30 s), M08 `CHALLENGE_RECORDED` (54 s), emberi
   jóváhagyás, M09 `REPORT_VERSION_RECORDED` (18 s), M10-D + M10-S → `PASS_WITH_WARNINGS` (48 s); 4 / 4 futás sémahelyes, javító futás
-  nélkül, mind §26 szerint admissible. Össz. ~37,7 ezer input- és ~22,8 ezer output-token. A `main` a CR7-02 PO-döntéséig változatlan.
+  nélkül, mind §26 szerint admissible. Össz. ~37,7 ezer input- és ~22,8 ezer output-token. A CR7-02-t a PO 2026-10-25-én jóváhagyta; a `main`-be olvasztva.
 - (2. futás:) a sémahiba részleteit a harness akkor még nem exportálta. Pilot-eszköz bővítve: a kimenetek
   `schema_failure_diagnostics` mezőt kapnak (validációs hibák + a modellkimenet eleje / vége, csak szintetikus anyag), és a
   workflow `scope = trial_only` olcsó diagnosztikai futást tesz lehetővé. A javítás (ha a lezárt kimenet-feldolgozást
@@ -149,7 +149,7 @@ kontrollált eredményből, a ciklus cutoffja = a report cutoffja).
 ## CHANGE REQUESTS
 
 - **CR7-01 — IMPLEMENTED (B), PO-utasítás 2026-10-24 alapján; valós futás igazolása a PO-ra vár** (migráció `20261011004200`, `provider_fixed_sampling`) — **igazolva**: a provider minden hívást elfogadott (runs 40105881022, 40111028306): a `claude-sonnet-5-5` a `temperature` paramétert elavultnak jelöli (preflight: HTTP 400 `invalid_request_error`, "`temperature` is deprecated for this model."), a lezárt low-variance szabály (explicit `temperature ≤ 0,2`, M02–M10) pedig mindig küldi. Opciók: A) régebbi, `temperature`-t elfogadó modell kódváltozás nélkül; B) „provider által vezérelt mintavétel” konfiguráció (zárt szemantika változik); C) mindkettő. Részletek: `docs/cr7-01-proposal.md`.
-- **CR7-02 — PROPOSED** (2026-10-24): a lezárt Phase 2 kérés-összeállítás a regisztrált `output_schema.json`-t nem küldi a modellnek; valós modellel minden modul kimenete sémahibás lesz (M07 diagnózis: kitalált mezőnevek, `S1` az `AS1` minta helyett, hiányzó burok). Javaslat: a séma a kérés része (trusted blokk az untrusted adat előtt), a prompt-csomagok és hashek változatlanok. Megvalósítás és tesztek a `cr7-02` ágon (teljes készlet 581 passed + 1 skipped); a `main` a PO-döntésig változatlan. Részletek: `docs/cr7-02-proposal.md`.
+- **CR7-02 — APPROVED és a `main`-be olvasztva** (PO, 2026-10-25, SPEC_INDEX 28; merge `25043c2`; nem nyitja újra a CG2-t / Phase 2-t). Eredeti megállapítás (2026-10-24): a lezárt Phase 2 kérés-összeállítás a regisztrált `output_schema.json`-t nem küldi a modellnek; valós modellel minden modul kimenete sémahibás lesz (M07 diagnózis: kitalált mezőnevek, `S1` az `AS1` minta helyett, hiányzó burok). Javaslat: a séma a kérés része (trusted blokk az untrusted adat előtt), a prompt-csomagok és hashek változatlanok. Egyetlen érintett lezárt viselkedés: `render_messages` (a kérés felhasználói üzenete); minden más változatlan. Részletek és pontos előtte / utána: `docs/cr7-02-proposal.md`. A 19. kritérium csak a `main`-ről futtatott teljes valós P7-BM-01 benchmarkból lehet PASS.
 
 ## KNOWN FAILURES
 

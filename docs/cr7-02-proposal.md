@@ -1,7 +1,23 @@
-# CR7-02 (JAVASLAT) — A modell nem kapja meg a kötelező kimeneti sémát
+# CR7-02 — A modell nem kapja meg a kötelező kimeneti sémát
 
-Állapot: **PROPOSED — PO-döntésre vár; az ágon igazolva** (run 40112066517: M07 → M08 → M09 → M10-S valós modellel, 4 / 4 sémahelyes, QA PASS_WITH_WARNINGS). Megvalósítás előkészítve a `cr7-02` ágon (a `main` változatlan); a PO a
-`pilot-real-provider` workflow-t erről az ágról futtathatja a döntés előtt (bizonyíték a döntéshez).
+Állapot: **APPROVED (PO, 2026-10-25, `docs/specs/PO_Decision_2026-10-25_CR7-02.md`, SPEC_INDEX 28) — a `main`-be olvasztva**
+(merge `25043c2`; a `cr7-02` ág commitja `30beb54`). Igazolva az ágon: run 40112066517 (M07 → M08 → emberi jóváhagyás → M09 →
+M10-D + M10-S valós `claude-sonnet-5-5`-tel, 4 / 4 sémahelyes, 0 javító futás, QA PASS_WITH_WARNINGS). A CR7-02 nem nyitja újra a
+CG2-t / Phase 2-t; a CG7 nyitva marad; a 19. kritérium csak a teljes valós P7-BM-01 benchmarkból lehet PASS.
+
+## Érintett lezárt viselkedés (pontosan)
+
+- **Egyetlen** módosított lezárt viselkedés: `services/ai-orchestrator/lfhe_orchestrator/providers.py` → `render_messages`
+  (Phase 2, ADR-0004), vagyis a providernek küldött felhasználói üzenet összeállítása.
+  - Előtte: `task.md` + untrusted-data figyelmeztetés + `<lfhe_task_envelope>` blokk.
+  - Utána: `task.md` + **OUTPUT CONTRACT utasítás** + **`<lfhe_output_schema>` blokk** (a prompt-verzió regisztrált,
+    hash-ellenőrzött `output_schema.json`-ja, kanonikus JSON, `<` `>` `&` escape-elve) + untrusted-data figyelmeztetés +
+    `<lfhe_task_envelope>` blokk (változatlan, továbbra is utolsó).
+- Változatlan: a `system.md` (system prompt), a prompt-csomagok fájljai, verzióazonosítói és hashei (prompt lock OK), az
+  envelope és annak escape-elése, a sémavalidáció, a javító-futás szabálya, az ingestion, a QA, az emberi hatáskörök, a
+  provenancia és a kiadás. A `FakeProvider` / tesztdublőrök viselkedése nem változott.
+- Új teszt: `tests/unit/test_cr7_02_output_contract.py`.
+- Merge utáni ellenőrzés (2026-10-25): teljes készlet 581 passed + 1 skipped (valós-provider teszt, kulcs nélkül), web 44 / 44, TypeScript és build PASS, prompt lock OK, secret scan és gitleaks tiszta.
 
 ## Megállapítás (2026-10-24, run 40111028306, `claude-sonnet-5-5`, `provider_fixed_sampling`)
 
