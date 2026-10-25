@@ -48,6 +48,7 @@ rögzítésre.
 | Kapacitás-felszabadítás, FTE, kapacitásérték | **NOT YET EVIDENCED** (nincs ciklus, nincs rögzített költség-feltevés) |
 | Valós provider: M07 / M08 / M09 / M10-S siker, latencia, token, költség | **MÉRVE (szintetikus lánc)** — run 40203842179: M07 26,5 s, M08 36,7 s, M09 16,3 s, M10 43,3 s; 4 / 4 sémahelyes, 0 javító futás; ~36 ezer input / ~19 ezer output token a láncra; költség: ár nincs rögzítve → ismeretlen. Előzmény: CR7-01 (`temperature`), CR7-02 (séma a kérésben) |
 | M10-S empirikus minőség (P7-BM-01, valós provider) | **RÉSZBEN MÉRVE**: S recall 0,91 / 1,0 (runs 40203842179 / 40206473436); a téves riasztás a P7-BM-01 hibás alapverziója miatt érvénytelen (a jelzések nagy része a bázis valódi hibáira vonatkozik) → P7-BM-02. D: recall 1,0 |
+| **M10-S empirikus minőség (P7-BM-02, PO-jóváhagyott alap, run 40213605927)** | **MÉRVE**: S recall 0,91 (10 / 11), 1 kritikus kihagyás (Q09 — kód-eltérés, a hibát CRITICAL FAIL-lel jelezte), tiszta eseteken 0 FAIL / 3 WARNING, hibán kívüli FAIL 0, konzervatív precision 0,22 (ismételt egybehangzó jelzések). D: recall 1,0, tiszta FP 0. n = 1 érvényes futás |
 | P7-BM-01 a szabályalapú tesztdublőrrel (csak a mérőút regressziója) | D: 13 címke, TP 13, FN 0, FP 10 (ebből tiszta eseteken 0), precision 0,5652, recall 1,0, kritikus kihagyás 0. S (tesztdublőr): 11 címke, TP 11, FN 0, FP 2 (tiszta eseteken 0), precision 0,8462, recall 1,0. **Nem a valós M10-S minősége.** |
 | Böngészős UX | **NOT YET EVIDENCED** |
 
@@ -59,7 +60,13 @@ rögzítésre.
 * A valós-provider próba teljes folyamata (M07 → M08 → emberi jóváhagyás → M09 → M10-D + M10-S → pilot-kötés →
   §26-ellenőrzés) a valós Anthropic adapterrel, csonkolt HTTP-vel hibátlanul fut — a valós futás technikailag kész.
 
+* A valós M10-S a PO-jóváhagyott, hibamentes alapon a beültetett hibák 10 / 11-ét a várt kóddal, a 11.-et más kóddal
+  CRITICAL szinten jelezte, és tiszta anyagon nem blokkolt (P7-BM-02).
+
 ## NEGATIVE FINDINGS (eddig)
+
+* MODEL_PERFORMANCE_LIMITATION (P7-BM-02): tiszta anyagon is ad nem blokkoló WARNING-ot (a 3 tiszta esetből 3 PASS_WITH_WARNINGS),
+  és egy hibát többszörösen jelez → elemzői QA-feloldási teher; a finding-kód választása nem mindig egyezik a címkével.
 
 * MEASUREMENT (2026-10-25, helyesbítve): a P7-BM-01 „tiszta” alapverziója valódi hibákat tartalmaz (attribúció-eltérés a claimhez képest,
   claimből nem következő állítás, `contested=false` cáfolt alapon). A valós M10-S ezeket helyesen jelezte; a benchmark téves-riasztás

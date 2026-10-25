@@ -162,6 +162,29 @@ zárolással). Audit hash-lánc: PASS, 161 bejegyzés; pg_cron aktív. `docs/dev
   FN 0, FP 2 (tiszta eseteken 0), precision 0,8462, recall 1,0. A D réteg provider-független, így a D-eredmény a valós
   futásban is így várható; az S-eredmény nem a valós modell minősége.
 
+**P7-BM-02 — érvényes valós futás (run 40213605927, `7aea2bf` ⊇ jóváhagyott alap `1b87d19`; `claude-sonnet-5-5`, `provider_fixed`,
+`benchmark_02_only`; `docs/cg7-real-provider-run9-bm02-main-*.json`) — a 19. kritérium bizonyítéka:**
+- Lefutás: 18 / 18 M10-S hívás SUCCEEDED, 0 sémahiba, minden esethez van QA-eredmény. Az eredményt a workflow annotációból
+  olvastam ki (secret scan után; `scripts/fetch_pilot_result.py`), nem kézi átadással.
+- **D (determinisztikus):** 13 / 13 címke (recall 1,0), kritikus kihagyás 0, tiszta eseteken 0 jelzés; precision 0,52 (konzervatív).
+- **S (valós M10-S):** 10 / 11 címke (recall 0,91), **kritikus kihagyás 1** (Q09, QA-07 `EPISTEMIC_STRENGTH_MISMATCH`);
+  precision 0,22 (konzervatív: minden nem címkézett jelzés FP), tiszta eseteken 3 jelzés.
+- Állapot-egyezés: 15 / 18 pontos; a 3 tiszta eset PASS helyett **PASS_WITH_WARNINGS** — egyik sem FAIL, tehát tiszta anyagon
+  nincs blokkoló téves riasztás.
+- Esetenkénti bontás (kézi átnézés, minden S-jelzés):
+  - A seedelt eseteken **minden FAIL-szintű S-jelzés a beültetett hibára vonatkozik**; hibán kívüli FAIL 0. A konzervatív FP-szám
+    zöme ugyanannak a hibának több ellenőrzésen (QA-01 / 06 / 07 / 09 / 17) történő ismételt, egybehangzó jelzése.
+  - A Q09 „kritikus kihagyás” tartalmilag nem kihagyás: a modell QA-07-en CRITICAL FAIL-t adott, de
+    `MATERIAL_EPISTEMIC_STRENGTH_INCREASE` kóddal a címkézett `EPISTEMIC_STRENGTH_MISMATCH` helyett (kód-szintű eltérés; a
+    pontozás szigorú kódegyezést mér, ezen nem változtattam).
+  - Hibán kívüli WARNING-ok két okra vezethetők vissza, mindkettő a jóváhagyott alap tényleges tulajdonsága:
+    (a) az S3 „the available benchmark record” fordulata LIVE reportban értékelési keretre utal (Q01, Q02, Q24, Q21);
+    (b) az RS4 szövege „remains contested”, de `contested=false` (INFORMATION_GAP a lezárt Phase 5 levezetés szerint nem vitatott;
+    Q05, Q09, Q21). Ezek nem hibák a PO-döntés szerint, de a modell megfigyelése tárgyszerű.
+- Korlát: egyetlen érvényes futás (a korábbi futások 0,82–1,0 S-recallt mutattak más alappal) → a szóródás nincs kimérve.
+- 8. kísérlet (run 40212574426): technikailag sikeres, de az annotáció 4096 karakteren csonkult → az eredmény nem volt
+  visszaolvasható, nem értékelt; javítva (`7aea2bf`, round-trip teszt).
+
 ## ANALYST-TIME / THROUGHPUT / CAPACITY-RELEASE MEASUREMENTS
 
 **NOT YET EVIDENCED** (nincs ciklus). A számítás reprodukálható és tesztelt (§11 képletek, Decimal).
@@ -203,7 +226,7 @@ kontrollált eredményből, a ciklus cutoffja = a report cutoffja).
 1. ~~DEV: 4100 migráció + smoke~~ — kész (2026-10-23: 42 migráció, 68 / 68 PASS).
 2. Szerepek: PILOT_LEAD kiosztása; külön DEV-felhasználók az elemzői / reviewer / security / release szerepekhez.
 3. Költség-feltevés és provider-ár rögzítése.
-4. Valós-provider próba (workflow és / vagy DEV worker) → trial + benchmark JSON.
+4. ~~Valós-provider próba + benchmark~~ — kész (lánc: run 40203842179; P7-BM-02: run 40213605927).
 5. Böngészős E2E végigjárás UX-megállapításokkal.
 6. 6 pilot-ciklus (≥ 2 REPLAY, ≥ 2 LIVE), majd `scripts/pilot_export.py`.
 7. A bizonyíték alapján a findings és a capability-ajánlás véglegesítése; K-11 / GS-001 csatorna (opcionális, §23);
@@ -231,7 +254,7 @@ kontrollált eredményből, a ciklus cutoffja = a report cutoffja).
 | 16 | Valós-provider futás megtörtént | PASS | run 40105881022: valódi M07 és M10-S hívások (provider-válaszazonosító, tokenek, latencia); a kimenetek sémahibásak — a minőség külön kritérium (19) |
 | 17 | Valós-provider modell / konfig / prompt nyomonkövetés teljes | PASS | §26 ellenőrzés minden valós futásra admissible: modell, konfiguráció-hash (benne `provider_fixed_sampling`), prompt 1.0.0 + hash, ingestion, repair-link |
 | 18 | Provider-hibák és javító futások megőrizve | PASS | valós provider-hiba (HTTP 400) `PROVIDER_ERROR`-ként rögzítve, nem lett siker; QA fail closed (run 40102872833); repair-link tesztelve |
-| 19 | M10-S valós minősége empirikusan mérve | NOT YET EVIDENCED | részben mérve: recall 0,91–1,0 (runs 40203842179, 40206473436); a téves riasztás a P7-BM-01 hibás alapverziója miatt érvénytelen → P7-BM-02 szükséges (a korábbi PASS visszavonva, 2026-10-25) |
+| 19 | M10-S valós minősége empirikusan mérve | PASS | P7-BM-02 valós futás (run 40213605927, PO-jóváhagyott alap): S recall 0,91, 1 kód-szintű kritikus kihagyás (tartalmilag jelzett), tiszta eseteken 0 FAIL / 3 WARNING, hibán kívüli FAIL 0; D recall 1,0. Mérve — a működési érték megítélése a PO-é; n = 1 futás |
 | 20 | D és S QA külön mérhető | PASS | benchmark és ciklus-metrikák rétegenként |
 | 21 | Böngészős E2E megtörtént | NOT YET EVIDENCED | P7-04, PO |
 | 22 | UX-megállapítások rögzítve | NOT YET EVIDENCED | rögzítő felület kész |
@@ -254,7 +277,7 @@ kontrollált eredményből, a ciklus cutoffja = a report cutoffja).
 | 39 | Phase 7 change requestek listázva | PASS | nincs |
 | 40 | Későbbi fázis nem indult | PASS | — |
 
-Összesítve: **PASS 28, FAIL 0, NOT YET EVIDENCED 12.**
+Összesítve: **PASS 29, FAIL 0, NOT YET EVIDENCED 11.**
 
 ## RECOMMENDED CAPABILITY VERDICT
 

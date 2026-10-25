@@ -1,0 +1,709 @@
+{
+ "benchmark": "P7-BM-02",
+ "evidence_class": "REAL_PROVIDER",
+ "m10s_model_runs": [
+  "d28cbf4f-31b3-4e52-9f0f-cad65a386989",
+  "f111e65d-34f9-49da-80fb-6a044d8d2f78",
+  "036e294d-67d0-4964-91f8-25d1b62cab66",
+  "ea1fefbc-c4a1-4967-a10a-c70229f7e3b3",
+  "8f8741fb-5da1-473b-9470-54024ad84786",
+  "9478feb3-cc6f-40d3-a63c-cb367e2e061b",
+  "d9e503a1-dda6-4ade-a0c3-407a77d86211",
+  "27f90c95-b30a-44c2-bd26-90fe5d5ec85d",
+  "6ee1e0ab-efff-4712-b045-c6b607289b16",
+  "f91589ce-5e28-412f-8df0-3c99b16c4b8d",
+  "5e707544-564f-4523-8ac5-a0d4cd0dcdd7",
+  "fe52f7fe-dd83-48d8-9f60-a37c2989664c",
+  "b96ab0c5-3f35-4bbe-b40a-7266e1b67dbc",
+  "791d14e3-4cbd-44fd-adeb-42f33fa43fbf",
+  "d925027b-ba9d-4b2f-90e2-69f30c2bf1be",
+  "330f051e-c257-4c48-bfb1-77f86795c9cf",
+  "6b5c006f-9b6f-4982-bda0-5fb1e21a25f6",
+  "4db26d87-ebbf-49d1-98ac-03f7e4bf495b"
+ ],
+ "m10s_run_status_counts": {
+  "SUCCEEDED": 18
+ },
+ "per_case": {
+  "BM02-Q01": {
+   "counts": {
+    "S:FALSE_POSITIVE": 1
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-17",
+     "details": "RS3 refers to 'the available benchmark record' in a LIVE-mode report. This is wording inherited verbatim from approved AS3. It is not an analytic source description and may confuse readers or point to evaluation framing. The factual content",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "WARNING",
+     "status": "WARNING"
+    }
+   ]
+  },
+  "BM02-Q02": {
+   "counts": {
+    "S:FALSE_POSITIVE": 1
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-17",
+     "details": "RS3 refers to 'the available benchmark record'. This is evaluation-style framing in a LIVE report. It is inherited from approved AS3 and does not change the factual content, but a reader may misread it as a reference to a source or evaluati",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "WARNING",
+     "status": "WARNING"
+    }
+   ]
+  },
+  "BM02-Q03": {
+   "counts": {
+    "S:FALSE_POSITIVE": 1,
+    "S:TRUE_POSITIVE": 1
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS1 says the air force reported that 'all four' tanker aircraft arrived. The cited AS1 and claim 5d22a9ab give only 'four tanker aircraft arrived at Fort Aster'. The word 'all' implies a known set of four with complete arrival. Neither the ",
+     "finding_code": "SCOPE_MISMATCH",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-06",
+     "details": "The number 'four' is attributed correctly to the air force. The added quantifier 'all' changes its relationship to the source. The source reports four aircraft arriving, not a complete arrival of a defined group of four. This is a paraphras",
+     "finding_code": "QUANTITY_SCOPE_DISTORTION",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    }
+   ]
+  },
+  "BM02-Q04": {
+   "counts": {
+    "S:FALSE_POSITIVE": 2,
+    "S:TRUE_POSITIVE": 1
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS1 cites only AS1, which says the air force reported the arrival of four tanker aircraft. AS1 lists the ministry denial (claim 088c3908) as contradicting evidence. The added clause 'the arrival is undisputed' is not entailed by AS1 and is ",
+     "finding_code": "CERTAINTY_STRENGTHENING",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-07",
+     "details": "AS1 is a source-reported statement ('The Northland air force reported...') at LOW confidence, with the denial as contradicting evidence. The paraphrase in RS1 adds 'the arrival is undisputed', which turns a contested claim into an establish",
+     "finding_code": "MATERIAL_EPISTEMIC_STRENGTH_INCREASE",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-09",
+     "details": "RS1 neutralises the contradicting evidence for AS1 (the ministry denial) by calling the arrival 'undisputed'. The denial still appears in RS2, but RS1 contradicts both the denial and the report's own contested framing.",
+     "finding_code": "CONTRADICTION_REMOVED",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    }
+   ]
+  },
+  "BM02-Q05": {
+   "counts": {
+    "D:FALSE_POSITIVE": 1,
+    "D:TRUE_POSITIVE": 1,
+    "S:FALSE_POSITIVE": 3,
+    "S:TRUE_POSITIVE": 1
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS3 states a roughly even chance that '12' tanker aircraft arrived. Its cited assessment statement AS3 speaks only of 'tanker aircraft', with no quantity. The only quantity in the evidence is 'four', from the Northland air force claim, and ",
+     "finding_code": "QUANTITY_SCOPE_DISTORTION",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-06",
+     "details": "The number 12 in RS3 appears in neither AS3 nor any of the supplied claims. The only quantity in the evidence is four, attributed to the Northland air force. This confirms the deterministic QA-06 finding. The number is a new unattributed fa",
+     "finding_code": "UNSUPPORTED_FACT",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "RS3 introduces '12 tanker aircraft', a factual proposition not supported by any eligible evidence or reference context. This confirms the deterministic QA-17 finding (UNSUPPORTED_NEW_FACT:RS3:12). No reference context was supplied that coul",
+     "finding_code": "UNSUPPORTED_FACT",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-09",
+     "details": "RS4 says the arrival 'remains contested' but carries contested=false, while RS1\u2013RS3 carry contested=true. The flag is inconsistent with the statement text. The wording itself preserves the contradiction.",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "WARNING",
+     "status": "WARNING"
+    }
+   ]
+  },
+  "BM02-Q06": {
+   "counts": {
+    "D:TRUE_POSITIVE": 1,
+    "S:FALSE_POSITIVE": 2,
+    "S:TRUE_POSITIVE": 1
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS3 is a PARAPHRASE of AS3 but appends 'because of the exercise'. AS3 contains no causal link and no exercise, and neither cited claim mentions an exercise or a cause for the arrival. The even-chance likelihood is thereby attached to a diff",
+     "finding_code": "UNSUPPORTED_CAUSAL_CLAIM",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-07",
+     "details": "Consistent with the deterministic UNSUPPORTED_NEW_JUDGMENT:RS3. A paraphrase introduces a new analytic judgment (a causal explanation with a likelihood term) that the approved AS3 does not contain. This turns an approved, uncertain existenc",
+     "finding_code": "MATERIAL_EPISTEMIC_STRENGTH_INCREASE",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "RS3 asserts an 'exercise' as the reason for the arrival. No supplied claim, assessment statement or reference context contains an exercise. This factual proposition is unsupported by eligible evidence.",
+     "finding_code": "UNSUPPORTED_FACT",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    }
+   ]
+  },
+  "BM02-Q07": {
+   "counts": {
+    "D:FALSE_POSITIVE": 1,
+    "S:FALSE_POSITIVE": 1,
+    "S:TRUE_POSITIVE": 1
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS3 is not entailed by AS3: the actor descriptor 'Southland' was added to the aircraft. The probability wording, confidence (LOW) and likelihood (ROUGHLY_EVEN_CHANCE) match AS3, but the added actor materially changes what is claimed about t",
+     "finding_code": "ACTOR_MISMATCH",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "RS3 states the aircraft that may have arrived were 'Southland tanker aircraft'. Neither the cited assessment statement AS3 ('tanker aircraft') nor the supporting/contradicting claims supply any 'Southland' nationality or ownership. The clai",
+     "finding_code": "UNSUPPORTED_FACT",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    }
+   ]
+  },
+  "BM02-Q08": {
+   "counts": {
+    "D:FALSE_POSITIVE": 1,
+    "D:TRUE_POSITIVE": 1,
+    "S:FALSE_POSITIVE": 3,
+    "S:TRUE_POSITIVE": 1
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS3 says tanker aircraft 'certainly arrived'. The cited AS3 gives only a ROUGHLY_EVEN_CHANCE judgment at LOW confidence, resting on one unverified claim that is contradicted by another. The report statement says materially more than its sou",
+     "finding_code": "CERTAINTY_STRENGTHENING",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-07",
+     "details": "AS3 is an ASSESSMENT with a roughly-even-chance likelihood. RS3 turns it into a categorical statement ('certainly arrived') in a key-judgment role, a material jump in epistemic strength. This confirms the M10-D finding EPISTEMIC_STRENGTHENI",
+     "finding_code": "MATERIAL_EPISTEMIC_STRENGTH_INCREASE",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-09",
+     "details": "RS3 states the arrival as certain. This neutralises the contradiction (the spokesman's denial in claim 088c3908) and the LOW-confidence, even-chance caveat that AS3 carries. RS1, RS2 and RS4 keep the dispute visible elsewhere in the item, b",
+     "finding_code": "CAVEAT_NEUTRALISED",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "RS3 asserts without attribution, and as certain, that tanker aircraft arrived at Fort Aster. The supplied evidence is only an UNVERIFIED air force claim, contradicted by an UNVERIFIED ministry denial. No eligible evidence or reference conte",
+     "finding_code": "UNSUPPORTED_FACT",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    }
+   ]
+  },
+  "BM02-Q09": {
+   "counts": {
+    "D:TRUE_POSITIVE": 1,
+    "S:FALSE_NEGATIVE": 1,
+    "S:FALSE_POSITIVE": 4,
+    "S:TRUE_POSITIVE": 1
+   },
+   "missed": [
+    {
+     "check_id": "QA-07",
+     "critical": true,
+     "finding_code": "EPISTEMIC_STRENGTH_MISMATCH",
+     "layer": "S"
+    }
+   ],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS1 states as plain fact that four tanker aircraft arrived at Fort Aster. The cited AS1 only entails that the Northland air force reported this. The underlying claim is UNVERIFIED, lineage is unknown, and it is contradicted by the ministry ",
+     "finding_code": "CERTAINTY_STRENGTHENING",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-07",
+     "details": "AS1 is a source-reported claim (FACT_REPORTED_BY_SOURCE, claim status UNVERIFIED, LOW confidence, contested). RS1 presents it as an unqualified fact. The editorial paraphrase promoted a reported claim to an asserted fact, and the change is ",
+     "finding_code": "MATERIAL_EPISTEMIC_STRENGTH_INCREASE",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "S19",
+     "details": "AS1 requires the attribution 'The Northland air force reported'. RS1 (PARAPHRASE) omits it. This confirms the deterministic D19 ATTRIBUTION_REMOVED failure. The unattributed text reads as an established fact rather than an official claim.",
+     "finding_code": "ATTRIBUTION_REMOVED",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-06",
+     "details": "The figure 'four' matches claim 5d22a9ab. Without the air-force attribution it is presented as an established count rather than a single source's unverified figure that another official source denies.",
+     "finding_code": "QUANTITY_SCOPE_DISTORTION",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-09",
+     "details": "RS4 says the arrival 'remains contested' but carries contested=false, unlike RS1 to RS3. This is a metadata inconsistency in how the contradiction is flagged.",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "WARNING",
+     "status": "WARNING"
+    }
+   ]
+  },
+  "BM02-Q10": {
+   "counts": {
+    "D:FALSE_POSITIVE": 2,
+    "D:TRUE_POSITIVE": 1,
+    "S:FALSE_POSITIVE": 4,
+    "S:TRUE_POSITIVE": 1
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS1 cites only AS1, which says the Northland air force reported the arrival. The claim behind it is UNVERIFIED, comes from a single source, and is contradicted by the ministry denial. The added phrase 'independently confirmed' goes beyond A",
+     "finding_code": "CERTAINTY_STRENGTHENING",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-05",
+     "details": "RS1 claims independent confirmation. The supplied lineage shows one claim with unknown lineage and its own independence group, so independence is not established. No second source corroborates the arrival, and the only other claim is a deni",
+     "finding_code": "FALSE_INDEPENDENT_CONFIRMATION",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-07",
+     "details": "AS1 is a source-reported statement (FACT, attributed to the air force) with an UNVERIFIED claim and LOW confidence. RS1 adds 'independently confirmed', which turns a source-reported, contested claim into a corroborated one. This is a materi",
+     "finding_code": "MATERIAL_EPISTEMIC_STRENGTH_INCREASE",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "The proposition that the arrival was independently confirmed has no support in the supplied evidence or eligible context. Only one unverified claim of unknown lineage supports the arrival, and one claim denies it.",
+     "finding_code": "UNSUPPORTED_FACT",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-09",
+     "details": "The contradicting denial is preserved in RS2, and RS3 and RS4 keep the dispute visible. However, the 'independently confirmed' wording in RS1 presents the arrival as settled and conflicts with RS2, which weakens how the contradiction reads.",
+     "finding_code": "CAVEAT_NEUTRALISED",
+     "severity": "WARNING",
+     "status": "WARNING"
+    }
+   ]
+  },
+  "BM02-Q11": {
+   "counts": {
+    "D:TRUE_POSITIVE": 1,
+    "S:FALSE_POSITIVE": 1
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS3 text and likelihood term (ROUGHLY_EVEN_CHANCE) match AS3. RS3 carries final_analytic_confidence HIGH, but the approved AS3 confidence is LOW. HIGH confidence on an even-chance judgment resting on two unverified, mutually contradicting o",
+     "finding_code": "CERTAINTY_STRENGTHENING",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    }
+   ]
+  },
+  "BM02-Q12": {
+   "counts": {
+    "D:TRUE_POSITIVE": 1,
+    "S:FALSE_POSITIVE": 2
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "The RS3 text matches AS3 ('roughly even chance'), but the report statement carries likelihood_term ALMOST_CERTAIN against the approved ROUGHLY_EVEN_CHANCE. The cited assessment does not entail this. The only evidence is two directly opposed",
+     "finding_code": "CERTAINTY_STRENGTHENING",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-07",
+     "details": "RS3 is a contested key judgment. Its likelihood was raised from the approved ROUGHLY_EVEN_CHANCE (AS3, LOW confidence) to ALMOST_CERTAIN. This is a material increase in epistemic strength on a contested claim. It is not authorised by the ap",
+     "finding_code": "MATERIAL_EPISTEMIC_STRENGTH_INCREASE",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    }
+   ]
+  },
+  "BM02-Q13": {
+   "counts": {
+    "D:FALSE_POSITIVE": 1,
+    "D:TRUE_POSITIVE": 1,
+    "S:FALSE_POSITIVE": 4,
+    "S:TRUE_POSITIVE": 1
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS3 is a paraphrase of AS3 but adds the clause 'as later shown in 2027'. AS3 and its supporting and contradicting claims (5d22a9ab..., 088c3908...) contain no such proposition. The clause is also dated after the information cutoff of 2026-1",
+     "finding_code": "UNSUPPORTED_FACT",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-06",
+     "details": "The number '2027' in RS3 appears in no approved source or evidence. It is a year after the cutoff of 2026-10-25. This confirms the deterministic QA-06 finding. The number 'four' in RS1 is supported by claim 5d22a9ab.",
+     "finding_code": "UNSUPPORTED_FACT",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-07",
+     "details": "AS3 is a LOW-confidence, roughly-even-chance ASSESSMENT. Adding 'as later shown in 2027' implies the question was later settled by demonstration. That makes the judgment look more certain than approved and conflicts with AS4, which says the",
+     "finding_code": "EPISTEMIC_STRENGTH_MISMATCH",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-09",
+     "details": "The clause 'as later shown in 2027' in RS3 undercuts the contested state of the arrival and the information gap in AS4. It implies a resolution that the evidence does not contain, which neutralises the caveat inside the key judgment.",
+     "finding_code": "CAVEAT_NEUTRALISED",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "RS3 contains an unsupported factual proposition, 'as later shown in 2027'. It is not backed by any supplied eligible evidence or reference context, and it postdates the information cutoff of 2026-10-25. This is hindsight, and is consistent ",
+     "finding_code": "UNSUPPORTED_FACT",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    }
+   ]
+  },
+  "BM02-Q14": {
+   "counts": {
+    "D:FALSE_POSITIVE": 1,
+    "D:TRUE_POSITIVE": 1,
+    "S:FALSE_POSITIVE": 2
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS3 (PARAPHRASE of AS3) prepends 'NATO SECRET:', which AS3 and its claims do not contain. The prefix asserts a classification/handling status that no supplied evidence supports, so the statement says more than its source. The likelihood ter",
+     "finding_code": "UNSUPPORTED_FACT",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "The proposition that RS3 carries a 'NATO SECRET' classification is not in any supplied assessment statement, claim or reference context. It is an unsupported factual/handling assertion in an OSINT-only product. This confirms the determinist",
+     "finding_code": "UNSUPPORTED_FACT",
+     "severity": "CRITICAL",
+     "status": "FAIL"
+    }
+   ]
+  },
+  "BM02-Q16": {
+   "counts": {
+    "D:TRUE_POSITIVE": 1,
+    "S:TRUE_POSITIVE": 1
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-13",
+     "details": "Confirms the M10-D finding. Items IT1 and KJDUP carry the same event pin, the same source candidate, the same assessment statements and identical text. The second KEY_JUDGMENT item could make one contested event look like two separate key j",
+     "finding_code": "MISLEADING_DUPLICATION",
+     "severity": "WARNING",
+     "status": "WARNING"
+    }
+   ]
+  },
+  "BM02-Q21": {
+   "counts": {
+    "D:FALSE_POSITIVE": 4,
+    "D:TRUE_POSITIVE": 2,
+    "S:FALSE_POSITIVE": 3
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-17",
+     "details": "Both underlying claims carry cutoff_eligible=false for the REPLAY cutoff 2026-01-05. The report's factual propositions therefore rest on evidence not shown to be eligible, which matches the deterministic POST_CUTOFF_EVIDENCE failures. The s",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    },
+    {
+     "check_id": "QA-09",
+     "details": "RS4 text says the arrival 'remains contested', but its contested flag is false, while RS1-RS3 on the same event are flagged contested=true. This is a metadata inconsistency. The text itself preserves the contradiction.",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "WARNING",
+     "status": "WARNING"
+    },
+    {
+     "check_id": "QA-17",
+     "details": "RS3 refers to 'the available benchmark record'. This is a reference to an evaluation or benchmark artefact, not to any supplied evidence or reference context. It appears verbatim in the approved assessment text, but it is unsupported framin",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "WARNING",
+     "status": "WARNING"
+    }
+   ]
+  },
+  "BM02-Q23": {
+   "counts": {
+    "D:FALSE_POSITIVE": 1,
+    "D:TRUE_POSITIVE": 1,
+    "S:FALSE_POSITIVE": 1
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "The deterministic findings flag a report statement (b575b4dd-b82e-4259-8852-f0fa9ec61d55) with no approved assessment-statement mapping, and a mismatch between canonical JSON and statement rows. That statement is not in the canonical conten",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "MAJOR",
+     "status": "FAIL"
+    }
+   ]
+  },
+  "BM02-Q24": {
+   "counts": {
+    "S:FALSE_POSITIVE": 1
+   },
+   "missed": [],
+   "s_findings": [
+    {
+     "check_id": "QA-01",
+     "details": "RS3 is entailed by AS3, and the likelihood (ROUGHLY_EVEN_CHANCE) and LOW confidence are unchanged. Both opposing claims are unverified with unknown lineage, so the judgment is consistent with the evidence. The wording 'available benchmark r",
+     "finding_code": "OTHER_SEMANTIC_CONCERN",
+     "severity": "WARNING",
+     "status": "WARNING"
+    }
+   ]
+  }
+ },
+ "provider": "anthropic/claude-sonnet-5-5",
+ "schema_failure_diagnostics": [],
+ "scores": {
+  "D": {
+   "critical_misses": 0,
+   "false_negatives": 0,
+   "false_positives": 12,
+   "false_positives_on_clean_cases": 0,
+   "findings_produced": 25,
+   "labels": 13,
+   "precision": 0.52,
+   "recall": 1.0,
+   "true_positives": 13
+  },
+  "S": {
+   "critical_misses": 1,
+   "false_negatives": 1,
+   "false_positives": 36,
+   "false_positives_on_clean_cases": 3,
+   "findings_produced": 46,
+   "labels": 11,
+   "precision": 0.2174,
+   "recall": 0.9091,
+   "true_positives": 10
+  },
+  "benchmark": "P7-BM-02",
+  "cases": 18,
+  "cases_without_qa_result": 0,
+  "clean_cases": 3,
+  "fp_note": "unlabelled findings on seeded cases count as false positives (conservative); false_positives_on_clean_cases is the false-alarm rate on unseeded versions"
+ },
+ "statuses": {
+  "BM02-Q01": {
+   "expected": "PASS",
+   "got": "PASS_WITH_WARNINGS",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM02-Q02": {
+   "expected": "PASS",
+   "got": "PASS_WITH_WARNINGS",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM02-Q03": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM02-Q04": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM02-Q05": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM02-Q06": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM02-Q07": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM02-Q08": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM02-Q09": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM02-Q10": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM02-Q11": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM02-Q12": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM02-Q13": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM02-Q14": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM02-Q16": {
+   "expected": "PASS_WITH_WARNINGS",
+   "got": "PASS_WITH_WARNINGS",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM02-Q21": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM02-Q23": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM02-Q24": {
+   "expected": "PASS",
+   "got": "PASS_WITH_WARNINGS",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  }
+ }
+}
