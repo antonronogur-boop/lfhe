@@ -8,8 +8,8 @@ import gzip
 import pathlib
 import sys
 
-CHUNK = 8000          # well below the annotation message limit
-MAX_NOTICES = 10      # GitHub keeps at most 10 notices per step
+CHUNK = 4000          # GitHub truncates annotation messages at 4096 characters
+MAX_NOTICES = 10      # GitHub keeps at most 10 notices per step (~40 KB of gzip+base64)
 
 
 def main(directory: str) -> int:
