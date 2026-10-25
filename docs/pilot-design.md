@@ -84,15 +84,17 @@ positives on clean cases. Unlabelled findings on seeded cases count as FP (conse
 rule-based stand-in the run is regression of the measurement path only; the real M10-S figures come from
 the `pilot-real-provider` workflow (or a local run with `LFHE_P7_PROVIDER=anthropic`).
 
-## Benchmark P7-BM-02 (2026-10-25, PO authorisation)
+## Benchmark P7-BM-02 (2026-10-25, PO authorisation; clean baseline approved by the PO)
 
-`evaluation/p7-bm-02/benchmark.json` — the same 18 cases / error classes on an internally consistent base
-(`tests/pilot/bm02_fixture.py`): claim attributions match the report wording; the key judgement (ROUGHLY_EVEN_CHANCE, LOW)
-follows from the two conflicting official statements and cites both; the denial is preserved as a caveat (a contested
-judgement cannot be a key judgement under the closed Phase 5 rule). With the test doubles every expected status holds and
-neither layer flags the clean cases. Runner: `tests/pilot/test_p7_benchmark.py::test_p7_bm_02`; workflow scope
-`benchmark_02_only`. The base must be confirmed error-free by a human evaluator (`docs/p7-bm-02-base-review.md`) before the
-real-provider false-alarm figure is used as CG7 evidence.
+`evaluation/p7-bm-02/benchmark.json` — the same 18 cases / error classes on the PO-approved clean baseline
+(`docs/specs/PO_Decision_2026-10-25_P7-BM-02_Clean_Baseline.md`, stored verbatim; implemented in `tests/pilot/bm02_fixture.py`):
+claims A / D with exact attributions; Statement 1 → AS1 KNOWN_FACT (A, contradicted by D), Statement 2 → AS2 KNOWN_FACT (D,
+contradicted by A), Statement 3 → AS3 ANALYTIC_JUDGMENT ROUGHLY_EVEN_CHANCE, final confidence LOW (A, contradicted by D),
+Statement 4 → AS4 INFORMATION_GAP; one KEY_JUDGMENT item, VERBATIM, RS3 the key judgement, RS1 / RS2 / RS4 caveats; the derived
+`contested` is true for RS1–RS3 (asserted by the test). Each seeded case changes one sentence or one field only; the clean
+cases are the baseline unchanged (BM02-Q01, -Q24) and one synonym paraphrase via the human edit path (BM02-Q02:
+"privilege" → "favour"). With the test doubles every expected status holds and neither layer flags a clean case. Runner:
+`tests/pilot/test_p7_benchmark.py::test_p7_bm_02`; workflow scope `benchmark_02_only`.
 
 ## Specification deviations (SD7)
 

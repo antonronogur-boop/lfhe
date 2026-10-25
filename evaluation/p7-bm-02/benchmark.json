@@ -1,9 +1,9 @@
 {
  "code": "P7-BM-02",
  "material": "SYNTHETIC",
- "description": "Phase 7 controlled benchmark 02: the P7-BM-01 error classes seeded into an internally consistent synthetic 'Northland' base (tests/pilot/bm02_fixture.py): claim attributions match the report wording, the key judgement follows from the two conflicting official statements and carries an approved likelihood term, the denial is preserved as a caveat. Labels are human-authored seeded-error truth, evaluator-only; never model input.",
+ "description": "Phase 7 controlled benchmark 02: the P7-BM-01 error classes seeded into the PO-approved clean baseline (claims A / D with exact attributions; Statements 1-4; contested = true for 1-3; key judgement ROUGHLY_EVEN_CHANCE, LOW). Each seeded case changes one sentence or one field only. Labels are human-authored seeded-error truth, evaluator-only; never model input.",
  "isolation": "Evaluator-only file outside every model-reachable tree; loaded only by the benchmark runner, recorded in evaluator-only tables, scored in aggregate.",
- "base_review": "docs/p7-bm-02-base-review.md (human evaluator confirmation that the base is error-free is required before the real-provider false-alarm figure is used as CG7 evidence)",
+ "base_review": "docs/specs/PO_Decision_2026-10-25_P7-BM-02_Clean_Baseline.md (PO FINAL / APPROVED clean baseline, stored verbatim)",
  "cases": [
   {
    "case_code": "BM02-Q01",

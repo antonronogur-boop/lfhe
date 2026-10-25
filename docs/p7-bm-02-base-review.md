@@ -1,5 +1,9 @@
 # P7-BM-02 — az alapverzió emberi ellenőrzése (értékelői jóváhagyás)
 
+> **LEZÁRVA (2026-10-25):** a PO a lenti javaslat helyett saját, végleges alapverziót hagyott jóvá
+> (`docs/specs/PO_Decision_2026-10-25_P7-BM-02_Clean_Baseline.md`, SPEC_INDEX 29). Az érvényes alap szó szerint az ott
+> rögzített szöveg (`tests/pilot/bm02_fixture.py`). Az alábbi tartalom a **felváltott javaslat**, csak előzményként marad meg.
+
 A P7-BM-02 téves-riasztási mérése csak akkor érvényes, ha az alapverzió ténylegesen hibamentes. Ezt **ember**
 (a PO, értékelőként) erősíti meg, nem a modell. Az alábbi szöveg pontosan az, amit a benchmark minden „tiszta” esete
 (BM02-Q01, -Q02 parafrázis, -Q24) a modellnek QA-ra ad; a 15 seedelt eset ennek egy-egy szándékos rontása.

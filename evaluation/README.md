@@ -8,7 +8,7 @@ tables `lfhe.pilot_benchmark_cases` / `lfhe.pilot_benchmark_labels`; exports car
 | Benchmark | Material | Cases | Labels |
 | --- | --- | --- | --- |
 | `p7-bm-01/benchmark.json` (P7-BM-01) | synthetic 'Northland' seeded errors | 18 | 24 |
-| `p7-bm-02/benchmark.json` (P7-BM-02) | synthetic 'Northland', internally consistent base (`tests/pilot/bm02_fixture.py`; human base review `docs/p7-bm-02-base-review.md`) | 18 | 24 |
+| `p7-bm-02/benchmark.json` (P7-BM-02) | synthetic 'Northland', PO-approved clean baseline (`docs/specs/PO_Decision_2026-10-25_P7-BM-02_Clean_Baseline.md`; `tests/pilot/bm02_fixture.py`) | 18 | 24 |
 
 P7-BM-01's 'clean' base reused the Phase 4–6 test chain and contains genuine fixture defects (claim attribution vs. report wording,
 unsupported judgement); its false-alarm figure is invalid. P7-BM-02 is the valid basis for the false-alarm measurement.

@@ -52,11 +52,21 @@ def test_p7_bm_01(pg, p7, make_user):
 
 
 def test_p7_bm_02(pg, p7, make_user):
+    built = {}
+
     def base(a):
         rv, rid, _, _ = bm02_fixture.build_base(pg, a, "RPT-P7BM2-BASE")
+        built["rv"] = rv
         return rv, rid
     out = run_benchmark(pg, make_user, load("p7-bm-02"), base, bm02_fixture.MUTATIONS, "LFHE_P7_BENCHMARK02_OUT",
                         "RPT-P7BM2-EARLY")
+    with pg.admin() as x:                      # the PO-approved baseline, verbatim, with the approved metadata
+        rows = x.execute("""SELECT s.statement_text t, s.statement_role::text r, s.contested c, s.likelihood_term::text l
+                            FROM lfhe.report_item_statements s JOIN lfhe.report_items i ON i.id = s.report_item_id
+                            WHERE i.report_version_id = %s ORDER BY s.statement_no""", (str(built["rv"]["id"]),)).fetchall()
+    assert [(r["t"], r["r"], r["c"], r["l"]) for r in rows] == [
+        (bm02_fixture.S1, "CAVEAT", True, None), (bm02_fixture.S2, "CAVEAT", True, None),
+        (bm02_fixture.S3, "KEY_JUDGMENT", True, "ROUGHLY_EVEN_CHANCE"), (bm02_fixture.S4, "CAVEAT", False, None)]
     if not real_provider_requested():          # the consistent base is clean for both layers; expected statuses hold
         assert all(v["expected"] == v["got"] for v in out["statuses"].values()), out["statuses"]
         assert out["scores"]["D"]["false_positives_on_clean_cases"] == 0 == out["scores"]["S"]["false_positives_on_clean_cases"]
