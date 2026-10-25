@@ -1,0 +1,203 @@
+{
+ "evidence_class": "REAL_PROVIDER",
+ "m10s_model_runs": [
+  "5f5eb35a-3e51-425e-8542-1e36202f305c",
+  "b1cc4312-6b14-43b9-adb9-ec657b419fd4",
+  "bcee09df-7bc3-4eee-ab7d-4bc4a4d41e22",
+  "e230069f-a472-47df-b0af-ddcfc9aa4fe9",
+  "01ab5560-a414-4cc4-b9e6-f08106b77ce2",
+  "ad49246d-d7a5-4ca6-98e4-e527614e9fd8",
+  "4538f9d9-c63f-4ae6-835e-80ee99758228",
+  "0f58a248-3c52-4445-936e-37b4fec06803",
+  "322c913b-08cd-4246-8dd1-c8b723ca3883",
+  "486bc3c0-b391-4da8-9583-7367c88a7f9d",
+  "30ba029f-1328-46cd-b065-79035456f3b3",
+  "7152c5b0-0ad4-4734-b57f-14cd7f944070",
+  "5daf9b4a-b345-4f9c-889a-4c780e06b6e1",
+  "7140a163-d1fa-45a7-ba96-dd95149a7261",
+  "322a27a8-8092-47da-8e33-3471c08bd061",
+  "1e1a61fc-8859-4ed4-9723-fe1de25de15c",
+  "cea7ca5e-07e5-4e71-a750-361eba22f535",
+  "cebd4c33-322c-401f-9eb6-c53da84931fe"
+ ],
+ "m10s_run_status_counts": {
+  "SUCCEEDED": 18
+ },
+ "provider": "anthropic/claude-sonnet-5-5",
+ "schema_failure_diagnostics": [],
+ "scores": {
+  "D": {
+   "critical_misses": 0,
+   "false_negatives": 0,
+   "false_positives": 10,
+   "false_positives_on_clean_cases": 0,
+   "findings_produced": 23,
+   "labels": 13,
+   "precision": 0.5652,
+   "recall": 1.0,
+   "true_positives": 13
+  },
+  "S": {
+   "critical_misses": 1,
+   "false_negatives": 1,
+   "false_positives": 111,
+   "false_positives_on_clean_cases": 20,
+   "findings_produced": 121,
+   "labels": 11,
+   "precision": 0.0826,
+   "recall": 0.9091,
+   "true_positives": 10
+  },
+  "benchmark": "P7-BM-01",
+  "cases": 18,
+  "cases_without_qa_result": 0,
+  "clean_cases": 3,
+  "fp_note": "unlabelled findings on seeded cases count as false positives (conservative); false_positives_on_clean_cases is the false-alarm rate on unseeded versions"
+ },
+ "statuses": {
+  "BM01-Q01": {
+   "expected": "PASS",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q02": {
+   "expected": "PASS",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q03": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q04": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q05": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q06": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q07": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q08": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q09": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q10": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q11": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q12": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q13": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q14": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q16": {
+   "expected": "PASS_WITH_WARNINGS",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q21": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q23": {
+   "expected": "FAIL",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  },
+  "BM01-Q24": {
+   "expected": "PASS",
+   "got": "FAIL",
+   "m10s_run": {
+    "error_code": null,
+    "status": "SUCCEEDED"
+   }
+  }
+ }
+}

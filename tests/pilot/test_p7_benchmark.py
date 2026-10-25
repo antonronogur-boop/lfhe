@@ -106,6 +106,25 @@ def test_p7_bm_01(pg, p7, make_user):
 
     with pg.admin() as x:
         scores = benchmark_scores(x, BENCH["code"])
+        # evaluator-side per-case breakdown (P7-08 analysis): outcome counts per layer, the missed labels, and the model's
+        # non-PASS S findings (check, code, status, severity, shortened details) — synthetic material only
+        per_case = {}
+        for r in x.execute("SELECT * FROM lfhe.pilot_benchmark_outcomes(%s)", (bid,)):
+            c = per_case.setdefault(r["case_code"], {"counts": {}, "missed": []})
+            key = f"{r['layer']}:{r['kind']}"
+            c["counts"][key] = c["counts"].get(key, 0) + 1
+            if r["kind"] == "FALSE_NEGATIVE":
+                c["missed"].append({"layer": r["layer"], "check_id": r["check_id"], "finding_code": r["finding_code"],
+                                    "critical": r["critical"]})
+        for code, st in statuses.items():
+            q = x.execute("""SELECT q.semantic_qa_run_id s FROM lfhe.qa_results q JOIN lfhe.pilot_benchmark_cases c
+                               ON c.report_version_id = q.report_version_id WHERE c.benchmark_id=%s AND c.case_code=%s
+                             ORDER BY q.result_no DESC LIMIT 1""", (bid, code)).fetchone()
+            per_case.setdefault(code, {"counts": {}, "missed": []})["s_findings"] = [
+                {"check_id": f["check_id"], "finding_code": f["finding_code"], "status": f["status"], "severity": f["sev"],
+                 "details": f["details"][:240]}
+                for f in x.execute("SELECT check_id, finding_code, status, severity::text sev, details FROM lfhe.qa_check_results "
+                                   "WHERE qa_run_id=%s AND status <> 'PASS' ORDER BY finding_no", (q["s"],))] if q and q["s"] else []
     assert export_problems(scores) == []                                                    # test 19: aggregate only
     assert scores["cases"] == len(BENCH["cases"]) and scores["cases_without_qa_result"] == 0
     assert set(scores) >= {"D", "S"}                                                         # D and S separately measurable
@@ -121,7 +140,7 @@ def test_p7_bm_01(pg, p7, make_user):
         evidence = "REAL_PROVIDER_RUNS_FAILED — not a measurement of M10-S quality"   # failures stay failures (§26)
     diagnostics = [d for d in (output_diagnostics(pg, r) for r in runs[:3]) if d]
     write_json("LFHE_P7_BENCHMARK_OUT", {"provider": provider_label(), "scores": scores, "statuses": statuses,
-                                         "schema_failure_diagnostics": diagnostics,
+                                         "schema_failure_diagnostics": diagnostics, "per_case": per_case,
                                          "m10s_model_runs": runs, "m10s_run_status_counts":
                                          {s: run_states.count(s) for s in sorted(set(map(str, run_states)))},
                                          "evidence_class": evidence})

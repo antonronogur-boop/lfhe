@@ -1,0 +1,245 @@
+{
+ "github_run": "40203842179",
+ "metrics": {
+  "modules": {
+   "M07_INTELLIGENCE_ASSESSOR": {
+    "cost": null,
+    "cost_unknown_runs": 1,
+    "currencies": [],
+    "error_codes": {},
+    "input_tokens": 6392,
+    "latency_ms_max": 26530,
+    "latency_ms_median": 26530,
+    "model_config_hashes": [
+     "e285d39a793b1fd70dcd04f7da6c0db5ffa6d2b25ededd523862ee5135b60e8b"
+    ],
+    "models": [
+     "claude-sonnet-5-5"
+    ],
+    "output_tokens": 4026,
+    "prompt_versions": [
+     "1.0.0@3341707b15b5"
+    ],
+    "provider_errors": 0,
+    "providers": [
+     "anthropic"
+    ],
+    "repair_runs": 0,
+    "runs": 1,
+    "schema_validation_failed": 0,
+    "structured_output_success_rate": 1.0,
+    "succeeded": 1,
+    "tokens_unknown_runs": 0
+   },
+   "M08_CHALLENGER": {
+    "cost": null,
+    "cost_unknown_runs": 1,
+    "currencies": [],
+    "error_codes": {},
+    "input_tokens": 7145,
+    "latency_ms_max": 36653,
+    "latency_ms_median": 36653,
+    "model_config_hashes": [
+     "e285d39a793b1fd70dcd04f7da6c0db5ffa6d2b25ededd523862ee5135b60e8b"
+    ],
+    "models": [
+     "claude-sonnet-5-5"
+    ],
+    "output_tokens": 4944,
+    "prompt_versions": [
+     "1.0.0@04b03b4dffe6"
+    ],
+    "provider_errors": 0,
+    "providers": [
+     "anthropic"
+    ],
+    "repair_runs": 0,
+    "runs": 1,
+    "schema_validation_failed": 0,
+    "structured_output_success_rate": 1.0,
+    "succeeded": 1,
+    "tokens_unknown_runs": 0
+   },
+   "M09_EXECUTIVE_EDITOR": {
+    "cost": null,
+    "cost_unknown_runs": 1,
+    "currencies": [],
+    "error_codes": {},
+    "input_tokens": 10044,
+    "latency_ms_max": 16343,
+    "latency_ms_median": 16343,
+    "model_config_hashes": [
+     "e285d39a793b1fd70dcd04f7da6c0db5ffa6d2b25ededd523862ee5135b60e8b"
+    ],
+    "models": [
+     "claude-sonnet-5-5"
+    ],
+    "output_tokens": 2607,
+    "prompt_versions": [
+     "1.0.0@adc1226c632e"
+    ],
+    "provider_errors": 0,
+    "providers": [
+     "anthropic"
+    ],
+    "repair_runs": 0,
+    "runs": 1,
+    "schema_validation_failed": 0,
+    "structured_output_success_rate": 1.0,
+    "succeeded": 1,
+    "tokens_unknown_runs": 0
+   },
+   "M10_QA_AUDITOR": {
+    "cost": null,
+    "cost_unknown_runs": 1,
+    "currencies": [],
+    "error_codes": {},
+    "input_tokens": 12341,
+    "latency_ms_max": 43285,
+    "latency_ms_median": 43285,
+    "model_config_hashes": [
+     "e285d39a793b1fd70dcd04f7da6c0db5ffa6d2b25ededd523862ee5135b60e8b"
+    ],
+    "models": [
+     "claude-sonnet-5-5"
+    ],
+    "output_tokens": 7501,
+    "prompt_versions": [
+     "1.0.0@dd7e2c3e3c9e"
+    ],
+    "provider_errors": 0,
+    "providers": [
+     "anthropic"
+    ],
+    "repair_runs": 0,
+    "runs": 1,
+    "schema_validation_failed": 0,
+    "structured_output_success_rate": 1.0,
+    "succeeded": 1,
+    "tokens_unknown_runs": 0
+   }
+  },
+  "real_provider_runs": 4,
+  "runs_bound": 4
+ },
+ "provider": "anthropic/claude-sonnet-5-5",
+ "runs": [
+  {
+   "admissible": true,
+   "error_code": null,
+   "ingestion_outcome": "REPORT_VERSION_RECORDED",
+   "input_tokens": 10044,
+   "latency_ms": 16343,
+   "model": "claude-sonnet-5-5",
+   "model_config_hash": "e285d39a793b1fd70dcd04f7da6c0db5ffa6d2b25ededd523862ee5135b60e8b",
+   "model_run_id": "182782e9-c993-4dea-9125-db6340ef663c",
+   "module_code": "M09_EXECUTIVE_EDITOR",
+   "output_tokens": 2607,
+   "problems": [],
+   "prompt_content_hash": "adc1226c632e369c8129b73ef22482182a110b6369f5b1c62a899c0f466d4085",
+   "prompt_semver": "1.0.0",
+   "provider": "anthropic",
+   "provider_model": "claude-sonnet-5-5",
+   "repair_of_model_run_id": null,
+   "settings": {
+    "max_tokens": 16000,
+    "provider_fixed_sampling": true,
+    "timeout_seconds": 300
+   },
+   "status": "SUCCEEDED"
+  },
+  {
+   "admissible": true,
+   "error_code": null,
+   "ingestion_outcome": "CHALLENGE_RECORDED",
+   "input_tokens": 7145,
+   "latency_ms": 36653,
+   "model": "claude-sonnet-5-5",
+   "model_config_hash": "e285d39a793b1fd70dcd04f7da6c0db5ffa6d2b25ededd523862ee5135b60e8b",
+   "model_run_id": "26e6bbce-8c2a-45c6-b8e9-c7f16e7ee985",
+   "module_code": "M08_CHALLENGER",
+   "output_tokens": 4944,
+   "problems": [],
+   "prompt_content_hash": "04b03b4dffe6d6a8b1b1b8588668249a285736666d5315c4dda5dd2b0031779a",
+   "prompt_semver": "1.0.0",
+   "provider": "anthropic",
+   "provider_model": "claude-sonnet-5-5",
+   "repair_of_model_run_id": null,
+   "settings": {
+    "max_tokens": 16000,
+    "provider_fixed_sampling": true,
+    "timeout_seconds": 300
+   },
+   "status": "SUCCEEDED"
+  },
+  {
+   "admissible": true,
+   "error_code": null,
+   "ingestion_outcome": "COMPLETED",
+   "input_tokens": 12341,
+   "latency_ms": 43285,
+   "model": "claude-sonnet-5-5",
+   "model_config_hash": "e285d39a793b1fd70dcd04f7da6c0db5ffa6d2b25ededd523862ee5135b60e8b",
+   "model_run_id": "324c9eae-46cd-4ac0-b58c-46a69ec92492",
+   "module_code": "M10_QA_AUDITOR",
+   "output_tokens": 7501,
+   "problems": [],
+   "prompt_content_hash": "dd7e2c3e3c9e9fd33d965a20e3b388fce399e2bdd220dae11033c731f1091061",
+   "prompt_semver": "1.0.0",
+   "provider": "anthropic",
+   "provider_model": "claude-sonnet-5-5",
+   "repair_of_model_run_id": null,
+   "settings": {
+    "max_tokens": 16000,
+    "provider_fixed_sampling": true,
+    "timeout_seconds": 300
+   },
+   "status": "SUCCEEDED"
+  },
+  {
+   "admissible": true,
+   "error_code": null,
+   "ingestion_outcome": "ASSESSMENT_RECORDED",
+   "input_tokens": 6392,
+   "latency_ms": 26530,
+   "model": "claude-sonnet-5-5",
+   "model_config_hash": "e285d39a793b1fd70dcd04f7da6c0db5ffa6d2b25ededd523862ee5135b60e8b",
+   "model_run_id": "4a66acd7-cb34-40b1-943c-094a5712843d",
+   "module_code": "M07_INTELLIGENCE_ASSESSOR",
+   "output_tokens": 4026,
+   "problems": [],
+   "prompt_content_hash": "3341707b15b52d5bc65755f109b912a638382f5d7f300a12e6d9455b73d8afa8",
+   "prompt_semver": "1.0.0",
+   "provider": "anthropic",
+   "provider_model": "claude-sonnet-5-5",
+   "repair_of_model_run_id": null,
+   "settings": {
+    "max_tokens": 16000,
+    "provider_fixed_sampling": true,
+    "timeout_seconds": 300
+   },
+   "status": "SUCCEEDED"
+  }
+ ],
+ "schema_failure_diagnostics": [],
+ "steps": {
+  "M07": {
+   "outcome": "ASSESSMENT_RECORDED",
+   "rejections": []
+  },
+  "M08": {
+   "outcome": "CHALLENGE_RECORDED"
+  },
+  "M09": {
+   "outcome": "REPORT_VERSION_RECORDED",
+   "rejections": []
+  },
+  "M10": {
+   "fail_reasons": [],
+   "status": "PASS_WITH_WARNINGS"
+  },
+  "human_review": {
+   "result": "57e115db-b8e1-42b4-a946-b08877fcdfc3"
+  }
+ }
+}

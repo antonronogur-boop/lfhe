@@ -114,7 +114,24 @@ zárolással). Audit hash-lánc: PASS, 161 bejegyzés; pg_cron aktív. `docs/dev
 
 ## BENCHMARK RESULT / M10-S EMPIRICAL QUALITY
 
-- Valós M10-S: **NOT YET EVIDENCED** (1. kísérlet: minden hívás elutasítva; 2. kísérlet: minden kimenet sémahibás — egyik sem minőségmérés; az S recall 0 / 11 nem a modell teljesítménye).
+- Valós M10-S: **MÉRVE — valós `claude-sonnet-5-5`, a `main`-ről (CR7-01 + CR7-02), run 40203842179, 2026-10-25**
+(`docs/cg7-real-provider-run5-main-*.json`). Mind a 18 M10-S futás `SUCCEEDED`, sémahelyes, javító futás nélkül.
+
+| Réteg | Címke | TP | FN | FP | ebből tiszta eseteken | Precision | Recall | Kritikus kihagyás |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| D (determinisztikus) | 13 | 13 | 0 | 10 | 0 | 0,5652 | 1,0 | 0 |
+| S (valós M10-S) | 11 | 10 | 1 | 111 | 20 | 0,0826 | 0,9091 | 1 |
+
+- **Detekció:** a valós M10-S a 11 seedelt szemantikai hibából 10-et megtalált (recall 0,91); **1 kritikus hibát kihagyott** (a
+  kihagyott eset azonosítása a következő benchmark-futás esetenkénti bontásából).
+- **Téves riasztás:** 121 nem-PASS jelzésből 111 nem címkézett; a **3 tiszta (seedeletlen) verzión 20 jelzés**, és mind a 3 tiszta
+  eset FAIL lett (várt: PASS). A kombinált QA így **mind a 18 esetet FAIL-re** állította (a várt 3 PASS / 1 PASS_WITH_WARNINGS helyett).
+- Értelmezés: a valós M10-S erős érzékenységű, de jelenlegi kalibrációjával **túlriaszt**; a rendszer biztonságosan (fail closed) viselkedik,
+  de a tiszta anyagot is blokkolná → jelentős emberi QA-feloldási teher várható. A nem címkézett jelzések egy része lehet jogos
+  megfigyelés a szintetikus anyagon (konzervatív FP-számítás); ennek szétválasztásához a benchmark-kimenet mostantól esetenkénti
+  bontást ad (`per_case`: kihagyott címkék, a modell nem-PASS S-jelzései rövidítve).
+- Kalibrálás (prompt / küszöb) a lezárt Phase 6 szemantikát érintené → csak külön CR-rel, a pilot bizonyítéka alapján (§4).
+- Korábbi kísérletek (nem minőségmérés): 1. — minden hívás elutasítva (`temperature`, CR7-01); 2.–3. — sémahibás kimenetek (a séma nem jutott el a modellhez, CR7-02).
 - Tesztdublőrrel (csak a mérőút regressziója, `docs/cg7-benchmark-test-double.json`): D — 13 címke, TP 13, FN 0, FP 10
   (tiszta eseteken 0), precision 0,5652, recall 1,0, kritikus kihagyás 0; S (szabályalapú stand-in) — 11 címke, TP 11,
   FN 0, FP 2 (tiszta eseteken 0), precision 0,8462, recall 1,0. A D réteg provider-független, így a D-eredmény a valós
@@ -189,7 +206,7 @@ kontrollált eredményből, a ciklus cutoffja = a report cutoffja).
 | 16 | Valós-provider futás megtörtént | PASS | run 40105881022: valódi M07 és M10-S hívások (provider-válaszazonosító, tokenek, latencia); a kimenetek sémahibásak — a minőség külön kritérium (19) |
 | 17 | Valós-provider modell / konfig / prompt nyomonkövetés teljes | PASS | §26 ellenőrzés minden valós futásra admissible: modell, konfiguráció-hash (benne `provider_fixed_sampling`), prompt 1.0.0 + hash, ingestion, repair-link |
 | 18 | Provider-hibák és javító futások megőrizve | PASS | valós provider-hiba (HTTP 400) `PROVIDER_ERROR`-ként rögzítve, nem lett siker; QA fail closed (run 40102872833); repair-link tesztelve |
-| 19 | M10-S valós minősége empirikusan mérve | NOT YET EVIDENCED | P7-BM-01 futtató kész |
+| 19 | M10-S valós minősége empirikusan mérve | PASS | teljes valós P7-BM-01, run 40203842179 (`main`): 18 / 18 sikeres M10-S futás; S recall 0,91, precision 0,08, 1 kritikus kihagyás, 20 téves jelzés a 3 tiszta esetén — a **mérés** PASS, az eredmény negatív minőségi megállapítás |
 | 20 | D és S QA külön mérhető | PASS | benchmark és ciklus-metrikák rétegenként |
 | 21 | Böngészős E2E megtörtént | NOT YET EVIDENCED | P7-04, PO |
 | 22 | UX-megállapítások rögzítve | NOT YET EVIDENCED | rögzítő felület kész |
@@ -212,7 +229,7 @@ kontrollált eredményből, a ciklus cutoffja = a report cutoffja).
 | 39 | Phase 7 change requestek listázva | PASS | nincs |
 | 40 | Későbbi fázis nem indult | PASS | — |
 
-Összesítve: **PASS 28, FAIL 0, NOT YET EVIDENCED 12.**
+Összesítve: **PASS 29, FAIL 0, NOT YET EVIDENCED 11.**
 
 ## RECOMMENDED CAPABILITY VERDICT
 
