@@ -84,6 +84,16 @@ positives on clean cases. Unlabelled findings on seeded cases count as FP (conse
 rule-based stand-in the run is regression of the measurement path only; the real M10-S figures come from
 the `pilot-real-provider` workflow (or a local run with `LFHE_P7_PROVIDER=anthropic`).
 
+## Benchmark P7-BM-02 (2026-10-25, PO authorisation)
+
+`evaluation/p7-bm-02/benchmark.json` — the same 18 cases / error classes on an internally consistent base
+(`tests/pilot/bm02_fixture.py`): claim attributions match the report wording; the key judgement (ROUGHLY_EVEN_CHANCE, LOW)
+follows from the two conflicting official statements and cites both; the denial is preserved as a caveat (a contested
+judgement cannot be a key judgement under the closed Phase 5 rule). With the test doubles every expected status holds and
+neither layer flags the clean cases. Runner: `tests/pilot/test_p7_benchmark.py::test_p7_bm_02`; workflow scope
+`benchmark_02_only`. The base must be confirmed error-free by a human evaluator (`docs/p7-bm-02-base-review.md`) before the
+real-provider false-alarm figure is used as CG7 evidence.
+
 ## Specification deviations (SD7)
 
 | ID | Deviation / interpretation | Reason |

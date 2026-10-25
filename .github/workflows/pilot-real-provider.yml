@@ -23,11 +23,11 @@ on:
         type: choice
         options: [provider_fixed, temperature_0]
       scope:
-        description: "trial_only (cheap, ~2-10 calls) or trial_and_benchmark (+18 M10-S calls)"
+        description: "benchmark_02_only (18 M10-S calls), trial_only (~4 calls), trial_and_benchmark (trial + BM-01 + BM-02)"
         required: false
-        default: "trial_and_benchmark"
+        default: "benchmark_02_only"
         type: choice
-        options: [trial_and_benchmark, trial_only]
+        options: [benchmark_02_only, trial_only, trial_and_benchmark]
 
 permissions:
   contents: read
@@ -70,10 +70,14 @@ jobs:
           LFHE_ANTHROPIC_API_KEY: ${{ secrets.LFHE_ANTHROPIC_API_KEY }}
           LFHE_P7_TRIAL_OUT: ${{ runner.temp }}/p7-real-provider-trial.json
           LFHE_P7_BENCHMARK_OUT: ${{ runner.temp }}/p7-bm-01-real-provider.json
+          LFHE_P7_BENCHMARK02_OUT: ${{ runner.temp }}/p7-bm-02-real-provider.json
         run: |
           test -n "$LFHE_ANTHROPIC_API_KEY" || { echo "repository secret LFHE_ANTHROPIC_API_KEY is not set"; exit 1; }
-          TESTS="tests/pilot/test_p7_provider_trial.py::test_real_provider_trial"
-          if [ "${{ inputs.scope }}" = "trial_and_benchmark" ]; then TESTS="$TESTS tests/pilot/test_p7_benchmark.py"; fi
+          case "${{ inputs.scope }}" in
+            benchmark_02_only) TESTS="tests/pilot/test_p7_benchmark.py::test_p7_bm_02" ;;
+            trial_only) TESTS="tests/pilot/test_p7_provider_trial.py::test_real_provider_trial" ;;
+            *) TESTS="tests/pilot/test_p7_provider_trial.py::test_real_provider_trial tests/pilot/test_p7_benchmark.py" ;;
+          esac
           python -m pytest -q $TESTS -rA
       - name: export check (no secrets in the results)
         if: always()

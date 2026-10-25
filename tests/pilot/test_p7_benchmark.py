@@ -1,4 +1,8 @@
-"""P7-05 controlled benchmark P7-BM-01 (Baseline §10 D, §22–§23; tests 9, 10, 19).
+"""P7-05 controlled benchmarks P7-BM-01 and P7-BM-02 (Baseline §10 D, §22–§23; tests 9, 10, 19).
+
+P7-BM-01 reuses the Phase 4–6 test chain (its 'clean' base turned out to contain genuine fixture defects, so its
+false-alarm figure is invalid — CG7 report 2026-10-25). P7-BM-02 uses the internally consistent base of
+tests/pilot/bm02_fixture.py with the same error classes; its labels are in evaluation/p7-bm-02/benchmark.json.
 
 Seeded synthetic report versions are built through the real chain in the throw-away harness (never in
 DEV: seeded corrupt versions must not enter the DEV analytical tables). Labels come from the
@@ -19,10 +23,14 @@ from lfhe_orchestrator.qa_pipeline import run_report_qa
 from lfhe_pilot.export import benchmark_scores, export_problems
 from p5_helpers import content_of, edit, new_report
 from p6_helpers import activate, drafted, park_jobs, request_qa, write_version_unvalidated
-from test_phase6_acceptance import MUTATIONS
+from test_phase6_acceptance import MUTATIONS as BM01_MUTATIONS
+import bm02_fixture
 
 pytestmark = pytest.mark.db
-BENCH = json.loads((ROOT / "evaluation" / "p7-bm-01" / "benchmark.json").read_text(encoding="utf-8"))
+
+
+def load(name):
+    return json.loads((ROOT / "evaluation" / name / "benchmark.json").read_text(encoding="utf-8"))
 
 
 @pytest.fixture(scope="module")
@@ -37,29 +45,47 @@ def call(pg, user, sql, args=()):
 
 
 def test_p7_bm_01(pg, p7, make_user):
+    def base(a):
+        d = drafted(pg, a, "RPT-P7BM-BASE")
+        return d.rv, d.rid
+    run_benchmark(pg, make_user, load("p7-bm-01"), base, BM01_MUTATIONS, "LFHE_P7_BENCHMARK_OUT", "RPT-P7BM-EARLY")
+
+
+def test_p7_bm_02(pg, p7, make_user):
+    def base(a):
+        rv, rid, _, _ = bm02_fixture.build_base(pg, a, "RPT-P7BM2-BASE")
+        return rv, rid
+    out = run_benchmark(pg, make_user, load("p7-bm-02"), base, bm02_fixture.MUTATIONS, "LFHE_P7_BENCHMARK02_OUT",
+                        "RPT-P7BM2-EARLY")
+    if not real_provider_requested():          # the consistent base is clean for both layers; expected statuses hold
+        assert all(v["expected"] == v["got"] for v in out["statuses"].values()), out["statuses"]
+        assert out["scores"]["D"]["false_positives_on_clean_cases"] == 0 == out["scores"]["S"]["false_positives_on_clean_cases"]
+
+
+def run_benchmark(pg, make_user, BENCH, base_factory, MUTATIONS, out_env, early_code, *, stand_in_s_exact=True):
     a, ev = make_user("ANALYST"), make_user("PILOT_LEAD")
     provider, config = provider_and_config(pg)
-    base = drafted(pg, a, "RPT-P7BM-BASE")
-    early = new_report(pg, a, "RPT-P7BM-EARLY", mode="REPLAY", cutoff=datetime(2026, 1, 5, tzinfo=timezone.utc))
-    base_content = content_of(pg, base.rv["id"])
+    base_rv, base_rid = base_factory(a)
+    early = new_report(pg, a, early_code, mode="REPLAY", cutoff=datetime(2026, 1, 5, tzinfo=timezone.utc))
+    base_content = content_of(pg, base_rv["id"])
     bid = call(pg, ev, "SELECT lfhe.pilot_record_benchmark(%s::jsonb) id", (json.dumps(
         {"code": BENCH["code"], "description": BENCH["description"][:900], "material": BENCH["material"]}),))["id"]
     runs, statuses = [], {}
     for case in BENCH["cases"]:
         fn = MUTATIONS[case["mutation"]]
         if case["write"] == "base":
-            v = base.rv
+            v = base_rv
         elif case["write"] == "edit":
             with pg.admin() as x:
                 latest = x.execute("SELECT * FROM lfhe.report_versions WHERE report_id=%s ORDER BY version_no DESC LIMIT 1",
-                                   (base.rid,)).fetchone()
+                                   (base_rid,)).fetchone()
             r = edit(pg, a, latest, fn(json.loads(json.dumps(base_content))), f"benchmark seeded edit {case['case_code']}")
             with pg.admin() as x:
                 v = x.execute("SELECT * FROM lfhe.report_versions WHERE id=%s", (r["report_version_id"],)).fetchone()
         elif case["write"] == "replay_early":
-            v = write_version_unvalidated(pg, base.rv, fn, user=a, report_id=early)
+            v = write_version_unvalidated(pg, base_rv, fn, user=a, report_id=early)
         else:
-            v = write_version_unvalidated(pg, base.rv, fn, user=a)
+            v = write_version_unvalidated(pg, base_rv, fn, user=a)
             if case["mutation"] == "unmapped_statement":
                 with pg.admin() as x:
                     x.execute("""INSERT INTO lfhe.report_item_statements (report_item_id, statement_no, report_statement_local_id,
@@ -125,12 +151,6 @@ def test_p7_bm_01(pg, p7, make_user):
                  "details": f["details"][:240]}
                 for f in x.execute("SELECT check_id, finding_code, status, severity::text sev, details FROM lfhe.qa_check_results "
                                    "WHERE qa_run_id=%s AND status <> 'PASS' ORDER BY finding_no", (q["s"],))] if q and q["s"] else []
-    assert export_problems(scores) == []                                                    # test 19: aggregate only
-    assert scores["cases"] == len(BENCH["cases"]) and scores["cases_without_qa_result"] == 0
-    assert set(scores) >= {"D", "S"}                                                         # D and S separately measurable
-    assert scores["D"]["critical_misses"] == 0                                               # deterministic layer is provider-independent
-    if not real_provider_requested():
-        assert scores["S"]["false_negatives"] == 0                                          # stand-in regression only
     run_states = [v.get("m10s_run", {}).get("status") for v in statuses.values()]
     if not real_provider_requested():
         evidence = "TEST_DOUBLE_REGRESSION"
@@ -139,8 +159,16 @@ def test_p7_bm_01(pg, p7, make_user):
     else:
         evidence = "REAL_PROVIDER_RUNS_FAILED — not a measurement of M10-S quality"   # failures stay failures (§26)
     diagnostics = [d for d in (output_diagnostics(pg, r) for r in runs[:3]) if d]
-    write_json("LFHE_P7_BENCHMARK_OUT", {"provider": provider_label(), "scores": scores, "statuses": statuses,
+    doc = {"benchmark": BENCH["code"], "provider": provider_label(), "scores": scores, "statuses": statuses,
                                          "schema_failure_diagnostics": diagnostics, "per_case": per_case,
                                          "m10s_model_runs": runs, "m10s_run_status_counts":
                                          {s: run_states.count(s) for s in sorted(set(map(str, run_states)))},
-                                         "evidence_class": evidence})
+                                         "evidence_class": evidence}
+    write_json(out_env, doc)
+    assert export_problems(scores) == []                                                    # test 19: aggregate only
+    assert scores["cases"] == len(BENCH["cases"]) and scores["cases_without_qa_result"] == 0
+    assert set(scores) >= {"D", "S"}                                                         # D and S separately measurable
+    assert scores["D"]["critical_misses"] == 0                                               # deterministic layer is provider-independent
+    if not real_provider_requested() and stand_in_s_exact:
+        assert scores["S"]["false_negatives"] == 0                                          # stand-in regression only
+    return doc

@@ -10,7 +10,7 @@ from conftest import REPO_ROOT
 MODEL_PATH = [REPO_ROOT / "packages" / "prompts", REPO_ROOT / "services" / "ai-orchestrator", REPO_ROOT / "services" / "collector",
               REPO_ROOT / "services" / "shared", REPO_ROOT / "tests" / "fixtures"]
 PILOT_REF = re.compile(r"pilot_|lfhe_pilot|evaluation/|P7-BM-", re.IGNORECASE)
-BENCH = REPO_ROOT / "evaluation" / "p7-bm-01" / "benchmark.json"
+BENCHES = sorted((REPO_ROOT / "evaluation").glob("p7-bm-*/benchmark.json"))
 
 
 def _files(root):
@@ -25,14 +25,19 @@ def test_model_path_never_references_pilot_data_or_benchmark_material():
 
 
 def test_benchmark_labels_live_only_in_the_evaluator_tree():
-    doc = json.loads(BENCH.read_text())
-    notes = {lb["note"] for c in doc["cases"] for lb in c["labels"]}
-    assert doc["material"] == "SYNTHETIC" and notes
+    assert len(BENCHES) >= 2
+    notes, codes = set(), set()
+    for b in BENCHES:
+        doc = json.loads(b.read_text())
+        assert doc["material"] == "SYNTHETIC"
+        notes |= {lb["note"] for c in doc["cases"] for lb in c["labels"]}
+        codes |= {c["case_code"].split("-")[0] + "-" for c in doc["cases"]}
+    assert notes
     for root in MODEL_PATH + [REPO_ROOT / "services" / "pilot"]:
         for f in _files(root):
             text = f.read_text(errors="replace")
             assert not any(n in text for n in notes), f
-            assert "BM01-" not in text, f
+            assert not any(c in text for c in codes), f
 
 
 def test_pilot_package_is_not_imported_by_the_worker_or_collector():

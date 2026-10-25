@@ -146,7 +146,9 @@ zárolással). Audit hash-lánc: PASS, 161 bejegyzés; pg_cron aktív. `docs/dev
 - Változékonyság: a 6. futás próbájában az M07 kimenetét az ingestion `OUTPUT_REJECTED`-del elutasította (`ATTRIBUTION_MISSING` AS1, AS2),
   a lánc ott megállt; a korábbi két futásban ugyanez sikeres volt (M07: 2 / 3 elfogadva). A lezárt védelem működött.
 - Következő lépés: **P7-BM-02** — konzisztens, valóban hibamentes szintetikus alapverzió (emberi értékelői ellenőrzéssel), ugyanazokkal a
-  seedelt hibákkal; ebből mérhető érvényesen a téves riasztás.
+  seedelt hibákkal; ebből mérhető érvényesen a téves riasztás. **Elkészült (PO-engedély 2026-10-25):** `evaluation/p7-bm-02/`,
+  `tests/pilot/bm02_fixture.py`; tesztdublőrrel minden várt állapot teljesül, a tiszta eseteken 0 jelzés; az alap emberi
+  ellenőrzése: `docs/p7-bm-02-base-review.md` (PO); valós futás: workflow `scope = benchmark_02_only`.
 - Korábbi kísérletek (nem minőségmérés): 1. — minden hívás elutasítva (`temperature`, CR7-01); 2.–3. — sémahibás kimenetek (a séma nem jutott el a modellhez, CR7-02).
 - Tesztdublőrrel (csak a mérőút regressziója, `docs/cg7-benchmark-test-double.json`): D — 13 címke, TP 13, FN 0, FP 10
   (tiszta eseteken 0), precision 0,5652, recall 1,0, kritikus kihagyás 0; S (szabályalapú stand-in) — 11 címke, TP 11,
