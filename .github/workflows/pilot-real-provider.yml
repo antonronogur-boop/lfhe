@@ -80,11 +80,15 @@ jobs:
           esac
           python -m pytest -q $TESTS -rA
       - name: export check (no secrets in the results)
+        id: scan
         if: always()
         run: |
           mkdir -p p7-results
           cp "${{ runner.temp }}"/p7-*.json p7-results/ 2>/dev/null || true
           python scripts/secret_scan.py p7-results
+      - name: publish results as annotations (readable via the REST API; only after the secret scan passed)
+        if: always() && steps.scan.outcome == 'success'
+        run: python scripts/emit_result_annotations.py p7-results
       - uses: actions/upload-artifact@v4
         if: always()
         with:
