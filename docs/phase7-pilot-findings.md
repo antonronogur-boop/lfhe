@@ -29,6 +29,9 @@ rögzítésre.
 
 ## LIMITATIONS (ismert, a mérés előtt)
 
+* P7-BM-02: egyetlen érvényes valós futás (run 40213605927) — a recall és a figyelmeztetési viselkedés **nem** statisztikailag
+  stabil termelési becslés; a szóródást a pilot-ciklusok során kell figyelni (PO, SPEC_INDEX 30).
+
 * Egy személyes működés (a PO egyetlen elemzőként): a ciklusok analista-populációja kicsi; a különböző emberi
   szerepek (ANALYST / REVIEWER / SECURITY_REVIEWER / RELEASE_AUTHORITY) külön DEV-felhasználók, de ugyanaz az
   ember működtetheti őket — ez a szereptanulási és időmérési eredményeket torzíthatja.

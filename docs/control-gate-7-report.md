@@ -254,7 +254,7 @@ kontrollált eredményből, a ciklus cutoffja = a report cutoffja).
 | 16 | Valós-provider futás megtörtént | PASS | run 40105881022: valódi M07 és M10-S hívások (provider-válaszazonosító, tokenek, latencia); a kimenetek sémahibásak — a minőség külön kritérium (19) |
 | 17 | Valós-provider modell / konfig / prompt nyomonkövetés teljes | PASS | §26 ellenőrzés minden valós futásra admissible: modell, konfiguráció-hash (benne `provider_fixed_sampling`), prompt 1.0.0 + hash, ingestion, repair-link |
 | 18 | Provider-hibák és javító futások megőrizve | PASS | valós provider-hiba (HTTP 400) `PROVIDER_ERROR`-ként rögzítve, nem lett siker; QA fail closed (run 40102872833); repair-link tesztelve |
-| 19 | M10-S valós minősége empirikusan mérve | PASS | P7-BM-02 valós futás (run 40213605927, PO-jóváhagyott alap): S recall 0,91, 1 kód-szintű kritikus kihagyás (tartalmilag jelzett), tiszta eseteken 0 FAIL / 3 WARNING, hibán kívüli FAIL 0; D recall 1,0. Mérve — a működési érték megítélése a PO-é; n = 1 futás |
+| 19 | M10-S valós minősége empirikusan mérve | PASS | P7-BM-02 valós futás (run 40213605927, PO-jóváhagyott alap): S recall 0,91, 1 kód-szintű kritikus kihagyás (tartalmilag jelzett), tiszta eseteken 0 FAIL / 3 WARNING, hibán kívüli FAIL 0; D recall 1,0. **PO által elfogadva** (SPEC_INDEX 30; Q09 szigorú kihagyásként megtartva); korlát: n = 1 futás, nem stabil termelési becslés |
 | 20 | D és S QA külön mérhető | PASS | benchmark és ciklus-metrikák rétegenként |
 | 21 | Böngészős E2E megtörtént | NOT YET EVIDENCED | P7-04, PO |
 | 22 | UX-megállapítások rögzítve | NOT YET EVIDENCED | rögzítő felület kész |
@@ -286,5 +286,8 @@ még nem igazolt); a döntés a PO-é.
 
 ## NEXT ACTION
 
-A PO futtatja a DEV-migrációt és smoke-ot, majd a pilotot (`docs/runbooks/phase7-pilot.md`); a visszaküldött JSON-ok
-(smoke, trial, benchmark, export) alapján frissítem a bizonyítékcsomagot. Más fázis nem indítható.
+**DEV PILOT HOLD — LIFTED** (PO, 2026-10-25, SPEC_INDEX 30). Nincs M10-S kalibrációs CR; minden M10-S jelzés megőrzendő.
+Az első mért ciklus előtt (PO, DEV): (1) pilot-szerepek és külön DEV-felhasználók; (2) analista loaded-cost feltevés;
+(3) provider-ár (Anthropic lista, `claude-sonnet-5-5`: 2 USD / M input, 10 USD / M output token — platform.claude.com
+pricing, 2026-10-25); (4) böngészős E2E; (5) UX-megállapítások. Utána 6 ciklus (≥ 2 REPLAY, ≥ 2 LIVE), az első REPLAY.
+Más fázis nem indítható.

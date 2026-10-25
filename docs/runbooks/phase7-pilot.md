@@ -65,7 +65,8 @@ model, currency, input / output cost per million tokens, effective from, source)
 (GitHub → Settings → Secrets and variables → Actions; you add it, nobody else sees it). It runs one
 synthetic chain through real M07 → M08 → human approval → real M09 → M10-D + real M10-S, and the
 P7-BM-01 benchmark (18 seeded cases) with the real M10-S, and uploads `p7-real-provider-results`
-(trial + benchmark JSON, secret-scanned). Send back those two JSON files.
+(trial + benchmark JSON, secret-scanned) and also publishes them as run annotations; Claude reads them back with
+`scripts/fetch_pilot_result.py <run id>` — nothing needs to be sent back.
 
 ## 4. A pilot cycle (P7-06) — target 6 complete cycles: ≥ 2 REPLAY, ≥ 2 LIVE
 
