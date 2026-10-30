@@ -16,74 +16,88 @@ import { createClient } from "@/lib/supabase/server";
  * database re-checks identity + permission, binds the decision to the exact
  * claim content (hash) and previous review, and writes the audit entry.
  */
-function fail(message: string): never {
-  redirect(`/claims?error=${encodeURIComponent(message.slice(0, 300))}`);
+function target(form: FormData): string {
+  const t = String(form.get("return_to") ?? "");
+  return /^\/claims(\/[0-9a-f-]{36})?(\?[A-Za-z0-9=&_-]*)?$/.test(t) ? t : "/claims";
 }
 
-function done(what: string): never {
+function sep(t: string) {
+  return t.includes("?") ? "&" : "?";
+}
+
+function fail(to: string, message: string): never {
+  redirect(`${to}${sep(to)}error=${encodeURIComponent(message.slice(0, 300))}`);
+}
+
+function done(to: string, what: string): never {
   revalidatePath("/claims");
-  redirect(`/claims?ok=${what}`);
+  redirect(`${to}${sep(to)}ok=${what}`);
 }
 
 export async function reviewClaim(form: FormData) {
+  const to = target(form);
   await requirePermission("CLAIM_REVIEW");
   const parsed = ReviewFormSchema.safeParse(formObject(form));
-  if (!parsed.success) fail(parsed.error.issues[0]?.message ?? "invalid review");
+  if (!parsed.success) fail(to, parsed.error.issues[0]?.message ?? "invalid review");
   const supabase = await createClient();
   const { error } = await supabase.rpc("review_claim", reviewRpcArgs(parsed.data));
-  if (error) fail(error.message);
-  done("review");
+  if (error) fail(to, error.message);
+  done(to, "review");
 }
 
 export async function setClaimStatus(form: FormData) {
+  const to = target(form);
   await requirePermission("CLAIM_REVIEW");
   const parsed = StatusFormSchema.safeParse(formObject(form));
-  if (!parsed.success) fail(parsed.error.issues[0]?.message ?? "invalid status change");
+  if (!parsed.success) fail(to, parsed.error.issues[0]?.message ?? "invalid status change");
   const f = parsed.data;
   const supabase = await createClient();
   const { error } = await supabase.rpc("set_claim_status", {
     p_claim_id: f.claim_id, p_expected_current_status: f.expected_current_status, p_new_status: f.new_status,
     p_reason: f.reason, p_review_id: null,
   });
-  if (error) fail(error.message);
-  done("status");
+  if (error) fail(to, error.message);
+  done(to, "status");
 }
 
 export async function markHighImpact(form: FormData) {
+  const to = target(form);
   await requirePermission("CLAIM_REVIEW");
   const parsed = HighImpactFormSchema.safeParse(formObject(form));
-  if (!parsed.success) fail(parsed.error.issues[0]?.message ?? "invalid high-impact change");
+  if (!parsed.success) fail(to, parsed.error.issues[0]?.message ?? "invalid high-impact change");
   const f = parsed.data;
   const supabase = await createClient();
   const { error } = await supabase.rpc("mark_claim_high_impact", {
     p_claim_id: f.claim_id, p_high_impact: f.high_impact, p_reasons: f.reasons, p_reason: f.reason,
   });
-  if (error) fail(error.message);
-  done("high_impact");
+  if (error) fail(to, error.message);
+  done(to, "high_impact");
 }
 
 export async function decideRevalidation(form: FormData) {
+  const to = target(form);
   await requirePermission("CLAIM_REVIEW");
   const parsed = RevalidationFormSchema.safeParse(formObject(form));
-  if (!parsed.success) fail(parsed.error.issues[0]?.message ?? "invalid revalidation decision");
+  if (!parsed.success) fail(to, parsed.error.issues[0]?.message ?? "invalid revalidation decision");
   const f = parsed.data;
   const supabase = await createClient();
   const { error } = await supabase.rpc("decide_high_impact_revalidation", {
     p_revalidation_id: f.revalidation_id, p_approve: f.approve, p_reason: f.reason,
   });
-  if (error) fail(error.message);
-  done("revalidation");
+  if (error) fail(to, error.message);
+  done(to, "revalidation");
 }
 
 export async function linkMention(form: FormData) {
+  const to = target(form);
   await requirePermission("ENTITY_MANAGE");
   const parsed = LinkFormSchema.safeParse(formObject(form));
-  if (!parsed.success) fail(parsed.error.issues[0]?.message ?? "invalid entity link");
+  if (!parsed.success) fail(to, parsed.error.issues[0]?.message ?? "invalid entity link");
   const f = parsed.data;
   const supabase = await createClient();
   const { error } = await supabase.rpc("link_entity_mention", {
     p_mention_id: f.mention_id, p_resolution: f.resolution, p_entity_id: f.entity_id, p_reason: f.reason,
   });
-  if (error) fail(error.message);
-  done("entity_link");
+  if (error) fail(to, error.message);
+  done(to, "entity_link");
 }
