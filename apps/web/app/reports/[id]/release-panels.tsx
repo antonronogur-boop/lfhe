@@ -14,8 +14,6 @@ import {
  * RLS; every button posts to a server action that calls a HUMAN_ONLY function. Showing or hiding a
  * button never grants authority — the database decides.
  */
-const box = { border: "1px solid #ddd", borderRadius: 4, padding: 10, marginBottom: 12 } as const;
-const muted = { color: "#666" } as const;
 const sevColor: Record<string, string> = { CRITICAL: "#a00", MAJOR: "#b45309", WARNING: "#a16207", INFO: "#555" };
 
 interface Version { report_version_id: string; version_no: number; report_version_hash: string; is_latest: boolean }
@@ -77,11 +75,11 @@ export async function QaPanel({ reportId, v, session }: { reportId: string; v: V
   return (
     <section>
       <h2>QA — version {v.version_no}</h2>
-      <p style={muted}>report_version_id <code>{v.report_version_id}</code> · report_version_hash <code>{v.report_version_hash}</code></p>
+      <p className="muted">report_version_id <code>{v.report_version_id}</code> · report_version_hash <code>{v.report_version_hash}</code></p>
       <p>Workflow state: <strong>{workflowLabel(wf?.workflow_state)}</strong>
         {!v.is_latest && <strong style={{ color: "#a00" }}> · not the latest version — QA and approvals do not apply</strong>}</p>
       {requester && v.is_latest && (
-        <form action={requestQa} style={box}>
+        <form action={requestQa} className="card">
           <Hidden reportId={reportId} v={v} />
           <strong>Request M10 QA (M10-D deterministic → M10-S semantic) for this exact version</strong>{" "}
           <input name="reason" placeholder="reason" required minLength={5} /> <button type="submit">Request QA</button>
@@ -90,29 +88,29 @@ export async function QaPanel({ reportId, v, session }: { reportId: string; v: V
       {!current && <p>No QA result yet for this version.</p>}
       {current && (
         <>
-          <div style={{ ...box, borderLeft: `4px solid ${current.status === "PASS" ? "#2a7" : current.status === "FAIL" ? "#c33" : "#c90"}` }}>
+          <div className="card" style={{ borderLeft: `4px solid ${current.status === "PASS" ? "#2a7" : current.status === "FAIL" ? "#c33" : "#c90"}` }}>
             <div>Combined QA (computed by the database): <strong>{current.status}</strong> · result #{current.result_no}
               {current.changed_by_rerun && " · changed by rerun"}</div>
-            <div style={muted}>M10-D {d?.status ?? "?"} ({d?.engine_version}) · M10-S {s?.status ?? "?"} (model run {s?.model_run_id ?? "—"})
+            <div className="muted">M10-D {d?.status ?? "?"} ({d?.engine_version}) · M10-S {s?.status ?? "?"} (model run {s?.model_run_id ?? "—"})
               {s?.diagnostic_only && " · semantic run diagnostic only (deterministic CRITICAL)"}</div>
             {s && s.invalid_reasons?.length > 0 && <div style={{ color: "#a00" }}>M10-S invalid: {s.invalid_reasons.join(", ")}</div>}
             {current.fail_reasons.length > 0 && <div style={{ color: "#a00" }}>Fail reasons: {current.fail_reasons.join(", ")}</div>}
-            <div style={muted}>{g.blocking} release-blocking · {g.warnings} warning(s) requiring acknowledgement ({wf?.warnings_acknowledged ?? 0} acknowledged)
+            <div className="muted">{g.blocking} release-blocking · {g.warnings} warning(s) requiring acknowledgement ({wf?.warnings_acknowledged ?? 0} acknowledged)
               · passed checks: {g.passedChecks.join(", ")}</div>
           </div>
           {g.groups.map((grp) => (
             <div key={grp.severity}>
               <h3 style={{ color: sevColor[grp.severity] }}>{grp.severity}</h3>
               {grp.findings.map((f) => (
-                <div key={f.id} style={{ ...box, borderLeft: `4px solid ${sevColor[f.severity]}` }}>
+                <div key={f.id} className="card" style={{ borderLeft: `4px solid ${sevColor[f.severity]}` }}>
                   <div><strong>{f.layer === "D" ? "M10-D" : "M10-S"} {f.check_id}</strong> · {f.status} · {f.finding_code}
                     {f.status === "FAIL" ? <strong style={{ color: "#a00" }}> · blocks release</strong> : null}
                     {needsAcknowledgement(f) && (acked.has(f.id) ? " · acknowledged" : <strong style={{ color: "#a16207" }}> · needs acknowledgement</strong>)}</div>
                   <div>{f.details}</div>
-                  <div style={muted}>affected statement {f.affected_statement_id ?? "—"} · object {f.affected_object_id ?? "—"} ·
+                  <div className="muted">affected statement {f.affected_statement_id ?? "—"} · object {f.affected_object_id ?? "—"} ·
                     recommended (advisory) {f.recommended_action}</div>
                   {f.evidence_refs.length > 0 && (
-                    <details><summary style={muted}>evidence / provenance ({f.evidence_refs.length})</summary>
+                    <details><summary className="muted">evidence / provenance ({f.evidence_refs.length})</summary>
                       <ul>{f.evidence_refs.map((r) => <li key={`${r.object_type}:${r.object_id}`}><code>{r.object_type}</code> {r.object_id}</li>)}</ul>
                     </details>
                   )}
@@ -130,7 +128,7 @@ export async function QaPanel({ reportId, v, session }: { reportId: string; v: V
             </div>
           ))}
           {reviewer && v.is_latest && !wf?.content_decision && (
-            <form action={decideContent} style={{ ...box, background: "#f6f8fa" }}>
+            <form action={decideContent} className="card" style={{ background: "#f6f8fa" }}>
               <Hidden reportId={reportId} v={v} />
               <input type="hidden" name="qa_result_id" value={current.id} />
               <strong>Content decision on QA result #{current.result_no} ({current.status}) for hash {v.report_version_hash.slice(0, 16)}…</strong>{" "}
@@ -169,34 +167,34 @@ export async function ReleasePanel({ reportId, v, session }: { reportId: string;
   return (
     <section>
       <h2>Security review &amp; release — version {v.version_no}</h2>
-      <p style={muted}>report_version_id <code>{v.report_version_id}</code> · hash <code>{v.report_version_hash}</code> · state{" "}
+      <p className="muted">report_version_id <code>{v.report_version_id}</code> · hash <code>{v.report_version_hash}</code> · state{" "}
         <strong>{workflowLabel(wf?.workflow_state)}</strong></p>
       {rel && (
-        <div style={{ ...box, borderLeft: "4px solid #1f4e79", background: "#f3f7fb" }}>
+        <div className="card" style={{ borderLeft: "4px solid #1f4e79", background: "#f3f7fb" }}>
           <h3>RELEASED</h3>
           <div>released at {rel.released_at} by {rel.released_by}</div>
           <div>manifest hash <code>{rel.manifest_hash}</code></div>
           <div>PDF SHA-256 <code>{rel.pdf_sha256}</code> · <a href={`/reports/${reportId}/pdf/${rel.pdf_artifact_id}`}>download released PDF</a></div>
           <details><summary>release manifest (immutable)</summary><pre style={{ whiteSpace: "pre-wrap" }}>{JSON.stringify(man?.manifest_json, null, 2)}</pre></details>
-          <p style={muted}>A correction creates a new version that goes through QA, approval, security review and release again.</p>
+          <p className="muted">A correction creates a new version that goes through QA, approval, security review and release again.</p>
         </div>
       )}
-      <div style={box}>
+      <div className="card">
         <strong>Security / handling review</strong>: {wf?.security_status ?? "not opened (needs content approval)"}
         {secrev && v.is_latest && wf?.security_status === "PENDING" && wf.security_review_id && (
           <form action={decideSecurity} style={{ marginTop: 6 }}>
             <Hidden reportId={reportId} v={v} />
             <input type="hidden" name="security_review_id" value={wf.security_review_id} />
-            <p style={muted}>Content approval {wf.content_approval_id} · QA {wf.qa_status}. Review the preview of this exact version before deciding.</p>
+            <p className="muted">Content approval {wf.content_approval_id} · QA {wf.qa_status}. Review the preview of this exact version before deciding.</p>
             <select name="status">{SECURITY_DECISIONS.map((x) => <option key={x}>{x}</option>)}</select>{" "}
             <input name="rationale" placeholder="handling rationale" required minLength={10} style={{ width: 320 }} />{" "}
             <button type="submit">Record security decision</button>
           </form>
         )}
       </div>
-      <div style={box}>
+      <div className="card">
         <strong>Release PDF artifacts</strong>
-        {artifacts.length === 0 && <p style={muted}>No PDF yet (rendered by the worker after security approval).</p>}
+        {artifacts.length === 0 && <p className="muted">No PDF yet (rendered by the worker after security approval).</p>}
         <ul>{artifacts.map((p) => (
           <li key={p.id}><code>{p.pdf_sha256}</code> · {p.byte_size} bytes · {p.template_version} ({p.template_hash.slice(0, 12)}…) ·
             {" "}{p.renderer_version} ({p.renderer_hash.slice(0, 12)}…) · <a href={`/reports/${reportId}/pdf/${p.id}`}>download</a></li>))}</ul>
@@ -208,12 +206,12 @@ export async function ReleasePanel({ reportId, v, session }: { reportId: string;
         )}
       </div>
       {!rel && (
-        <div style={box}>
+        <div className="card">
           <strong>Deterministic release eligibility (evaluated by the database)</strong>: {elig?.eligible ? "ELIGIBLE" : "NOT ELIGIBLE"}
           <ul>{checklistRows(elig).map((c) => (
             <li key={c.code} style={{ color: c.ok ? "#070" : "#a00" }}>{c.ok ? "✓" : "✗"} {c.label}</li>))}</ul>
           {authority && v.is_latest && elig?.eligible && chosen && (
-            <form action={releaseReport} style={{ ...box, borderColor: "#1f4e79" }}>
+            <form action={releaseReport} className="card" style={{ borderColor: "#1f4e79" }}>
               <Hidden reportId={reportId} v={v} />
               <input type="hidden" name="pdf_artifact_id" value={chosen.id} />
               <p>Release version {v.version_no} with PDF <code>{chosen.pdf_sha256.slice(0, 16)}…</code>. The database re-checks every condition

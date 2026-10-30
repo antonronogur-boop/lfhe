@@ -100,3 +100,30 @@ describe("Phase 7 pilot workspace helpers", () => {
     expect(currentDisposition(h, U)).toBe("OPEN");
   });
 });
+
+import { capacityStatement, runSummary, timeByGroup, timeCost } from "@/lib/pilot";
+
+describe("CR7-03 pilot summary helpers", () => {
+  it("groups active time by workflow stage group", () => {
+    const g = timeByGroup([{ stage: "CLAIM_REVIEW", user_id: "a", active_seconds: 60, open_segments: 0 },
+      { stage: "CONTENT_APPROVAL", user_id: "r", active_seconds: "30", open_segments: 0 },
+      { stage: "SECURITY_REVIEW", user_id: "s", active_seconds: 20, open_segments: 0 },
+      { stage: "RELEASE", user_id: "x", active_seconds: 10, open_segments: 0 }]);
+    expect(g).toEqual({ analyst: 60, reviewer: 30, security: 20, release: 10 });
+  });
+  it("keeps model cost unknown unless every run is priced in one currency", () => {
+    const base = { module_code: "M07_INTELLIGENCE_ASSESSOR", provider: "anthropic", model: "claude-sonnet-5-5", status: "SUCCEEDED",
+      input_tokens: 1000, output_tokens: 500, is_repair_run: false };
+    expect(runSummary([{ ...base, model_cost: "0.01", cost_currency: "USD" }, { ...base, model_cost: null, cost_currency: null }]).cost).toBeNull();
+    const s = runSummary([{ ...base, model_cost: "0.01", cost_currency: "USD" }, { ...base, model_cost: "0.02", cost_currency: "USD" }]);
+    expect(s.cost?.currency).toBe("USD");
+    expect(s.cost?.value).toBeCloseTo(0.03);
+    expect(s.tokensIn).toBe(2000);
+  });
+  it("never presents capacity value without a comparator", () => {
+    expect(capacityStatement(null)).toContain("productivity claim not available");
+    expect(capacityStatement("NONE")).toContain("observational only");
+    expect(timeCost(3600, 6600)).toBe(6600);
+    expect(timeCost(3600, null)).toBeNull();
+  });
+});

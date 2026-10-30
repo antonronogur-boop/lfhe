@@ -75,3 +75,47 @@ jobs:
         env:
           NEXT_PUBLIC_SUPABASE_URL: "https://placeholder.supabase.invalid"
           NEXT_PUBLIC_SUPABASE_ANON_KEY: "placeholder-anon-key-not-a-secret"
+
+  e2e:
+    # CR7-03: browser E2E of the full human-in-command path on a throw-away local stack (PostgreSQL + PostgREST +
+    # test-only auth gateway + Next.js + the real worker loop with the SYNTHETIC_TEST_ONLY model). No secrets.
+    runs-on: ubuntu-24.04
+    needs: [python-tests, web]
+    env:
+      POSTGREST_VERSION: "12.2.3"
+      POSTGREST_SHA256: "9f71269e61ac3a940281e93ff415760f5957e430e475ba4c3889f3ede7d5527c"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: "apps/web/.nvmrc"
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - name: install PostgreSQL 16 binaries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-16 postgresql-contrib-16
+          echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"
+      - name: install locked dependencies (hash-checked) + Playwright
+        run: |
+          python -m pip install --upgrade pip
+          pip install --require-hashes -r requirements/py313-test.lock
+          pip install --no-deps -e .
+          pip install playwright==1.56.0 pyee==13.0.1
+          python -m playwright install --with-deps chromium
+      - name: web dependencies
+        working-directory: apps/web
+        run: npm ci
+      - name: PostgREST (pinned binary, checksum verified)
+        run: |
+          curl -sSL -o pgrst.tar.xz "https://github.com/PostgREST/postgrest/releases/download/v${POSTGREST_VERSION}/postgrest-v${POSTGREST_VERSION}-linux-static-x64.tar.xz"
+          echo "${POSTGREST_SHA256}  pgrst.tar.xz" | sha256sum -c -
+          tar xf pgrst.tar.xz
+          echo "LFHE_E2E_POSTGREST=$PWD/postgrest" >> "$GITHUB_ENV"
+      - name: browser E2E
+        env:
+          LFHE_CHROMIUM_NO_SANDBOX: "1"
+        run: python -m pytest -q tests/e2e -rA

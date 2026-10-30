@@ -33,4 +33,5 @@ testpaths = ["tests"]
 addopts = "-ra"
 markers = [
   "db: requires the throw-away PostgreSQL cluster",
+  "e2e: browser end-to-end (PostgreSQL + PostgREST + Next.js + Playwright); skipped when the tools are absent",
 ]

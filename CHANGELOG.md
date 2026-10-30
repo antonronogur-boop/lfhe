@@ -2,6 +2,28 @@
 
 All material project changes are recorded here.
 
+## [Unreleased] — Phase 7 CR7-03 (PO 2026-10-30, SPEC_INDEX 31)
+
+Status: PO approved · implemented on branch `cr7-03-pilot-operational-path` · automated tests and technical browser E2E
+PASS · not yet applied to DEV · human P7-04 outstanding · 0 / 6 real pilot cycles (first measured cycle: REPLAY).
+Repository total: 44 migrations.
+
+### Added
+- Migration `20261011004300_cr7_03_workflow_job_requests.sql`: HUMAN_ONLY `request_workflow_job` /
+  `request_pending_claim_extractions` (M02 / M04 / M05 / M06 / M07 / M08 requests; idempotent, audited
+  `WORKFLOW_JOB_REQUESTED`, role-bound, cutoff-checked, manual-promotion rule for M07), append-only
+  `workflow_job_requests`, status view `workflow_job_request_status`.
+- Web: application shell with role-aware navigation, dashboard, design system (`app/globals.css`, `components/`),
+  claims (queues, intake, detail), `/events`, `/assessments`, `/jobs`, decision queues (`/queue/review|security|release`),
+  pilot workspace summary and UX-finding workflow, loading / error / empty / locked states.
+- Browser E2E (`tests/e2e/`): local test-only stack (PostgreSQL + PostgREST + auth gateway + Next.js + worker with a
+  SYNTHETIC_TEST_ONLY model) and a multi-role Playwright test of the full path to release and pilot completion.
+- Docs: `docs/cr7-03.md`, runbook section for the operational path; DEV smoke checks for CR7-03.
+
+### Changed
+- Web pages restyled (reports, sources, pilot); claim actions return to the originating page; sign-in lands on the dashboard.
+- No Phase 1–6 semantics changed; no dependency upgraded.
+
 ## [Unreleased] — Phase 1 Foundation
 
 ### Added

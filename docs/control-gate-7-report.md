@@ -4,7 +4,8 @@
 
 - Fázis: **Phase 7 — Controlled Operational Pilot & Validation** (`docs/specs/LFHE_Phase7_Authoritative_Baseline_v1.0.md`,
   SPEC_INDEX 26; PO felhatalmazás `docs/specs/PO_Decision_2026-10-23_Authorise_Phase7.md`, SPEC_INDEX 27).
-- Kapu: **CONTROL GATE 7 — PO DECISION REQUIRED, de a bizonyítékcsomag még NEM teljes.** A P7-00 … P7-09 munkacsomagok
+- Kapu: **CONTROL GATE 7 — OPEN; a bizonyítékcsomag még NEM teljes** (0 / 6 valós ciklus; verdikt: OPERATIONAL VALUE
+  NOT YET VALIDATED). A P7-00 … P7-09 munkacsomagok
   implementációs része kész; a pilot-bizonyíték (valós provider, böngészős használat, 6 ciklus) a PO DEV / pilot
   futtatásaitól függ. A PO-döntés szerint a kapu nyitva marad, amíg elegendő bizonyíték nincs, vagy a PO kifejezetten
   el nem fogad egy dokumentált korai-leállítási készletet. Ez a jelentés nem jóváhagyás.
@@ -25,10 +26,11 @@
   comparator, report- és futáskötés, provider-metrikák, UX, terhelés, lezárás, költség-feltevés, provider-ár).
 - **P7-03** — valós-provider próba: DEV worker (pilot-ciklusokhoz kötve) és a kézi `pilot-real-provider` GitHub
   workflow (szintetikus lánc valós M07 → M08 → emberi jóváhagyás → M09 → M10-D + M10-S); §26 ellenőrzés
-  (`lfhe_pilot.provider_trial`). A folyamat a valós Anthropic adapterrel, csonkolt HTTP-vel regressziós teszttel igazolt.
-  **Valós hívás még nem történt.**
-- **P7-04** — böngészős E2E: ellenőrzőlista és UX-rögzítés kész (`docs/runbooks/phase7-pilot.md` 5.); **a valós
-  böngészős végigjárás a PO feladata, még nem történt.**
+  (`lfhe_pilot.provider_trial`). Valós hívások: a `pilot-real-provider` workflow futásai (lásd REAL-PROVIDER TRIAL
+  RESULT és BENCHMARK RESULT); DEV-pilot-ciklushoz kötött valós futás még nincs.
+- **P7-04** — böngészős E2E: ellenőrzőlista és UX-rögzítés kész (`docs/runbooks/phase7-pilot.md` 5.); a technikai,
+  automatizált böngészős E2E (CR7-03) PASS a helyi tesztveremben; **a humán P7-04 végigjárás a PO feladata: NOT YET
+  EVIDENCED.**
 - **P7-05** — kontrollált benchmark P7-BM-01 (`evaluation/p7-bm-01/benchmark.json`): 18 szintetikus eset (15 seedelt
   hiba, 3 tiszta), 24 emberi címke; futtató `tests/pilot/test_p7_benchmark.py`; D és S külön.
 - **P7-06** — pilot-ciklusok: instrumentáció és munkamenet kész; **0 / 6 ciklus** (valós naptári idő és PO-működtetés kell).
@@ -37,10 +39,16 @@
 - **P7-08** — előzetes findings / capability assessment: `docs/phase7-pilot-findings.md`.
 - **P7-09** — ez a jelentés; teszt-nyomonkövetés `docs/phase7-test-traceability.md`; metrika-export minta
   `docs/cg7-benchmark-test-double.json`.
+- **CR7-03 (PO-jóváhagyás 2026-10-30, SPEC_INDEX 31; `docs/cr7-03.md`; ág `cr7-03-pilot-operational-path`)** — a pilotot
+  blokkoló rés megszüntetése: HUMAN_ONLY, auditált, idempotens kérés-út a meglévő M02 / M04 / M05 / M06 / M07 / M08
+  jobokhoz (migráció `20261011004300`), webes munkafelület a claim → esemény → relevancia → értékelés → emberi review
+  láncra (`/claims`, `/events`, `/assessments`, `/jobs`, döntési sorok), szerepkör-érzékeny alkalmazás-keret és
+  dashboard, pilot-összesítő; böngészős E2E helyi tesztveremmel. Lezárt Phase 1–6 szemantika nem változott.
 
 ## FILES CHANGED / MIGRATIONS ADDED
 
-- Migráció (új, előrefelé): `database/migrations/20261011004100_p7_pilot_instrumentation.sql`. **Összes: 42.**
+- Migráció (új, előrefelé): `database/migrations/20261011004100_p7_pilot_instrumentation.sql` (pre-CR7-01 / CR7-03
+  állapotban 42 volt; **aktuális összes: 44**, lásd 4200 CR7-01 és 4300 CR7-03).
   A 3800 / 3900 / 4000 és minden korábbi fájl változatlan (zárolás + teszt + DEV-ellenőrzés).
 - Új: `database/migrations.lock.json`; `services/pilot/lfhe_pilot/{capacity,metrics,export,provider_trial}.py`;
   `scripts/pilot_export.py`; `evaluation/` (benchmark, README); `.github/workflows/pilot-real-provider.yml`;
@@ -51,22 +59,38 @@
 - Módosított: `pyproject.toml` (services/pilot), `scripts/supabase_dev_smoke.py` (+6 Phase 7 ellenőrzés),
   `apps/web/lib/auth.ts` (PILOT_* jogok), `apps/web/app/layout.tsx` (Pilot link), `docs/permission-matrix.md`,
   `docs/runbooks/dev-supabase-smoke.md`, `docs/SPEC_INDEX.md`, `docs/PROJECT_STATUS.md`.
+- **CR7-03:** új migráció `database/migrations/20261011004300_cr7_03_workflow_job_requests.sql` (**összes: 44**; a
+  lezárt 1–41 változatlan); `apps/web/{app,components,lib}/**` (új oldalak és design-rendszer); `tests/integration/
+  test_cr7_03_requests.py`; `tests/e2e/**`; `apps/web/tests/workflow.test.ts`; `.github/workflows/ci.yml` (`e2e` job);
+  `scripts/supabase_dev_smoke.py` (+3 CR7-03 ellenőrzés); dokumentumok: `docs/cr7-03.md`, runbook 3a, permission matrix.
 
 ## AUTOMATED TEST RESULTS
 
-- Teljes Python készlet: **576 passed, 1 skipped** (a skipped = a valós-provider próba, amely csak
-  `LFHE_P7_PROVIDER=anthropic` mellett fut). Phase 7: 13 / 13 PASS (+1 kihagyott valós-provider teszt).
-- **Phase 1–6 regresszió: 563 / 563 PASS** (változatlan tesztek).
-- Web: **44 / 44** (5 fájl), TypeScript PASS, production build PASS (a Next.js frissítési figyelmeztetés változatlan).
+**Aktuális eredmény (2026-10-30, CR7-03 ág `cr7-03-pilot-operational-path`):**
+
+- Teljes Python készlet: **592 passed, 1 skipped** (a skipped = a valós-provider próba, amely csak
+  `LFHE_P7_PROVIDER=anthropic` mellett fut). Ebben: CR7-03 integráció **7 / 7**, technikai böngészős E2E **2 / 2**, a
+  változatlan Phase 1–6 regresszió és a Phase 7 tesztek.
+- Web: vitest **54 / 54** (6 fájl), TypeScript PASS, production build PASS.
 - Prompt lock: PASS. Secret scan: clean. Gitleaks (git-előzmény): clean.
-- CI: zöld — run 40009048791, commit `cba45d1` (secret-scan, python-tests, web).
+- CI (PR #1; secret-scan, python-tests, web, e2e — mind zöld):
+  - CR7-03 implementációs CI (`5c37a02`): run 41025798079;
+  - **pre-merge cleanup verification CI** a `fe4b29f` dokumentációs cleanup commit után: **run 41039249220** — ez a
+    merge előtti ellenőrzési bizonyíték. (Az ezt követő, csak dokumentációs commitok CI-futásai nem kerülnek ide.)
+
+*Történeti, pre-CR7-03 eredmény (2026-10-23, nem aktuális):* 576 passed / 1 skipped, web 44 / 44, CI run 40009048791
+(`cba45d1`).
 
 ## DEV SMOKE RESULT
 
-**PASS** (PO, 2026-10-23): 42 migráció, smoke **68 / 68 PASS**, ebből a 6 Phase 7 ellenőrzés 6 / 6 (pilot-táblák RLS-sel 13 / 13;
+*Történeti, pre-CR7-03 DEV-állapot.* **PASS** (PO, 2026-10-23): 42 migráció, smoke **68 / 68 PASS**, ebből a 6 Phase 7 ellenőrzés 6 / 6 (pilot-táblák RLS-sel 13 / 13;
 nincs közvetlen írás, a worker nem olvas pilot-adatot; 16 HUMAN_ONLY pilot-függvény, 0 kitett; viewer és ADMIN nem hozhat
 létre ciklust; PILOT_LEAD-nek nincs analitikai / QA / jóváhagyási / biztonsági / kiadási joga; a 41 lezárt migráció megegyezik a
 zárolással). Audit hash-lánc: PASS, 161 bejegyzés; pg_cron aktív. `docs/dev-smoke-20261023-phase7.json`.
+
+**Aktuális:** a repóban (a CR7-03 ág beolvasztása után a `main`-en) **44 migráció** van (új: 4200 CR7-01, 4300 CR7-03). A
+CR7-03 **még nincs a DEV-re alkalmazva**: a DEV frissítése, a 4300-as migráció és az ezt követő smoke (+3 CR7-03
+ellenőrzés) a PO-ra vár; addig nincs a 44-es állapotra vonatkozó DEV smoke-bizonyíték.
 
 ## REAL-PROVIDER TRIAL RESULT / PROVIDER COST & LATENCY
 
@@ -106,7 +130,16 @@ zárolással). Audit hash-lánc: PASS, 161 bejegyzés; pg_cron aktív. `docs/dev
 
 ## BROWSER UX VALIDATION RESULT
 
-**NOT YET EVIDENCED** (P7-04, PO).
+**NOT YET EVIDENCED** (P7-04, PO) — az emberi böngészős végigjárást automatizálás nem helyettesíti (§17, P7-04).
+
+Technikai bizonyíték (CR7-03, 2026-10-30): `tests/e2e/test_pilot_path_e2e.py` valódi böngészőben (Playwright /
+Chromium), hat szereppel végigjárja a teljes utat helyi, eldobható veremben (PostgreSQL + PostgREST + teszt-auth +
+Next.js production build + a valódi worker-hurok SYNTHETIC_TEST_ONLY modellel): M02-kérés → claim review → M05-kérés →
+esemény review / állapot → M06 + relevancia-döntés → M07 (M08 automatikusan) → flag-diszpozíció → emberi jóváhagyás
+végső bizonyossággal → candidate pool → M09 → QA (PASS_WITH_WARNINGS) → figyelmeztetés-nyugtázás (REVIEWER) → tartalmi
+jóváhagyás (REVIEWER) → security review (SECURITY_REVIEWER) → release PDF + kiadás (RELEASE_AUTHORITY) → letöltött
+`%PDF`, manifest-hash; pilot-ciklus COMPLETED (csak az eldobható DB-ben); VIEWER csak olvas, ADMIN-nak nincs elemzői
+hatásköre. Eredmény: 2 / 2 PASS.
 
 ## PILOT-CYCLE SUMMARY
 
@@ -191,8 +224,16 @@ zárolással). Audit hash-lánc: PASS, 161 bejegyzés; pg_cron aktív. `docs/dev
 
 ## ECONOMIC ASSUMPTIONS
 
-Nincs rögzített költség-feltevés és provider-ár (szándékosan nincs alapérték). A PO rögzíti a `/pilot` oldalon.
-Kapacitásérték ≠ pénzbeli megtakarítás; éves érték csak kontrollált, igényelhető heti értékből.
+A PO a DEV `/pilot` oldalán rögzítette (immutable rekordok; nincs alapérték):
+
+- **Költség-feltevés `COST-2026-A`:** HUF, loaded hourly cost **6600**, heti 40 óra, évi 46 munkahét; alap: „597000 HUF
+  net/month; estimated direct employer cost, 2026; excludes organisational overhead”.
+- **Provider-ár:** `anthropic / claude-sonnet-5-5`, USD, input **2** / M token, output **10** / M token, hatályos
+  **2026-09-28** (helyi dátum). Egy korábbi, téves hatálydátummal rögzített immutable ár-rekord is létezik; nem lett
+  törölve vagy módosítva — **a későbbi, helyes dátumú rekord az alkalmazandó.**
+
+Kapacitásérték ≠ pénzbeli megtakarítás; pénzbeli megtakarítás nincs állítva. Éves érték csak kontrollált, igényelhető heti
+értékből; comparator nélkül (az első ciklus: `NONE`) az eredmény csak megfigyelési jellegű (observational only).
 
 ## PROVENANCE / SECURITY / AUDIT STATUS
 
@@ -213,24 +254,40 @@ kontrollált eredményből, a ciklus cutoffja = a report cutoffja).
 
 ## CHANGE REQUESTS
 
-- **CR7-01 — IMPLEMENTED (B), PO-utasítás 2026-10-24 alapján; valós futás igazolása a PO-ra vár** (migráció `20261011004200`, `provider_fixed_sampling`) — **igazolva**: a provider minden hívást elfogadott (runs 40105881022, 40111028306): a `claude-sonnet-5-5` a `temperature` paramétert elavultnak jelöli (preflight: HTTP 400 `invalid_request_error`, "`temperature` is deprecated for this model."), a lezárt low-variance szabály (explicit `temperature ≤ 0,2`, M02–M10) pedig mindig küldi. Opciók: A) régebbi, `temperature`-t elfogadó modell kódváltozás nélkül; B) „provider által vezérelt mintavétel” konfiguráció (zárt szemantika változik); C) mindkettő. Részletek: `docs/cr7-01-proposal.md`.
+- **CR7-01 — IMPLEMENTED (B), PO-utasítás 2026-10-24 alapján** (migráció `20261011004200`, `provider_fixed_sampling`) — **igazolva**: a provider minden hívást elfogadott (runs 40105881022, 40111028306): a `claude-sonnet-5-5` a `temperature` paramétert elavultnak jelöli (preflight: HTTP 400 `invalid_request_error`, "`temperature` is deprecated for this model."), a lezárt low-variance szabály (explicit `temperature ≤ 0,2`, M02–M10) pedig mindig küldi. Opciók: A) régebbi, `temperature`-t elfogadó modell kódváltozás nélkül; B) „provider által vezérelt mintavétel” konfiguráció (zárt szemantika változik); C) mindkettő. Részletek: `docs/cr7-01-proposal.md`.
 - **CR7-02 — APPROVED és a `main`-be olvasztva** (PO, 2026-10-25, SPEC_INDEX 28; merge `25043c2`, CI zöld: run 40203246537 / `3c5de52`; nem nyitja újra a CG2-t / Phase 2-t). Eredeti megállapítás (2026-10-24): a lezárt Phase 2 kérés-összeállítás a regisztrált `output_schema.json`-t nem küldi a modellnek; valós modellel minden modul kimenete sémahibás lesz (M07 diagnózis: kitalált mezőnevek, `S1` az `AS1` minta helyett, hiányzó burok). Javaslat: a séma a kérés része (trusted blokk az untrusted adat előtt), a prompt-csomagok és hashek változatlanok. Egyetlen érintett lezárt viselkedés: `render_messages` (a kérés felhasználói üzenete); minden más változatlan. Részletek és pontos előtte / utána: `docs/cr7-02-proposal.md`. A 19. kritérium csak a `main`-ről futtatott teljes valós P7-BM-01 benchmarkból lehet PASS.
+
+- **CR7-03 — PO APPROVED (2026-10-30, SPEC_INDEX 31) · IMPLEMENTED ON BRANCH (`cr7-03-pilot-operational-path`, PR #1) ·
+  automated tests PASS · technical browser E2E PASS · NOT YET DEPLOYED / APPLIED TO DEV · human P7-04 browser
+  validation NOT YET EVIDENCED.** Tartalom:
+  emberi kérés-út a meglévő M02 / M04 / M05 / M06 / M07 / M08 jobokhoz (HUMAN_ONLY, auditált `WORKFLOW_JOB_REQUESTED`,
+  idempotens, a megfelelő emberi lépés jogosultságához kötött; M07 csak M06-ajánlás vagy auditált kézi kérés után) és a
+  hiányzó munkafelület. Lezárt szemantika, szerepek, provider / modell, költség- és ár-rekordok változatlanok.
+  Részletek: `docs/cr7-03.md`.
 
 ## KNOWN FAILURES
 
-- A Next.js `next build` első futása időnként a frissítési figyelmeztetésen megáll, újrafuttatva PASS (ismert, nem
-  blokkoló; a biztonsági frissítés külső elérés előtt kötelező).
+- Next.js 16.4.0 a (nem interaktív / agent) `next build` első futását egyszer megállítja a biztonsági frissítési
+  ajánlással (`SecurityFatalError`), az ismételt futás lefut; `next dev` interaktív terminálban frissítési menüt mutat,
+  amelynek alapértelmezett választása leállítja a szervert. Függőség nem frissült (PO); a webes felület DEV / localhost
+  marad.  A biztonsági frissítés külső elérés előtt kötelező.
 
 ## OPEN ITEMS
 
 1. ~~DEV: 4100 migráció + smoke~~ — kész (2026-10-23: 42 migráció, 68 / 68 PASS).
-2. Szerepek: PILOT_LEAD kiosztása; külön DEV-felhasználók az elemzői / reviewer / security / release szerepekhez.
-3. Költség-feltevés és provider-ár rögzítése.
+2. ~~Szerepek~~ — kész (PO): lfhe-admin → ADMIN, lfhe-viewer → VIEWER, lfhe-analyst → ANALYST + PILOT_LEAD,
+   lfhe-reviewer → REVIEWER, lfhe-security → SECURITY_REVIEWER, lfhe-release → RELEASE_AUTHORITY; ADMIN és VIEWER nem
+   kapott pilot-operatív többletjogot.
+3. ~~Költség-feltevés és provider-ár~~ — kész (PO): `COST-2026-A`; `claude-sonnet-5-5` ára 2026-09-28-tól (ECONOMIC ASSUMPTIONS).
 4. ~~Valós-provider próba + benchmark~~ — kész (lánc: run 40203842179; P7-BM-02: run 40213605927).
-5. Böngészős E2E végigjárás UX-megállapításokkal.
-6. 6 pilot-ciklus (≥ 2 REPLAY, ≥ 2 LIVE), majd `scripts/pilot_export.py`.
+5. CR7-03 telepítése és DEV-validálása (az első mért ciklus előfeltétele): beolvasztás a `main`-be; DEV `git pull`;
+   4300-as migráció; DEV smoke; worker M02–M10 konfigurációval és indítással; a BLOCKING UX-megállapítás rögzítése a
+   `/pilot → UX findings` felületen, majd a humán ellenőrzés után diszpozíciója; humán P7-04 böngészős végigjárás
+   UX-megállapításokkal (a technikai E2E nem helyettesíti).
+6a. **First REPLAY readiness: NOT READY FOR P7C-REPLAY-01** — kizárólag az 5. pont lépései hiányoznak.
+6. 6 pilot-ciklus (≥ 2 REPLAY, ≥ 2 LIVE; jelenleg 0 / 6; az első mért ciklus REPLAY: `P7C-REPLAY-01`), majd `scripts/pilot_export.py`.
 7. A bizonyíték alapján a findings és a capability-ajánlás véglegesítése; K-11 / GS-001 csatorna (opcionális, §23);
-   Phase 4 review UI és opcionális service-role smoke (korábbi nem blokkoló tételek).
+   ~~Phase 4 review UI~~ (CR7-03) és opcionális service-role smoke.
 
 ## CG7 ACCEPTANCE CRITERIA (40)
 
@@ -250,15 +307,15 @@ kontrollált eredményből, a ciklus cutoffja = a report cutoffja).
 | 12 | Minőségi metrikák reprodukálhatók | NOT YET EVIDENCED | determinisztikus számítás tesztelve; pilot-adat nincs |
 | 13 | Kapacitás-metrikák reprodukálhatók | NOT YET EVIDENCED | §11 számítás tesztelve; pilot-adat nincs |
 | 14 | Kapacitásérték és pénzbeli megtakarítás nincs összemosva | PASS | külön mezők / tábla; teszt 13 |
-| 15 | Költség-feltevések explicitek | PASS | nincs alapérték; kötelező explicit input; teszt 11 |
+| 15 | Költség-feltevések explicitek | PASS | nincs alapérték; kötelező explicit input; teszt 11; a PO rögzítette: `COST-2026-A`, provider-ár 2026-09-28-tól |
 | 16 | Valós-provider futás megtörtént | PASS | run 40105881022: valódi M07 és M10-S hívások (provider-válaszazonosító, tokenek, latencia); a kimenetek sémahibásak — a minőség külön kritérium (19) |
 | 17 | Valós-provider modell / konfig / prompt nyomonkövetés teljes | PASS | §26 ellenőrzés minden valós futásra admissible: modell, konfiguráció-hash (benne `provider_fixed_sampling`), prompt 1.0.0 + hash, ingestion, repair-link |
 | 18 | Provider-hibák és javító futások megőrizve | PASS | valós provider-hiba (HTTP 400) `PROVIDER_ERROR`-ként rögzítve, nem lett siker; QA fail closed (run 40102872833); repair-link tesztelve |
 | 19 | M10-S valós minősége empirikusan mérve | PASS | P7-BM-02 valós futás (run 40213605927, PO-jóváhagyott alap): S recall 0,91, 1 kód-szintű kritikus kihagyás (tartalmilag jelzett), tiszta eseteken 0 FAIL / 3 WARNING, hibán kívüli FAIL 0; D recall 1,0. **PO által elfogadva** (SPEC_INDEX 30; Q09 szigorú kihagyásként megtartva); korlát: n = 1 futás, nem stabil termelési becslés |
 | 20 | D és S QA külön mérhető | PASS | benchmark és ciklus-metrikák rétegenként |
-| 21 | Böngészős E2E megtörtént | NOT YET EVIDENCED | P7-04, PO |
+| 21 | Böngészős E2E megtörtént | NOT YET EVIDENCED | humán P7-04 (PO) hátra van; a technikai automatizált E2E (CR7-03) PASS, de nem helyettesíti |
 | 22 | UX-megállapítások rögzítve | NOT YET EVIDENCED | rögzítő felület kész |
-| 23 | BLOCKING UX-hibák megoldva vagy az út használhatatlannak nyilvánítva | NOT YET EVIDENCED | lezárási szabály kikényszerítve |
+| 23 | BLOCKING UX-hibák megoldva vagy az út használhatatlannak nyilvánítva | NOT YET EVIDENCED | lezárási szabály kikényszerítve; a „No UI / request path …” BLOCKING megállapítás CR7-03-mal kezelve, DEV-en rögzítendő és humán ellenőrzés után diszponálandó |
 | 24 | Benchmark-címkék izolálva | PASS | értékelői táblák / fájl; teszt 9, 19 |
 | 25 | K-11 / GS izoláció ép | PASS | GS-izolációs tesztek változatlanul zöldek |
 | 26 | Tiltott adat nem jutott providerhez | PASS | az eddigi provider-hívások csak szintetikus 'Northland' anyagot vittek (run 40102872833) — a DEV-pilot után újra megerősítendő |
@@ -274,7 +331,7 @@ kontrollált eredményből, a ciklus cutoffja = a report cutoffja).
 | 36 | Capability-ajánlás készült | PASS | OPERATIONAL VALUE NOT YET VALIDATED |
 | 37 | Nyitott tételek azonosítva | PASS | fenti OPEN ITEMS |
 | 38 | Phase 7 eltérések listázva | PASS | SD7-01 … SD7-12 |
-| 39 | Phase 7 change requestek listázva | PASS | nincs |
+| 39 | Phase 7 change requestek listázva | PASS | CR7-01, CR7-02, CR7-03 (CHANGE REQUESTS) |
 | 40 | Későbbi fázis nem indult | PASS | — |
 
 Összesítve: **PASS 29, FAIL 0, NOT YET EVIDENCED 11.**
@@ -287,7 +344,11 @@ még nem igazolt); a döntés a PO-é.
 ## NEXT ACTION
 
 **DEV PILOT HOLD — LIFTED** (PO, 2026-10-25, SPEC_INDEX 30). Nincs M10-S kalibrációs CR; minden M10-S jelzés megőrzendő.
-Az első mért ciklus előtt (PO, DEV): (1) pilot-szerepek és külön DEV-felhasználók; (2) analista loaded-cost feltevés;
-(3) provider-ár (Anthropic lista, `claude-sonnet-5-5`: 2 USD / M input, 10 USD / M output token — platform.claude.com
-pricing, 2026-10-25); (4) böngészős E2E; (5) UX-megállapítások. Utána 6 ciklus (≥ 2 REPLAY, ≥ 2 LIVE), az első REPLAY.
-Más fázis nem indítható.
+A 2026-10-25-i döntés előfeltételei közül (1) szerepek, (2) loaded-cost feltevés és (3) provider-ár **kész**; (4) humán
+böngészős végigjárás és (5) UX-megállapítások hátra vannak. Más fázis nem indítható.
+
+Aktuális (2026-10-30): a szerepek, a költség-feltevés és a provider-ár kész (PO). **NOT READY FOR P7C-REPLAY-01** — hátra
+van: CR7-03 beolvasztása a `main`-be; DEV `git pull`; 4300-as migráció; DEV smoke; worker M02–M10 konfiguráció és indítás;
+a BLOCKING UX-megállapítás rögzítése, majd humán ellenőrzés utáni diszpozíciója; humán P7-04 végigjárás. Utána az első
+mért ciklus: REPLAY `P7C-REPLAY-01` (runbook 4. pont). 0 / 6 valós ciklus. CG7 **OPEN**; verdikt: **OPERATIONAL VALUE NOT
+YET VALIDATED**.

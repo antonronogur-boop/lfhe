@@ -16,11 +16,15 @@ python scripts/apply_migrations.py $env:LFHE_DEV_DB_URL
 python scripts/supabase_dev_smoke.py | Out-File -Encoding utf8 dev-smoke-phase7.json
 ```
 
-Expected: **42 migrations** (new: `20261011004100_p7_pilot_instrumentation.sql`), smoke **68 / 68 PASS**
+*Historical, pre-CR7-03 (2026-10-23):* **42 migrations** (new: `20261011004100_p7_pilot_instrumentation.sql`), smoke **68 / 68 PASS**
 (62 earlier + 6 Phase 7 checks: pilot tables with RLS; no direct writes / no worker reads; 16 HUMAN_ONLY
 pilot functions not exposed to worker / service_role / anon; viewer and ADMIN cannot create a cycle;
 PILOT_LEAD holds no analytical / QA / approval / security / release authority; the 41 applied migrations
 match `database/migrations.lock.json`). The smoke creates no pilot record.
+
+**Current:** after merging CR7-03 the repository holds **44 migrations** (4200 CR7-01, 4300 CR7-03); applying them and the
+smoke (+3 CR7-03 checks) is described in §3a. Roles, the cost assumption and the provider price are already recorded
+(PO) — §1 and §2 are done.
 
 ## 1. Pilot roles (once)
 
@@ -68,9 +72,52 @@ P7-BM-01 benchmark (18 seeded cases) with the real M10-S, and uploads `p7-real-p
 (trial + benchmark JSON, secret-scanned) and also publishes them as run annotations; Claude reads them back with
 `scripts/fetch_pilot_result.py <run id>` — nothing needs to be sent back.
 
+## 3a. Operational path in the web UI (CR7-03) — claims → events → assessment
+
+Apply migration `20261011004300_cr7_03_workflow_job_requests.sql` first (§0: `apply_migrations.py` applies it; expected
+**44 migrations**; the smoke adds 3 CR7-03 checks — request functions not exposed to worker / service_role / anon, VIEWER and ADMIN refused, append-only request log — all PASS). Run the worker with a model configuration for **every**
+module M02–M10 (`LFHE_M02_MODEL_CONFIGURATION_ID` … `LFHE_M10_MODEL_CONFIGURATION_ID`; all `anthropic /
+claude-sonnet-5-5`, `provider_fixed_sampling`) and the object store settings for the release PDF. Then, as ANALYST:
+
+1. **Claims → Article intake (M02)** — *Extract all pending* (or *Extract* per article). The worker extracts (M02) and
+   classifies (M03). Job status is visible on the page and under **Pipeline jobs**.
+2. **Claims → Needs review** — open each claim: original-language evidence span, source, public availability; record
+   APPROVE / MODIFY_AND_APPROVE / REJECT / ESCALATE / REQUEST_REPROCESSING.
+3. **Claims → All claims** — tick the claims of one development, choose the **analysis context** (the report = its mode
+   and exact cutoff; or LIVE now), *Build events (M05)* (optionally *Analyse lineage (M04)*). Or **Events → New event
+   from claims** (manual, with roles; CONTRADICTS keeps a denial visible).
+4. **Events → <event>** — review the event version, change state (CANDIDATE → ACTIVE …), *Request relevance (M06)*,
+   validate / override the relevance result. *Request assessment (M07)* is available when M06 recommends assessment, or
+   after an audited *manual assessment request*. M08 runs automatically after M07.
+5. **Assessments → Awaiting human review** — dispose every M08 flag, then APPROVE with the final analytic confidence and
+   rationale (or REJECT / ESCALATE / REQUEST_REPROCESSING, or modify-and-approve the wording).
+6. **Reports → <report> → Candidate pool** — *Refresh eligible candidates*, INCLUDE in a section, *Request M09 draft*;
+   QA tab → *Request QA*.
+7. REVIEWER: **QA & content approval** queue; SECURITY_REVIEWER: **Security review** queue; RELEASE_AUTHORITY:
+   **Release decisions** queue (request release PDF, then release with the typed confirmation).
+
+Every request is a HUMAN_ONLY, audited, idempotent database call (`request_workflow_job`); a repeated click while a job is
+queued or running creates nothing; a re-request is possible only after a permanent failure.
+
+**K-05 DEV corpus inventory (read-only, SQL editor)** — what the first REPLAY cycle can use:
+
+```sql
+SELECT (SELECT count(*) FROM lfhe.articles) AS articles,
+       (SELECT count(*) FROM lfhe.article_snapshots) AS snapshots,
+       (SELECT count(*) FROM lfhe.article_snapshots WHERE public_availability_datetime <= '2026-10-19 11:25:00+00') AS replay_eligible_snapshots,
+       (SELECT count(*) FROM lfhe.claims) AS claims,
+       (SELECT count(*) FROM lfhe.event_heads WHERE is_current) AS events,
+       (SELECT count(*) FROM lfhe.assessment_versions) AS assessments,
+       (SELECT count(*) FROM lfhe.assessment_version_states WHERE state = 'APPROVED') AS approved_assessments;
+```
+
 ## 4. A pilot cycle (P7-06) — target 6 complete cycles: ≥ 2 REPLAY, ≥ 2 LIVE
 
-1. ANALYST creates the report (`/reports`, mode and cutoff as planned).
+1. ANALYST creates the report (`/reports`, mode and cutoff as planned). First REPLAY cycle (PO, 2026-10-30): code
+   `RPT-P7-REPLAY-01`, title `LFHÉ Phase 7 pilot — REPLAY cycle 1 (K-05 DEV corpus)`, cycle label `P7-REPLAY-01`, mode
+   REPLAY, cutoff `2026-10-19 13:25` Budapest (= 11:25 UTC; the form uses the web server's local time), reason
+   `First measured Phase 7 REPLAY pilot cycle`; cycle `P7C-REPLAY-01`, boundary `PUBLIC_OSINT`, comparator `NONE`
+   (comparable scope no). Create both only when the timed work starts — never to test.
 2. PILOT_LEAD creates the cycle (`/pilot` → New pilot cycle): same mode and **exactly the same cutoff**,
    data boundary, input scope, analyst user id, provider setup; then **Bind report** (refused if mode or
    cutoff differ) and **Record comparator** (method, timed / documented baseline in whole minutes,
@@ -91,12 +138,17 @@ CONTENT_REJECTED — a human gate decided. Releasing inside LFHÉ is **not** ope
 
 ## 5. Browser end-to-end validation (P7-04) — a human in a real browser
 
-Walk the path at least once per mode and record every problem as a UX finding:
-analytical review (`/claims`, Phase 4 review where available) → assessment → report workspace
+Walk the path at least once per mode and record every problem as a UX finding (**Pilot → UX findings**):
+claims (`/claims`) → events (`/events`) → assessment (`/assessments`) → report workspace
 (`/reports/<id>` pool / draft / versions) → QA view (`?view=qa`) → warning acknowledgement →
 content approval → security review (`?view=release`) → release decision → released artifact and
 provenance inspection (PDF download, manifest hash). Automated tests do not replace this step.
 BLOCKING findings stop the affected path until resolved or the path is declared unusable.
+
+The automated browser E2E (`tests/e2e/test_pilot_path_e2e.py`, local throw-away stack with a SYNTHETIC_TEST_ONLY model)
+proves the path technically; it does not replace this human validation (§17). Run it locally with
+`LFHE_E2E_POSTGREST=<postgrest binary> python -m pytest tests/e2e` (PostgreSQL 16, Node 22 + `npm ci` in `apps/web`,
+Playwright + Chromium); or start the stack for manual inspection with `python tests/e2e/stack.py`.
 
 ## 6. Export (P7-07)
 

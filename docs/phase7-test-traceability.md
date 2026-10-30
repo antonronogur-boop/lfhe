@@ -40,3 +40,16 @@ usability and the pilot cycles are evidenced only by the DEV / pilot runs (CG7 r
 `apps/web/tests/pilot.test.ts`: vocabularies mirror the migration enums; timer contract has no duration /
 timestamp; LIVE cannot claim replay material; comparator rules; cost / price inputs explicit; UX finding
 parsing; timing aggregation; completeness labels; disposition history.
+
+## CR7-03 (PO 2026-10-30)
+
+| Requirement (PO decision §) | Evidence |
+| --- | --- |
+| §4 human-started, audited, role-bound, idempotent request path; no service_role substitute | `tests/integration/test_cr7_03_requests.py::test_only_humans_with_the_step_permission_can_request`, `::test_extract_request_uses_the_worker_key_and_is_idempotent` |
+| §4 failed status visible; retry only after permanent failure | `::test_permanent_failure_can_be_re_requested_once_per_failure` |
+| §4 cutoff respected; payload read by the unchanged worker | `::test_build_events_request_respects_cutoff_and_runs_through_the_worker` |
+| Phase 4 §4.1 M07 regardless of M06 only as audited override; M08 chain unchanged; nothing approved by a request | `::test_assessment_request_requires_m06_recommendation_or_audited_manual_request`, `::test_manual_promotion_unlocks_assessment_without_m06` |
+| §15 browser E2E of the full path with several roles | `tests/e2e/test_pilot_path_e2e.py::test_full_human_in_command_path` |
+| §11 VIEWER read-only, ADMIN no analytical authority, locked actions explained | `tests/e2e/test_pilot_path_e2e.py::test_role_boundaries_in_the_ui`; `apps/web/tests/workflow.test.ts` |
+| §7 capacity value never a cash saving; observational only without comparator | `apps/web/tests/pilot.test.ts` (CR7-03 helpers) |
+| §17 forward-only, closed migrations unchanged | `tests/unit/test_migration_lock.py`; DEV smoke CR7-03 checks |

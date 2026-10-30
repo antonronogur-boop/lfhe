@@ -2,7 +2,7 @@ import { can, requireSession } from "@/lib/auth";
 import { COLLECTION_METHODS, RETENTION_MODES, SOURCE_TYPES } from "@/lib/sources";
 import { createClient } from "@/lib/supabase/server";
 
-import { signOut } from "../login/actions";
+import { Flash, PageHeader } from "@/components/ui";
 import { createSource, setCollectionMethodApproval, setSourceActive } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +20,6 @@ interface SourceRow {
   updated_at: string;
 }
 
-const cell = { borderBottom: "1px solid #eee", padding: "4px 6px", verticalAlign: "top" } as const;
 
 export default async function SourcesPage({
   searchParams,
@@ -42,35 +41,30 @@ export default async function SourcesPage({
 
   return (
     <main>
-      <p style={{ color: "#555" }}>
-        Signed in as {session.email ?? session.userId} ·{" "}
-        <form action={signOut} style={{ display: "inline" }}><button type="submit">Sign out</button></form>
-      </p>
-      <h1>Source registry</h1>
-      {error && <p role="alert" style={{ color: "#a00" }}>Error: {error}</p>}
-      {ok && <p style={{ color: "#070" }}>Saved ({ok}). The change is recorded in the audit log.</p>}
-      {loadError && <p role="alert" style={{ color: "#a00" }}>Could not load sources: {loadError.message}</p>}
-
-      <table style={{ borderCollapse: "collapse", width: "100%" }}>
+      <PageHeader title="Source registry" crumbs={[{ href: "/", label: "Dashboard" }, { label: "Sources" }]}
+        lede="Approved public sources only. Collection method approval and activation are separate, audited human decisions; the collector reads only active, approved sources." />
+      <Flash ok={ok} error={error} />
+      {loadError && <Flash error={`Could not load sources: ${loadError.message}`} />}
+      <div className="table-wrap"><table className="table">
         <thead>
           <tr>
             {["Name", "Domain", "Type", "Lang", "Method", "Approved", "Retention", "Active", "Actions"].map((h) => (
-              <th key={h} style={{ ...cell, textAlign: "left", borderBottom: "2px solid #ccc" }}>{h}</th>
+              <th key={h} >{h}</th>
             ))}
           </tr>
         </thead>
         <tbody>
           {sources.map((s) => (
             <tr key={s.id}>
-              <td style={cell}>{s.name}</td>
-              <td style={cell}>{s.canonical_domain}</td>
-              <td style={cell}>{s.source_type}</td>
-              <td style={cell}>{s.primary_language}</td>
-              <td style={cell}>{s.collection_method}</td>
-              <td style={cell}>{s.collection_method_approved ? "yes" : "no"}</td>
-              <td style={cell}>{s.retention_mode}</td>
-              <td style={cell}>{s.active ? "ACTIVE" : "inactive"}</td>
-              <td style={cell}>
+              <td>{s.name}</td>
+              <td>{s.canonical_domain}</td>
+              <td>{s.source_type}</td>
+              <td>{s.primary_language}</td>
+              <td>{s.collection_method}</td>
+              <td>{s.collection_method_approved ? "yes" : "no"}</td>
+              <td>{s.retention_mode}</td>
+              <td>{s.active ? "ACTIVE" : "inactive"}</td>
+              <td>
                 {can(session, "SOURCE_APPROVE_COLLECTION_METHOD") && (
                   <form action={setCollectionMethodApproval} style={{ marginBottom: 4 }}>
                     <input type="hidden" name="id" value={s.id} />
@@ -93,19 +87,19 @@ export default async function SourcesPage({
             </tr>
           ))}
           {sources.length === 0 && (
-            <tr><td style={cell} colSpan={9}>No sources registered yet (initial source list K-05 is pending).</td></tr>
+            <tr><td colSpan={9}>No sources registered yet (initial source list K-05 is pending).</td></tr>
           )}
         </tbody>
-      </table>
+      </table></div>
 
       {can(session, "SOURCE_CREATE") && (
-        <section style={{ marginTop: 24 }}>
+        <section className="card" style={{ marginTop: 16 }}>
           <h2>Register a source</h2>
           <p style={{ color: "#555" }}>
             New sources start inactive with an unapproved collection method. A reviewer must approve the
             method (terms / legal basis) before the source can be activated.
           </p>
-          <form action={createSource} style={{ display: "grid", gap: 6, maxWidth: 560 }}>
+          <form action={createSource} className="form" style={{ maxWidth: 640 }}>
             <label>Name <input name="name" required /></label>
             <label>Canonical domain <input name="canonical_domain" required placeholder="example.org" /></label>
             <label>Owner organisation <input name="owner_organisation" /></label>

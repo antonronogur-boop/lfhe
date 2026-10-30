@@ -4,6 +4,12 @@ import { createClient } from "@/lib/supabase/server";
 
 export type Permission =
   | "SOURCE_READ"
+  | "ARTICLE_READ"
+  | "SYSTEM_READ"
+  | "EVENT_ACTION"
+  | "ASSESSMENT_REVIEW"
+  | "FINAL_CONFIDENCE_SET"
+  | "PROMPT_ACTIVATE"
   | "SOURCE_CREATE"
   | "SOURCE_UPDATE"
   | "SOURCE_APPROVE_COLLECTION_METHOD"
@@ -27,6 +33,7 @@ export interface Session {
   userId: string;
   email: string | null;
   permissions: ReadonlySet<string>;
+  roles: readonly string[];
 }
 
 /**
@@ -34,15 +41,26 @@ export interface Session {
  * the authoritative check is repeated inside PostgreSQL for every write.
  */
 export async function requireSession(): Promise<Session> {
+  const session = await getSession();
+  if (!session) redirect("/login");
+  return session;
+}
+
+/** The signed-in session, or null (no redirect) — used by the application shell. */
+export async function getSession(): Promise<Session | null> {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
-  if (error || !data.user) redirect("/login");
-  const { data: perms, error: permError } = await supabase.rpc("my_permissions");
+  if (error || !data.user) return null;
+  const [{ data: perms, error: permError }, { data: roleRows }] = await Promise.all([
+    supabase.rpc("my_permissions"),
+    supabase.from("user_roles").select("role_code").eq("user_id", data.user.id),
+  ]);
   if (permError) throw new Error(`could not load permissions: ${permError.message}`);
   return {
     userId: data.user.id,
     email: data.user.email ?? null,
     permissions: new Set((perms as string[] | null) ?? []),
+    roles: ((roleRows ?? []) as { role_code: string }[]).map((r) => r.role_code).sort(),
   };
 }
 
