@@ -20,7 +20,7 @@ MAX_AUTO_ASSESSMENTS = 20      # cost guard per analysis context (an extra asses
 
 
 def _context(conn):
-    return conn.execute("SELECT report_id, report_mode, information_cutoff FROM lfhe.autopilot_context()").fetchone()
+    return conn.execute("SELECT report_id, report_mode, information_cutoff FROM lfhe.auto_analysis_context()").fetchone()
 
 
 def _same_context(ctx, payload: dict) -> bool:
@@ -42,7 +42,7 @@ def after_classification(conn, queue, claim_ids) -> int:
         if ctx is None or not claim_ids:
             return 0
         eligible = [str(i) for i in conn.execute(
-            "SELECT lfhe.autopilot_eligible_claims(%s::uuid[], %s, %s) AS ids",
+            "SELECT lfhe.auto_analysis_eligible_claims(%s::uuid[], %s, %s) AS ids",
             ([str(i) for i in claim_ids], ctx["report_mode"], ctx["information_cutoff"])).fetchone()["ids"]]
         if not eligible:
             return 0
