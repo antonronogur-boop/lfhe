@@ -44,6 +44,7 @@ from datetime import datetime
 from lfhe_shared.jobs import Job, JobQueue, PermanentJobError, default_worker_id
 
 from .claim_inputs import InputBuildError
+from . import autopilot
 from .claim_pipeline import classify_claims, extract_claims
 from .assessment_pipeline import run_assessment, run_challenge, run_relevance
 from .event_pipeline import run_event_builder, run_lineage
@@ -88,10 +89,12 @@ def make_handlers(conn, queue: JobQueue, provider: Provider, *, m02_config: str 
         log.info("CLASSIFY_CLAIMS %s → %s (%d assignment(s))", job.object_id, out.outcome, out.assignments)
         if out.outcome == "PROVIDER_ERROR":
             raise RuntimeError("provider error (recorded as model run); will retry within max_attempts")
+        if out.outcome not in ("OUTPUT_REJECTED", "HUMAN_REVIEW_REQUIRED", "SCHEMA_VALIDATION_FAILED"):
+            autopilot.after_classification(conn, queue, job.payload.get("claim_ids") or [])   # CR7-05 (only if switched on)
         return "HUMAN_REVIEW" if out.outcome in ("OUTPUT_REJECTED", "HUMAN_REVIEW_REQUIRED",
                                                  "SCHEMA_VALIDATION_FAILED") else "SUCCESS"
 
-    def analysis(module_config, runner, label, review_outcomes):
+    def analysis(module_config, runner, label, review_outcomes, after=None):
         def handle(job: Job):
             if not module_config:
                 raise PermanentJobError(f"{label} model configuration is not configured")
@@ -106,6 +109,8 @@ def make_handlers(conn, queue: JobQueue, provider: Provider, *, m02_config: str 
             log.info("%s %s → %s", label, job.object_id, out.outcome)
             if out.outcome == "PROVIDER_ERROR":
                 raise RuntimeError("provider error (recorded as model run); will retry within max_attempts")
+            if after is not None:
+                after(job, out)
             return "HUMAN_REVIEW" if out.outcome in review_outcomes else "SUCCESS"
         return handle
 
@@ -141,6 +146,10 @@ def make_handlers(conn, queue: JobQueue, provider: Provider, *, m02_config: str 
                               reference_context_codes=tuple(p.get("reference_context_codes") or ()),
                               previous_assessment_version_id=p.get("previous_assessment_version_id"),
                               model_configuration_id=mc, provider=provider, worker_id=worker_id, job_id=job.id)
+
+    def chain_after_relevance(job, out):
+        if out.outcome == "RELEVANCE_RECORDED":
+            autopilot.after_relevance(conn, queue, job.object_id, job.payload)   # CR7-05 (only if switched on)
 
     def enqueue_challenge(job, out):
         if out.outcome != "ASSESSMENT_RECORDED":
@@ -192,8 +201,9 @@ def make_handlers(conn, queue: JobQueue, provider: Provider, *, m02_config: str 
             "RUN_REPORT_QA": report_qa, "RENDER_RELEASE_PDF": release_pdf,
             "EXTRACT_CLAIMS": extract, "CLASSIFY_CLAIMS": classify,
             "ANALYSE_LINEAGE": analysis(m04_config, run_lineage, "ANALYSE_LINEAGE", review),
-            "BUILD_EVENTS": analysis(m05_config, run_event_builder, "BUILD_EVENTS", review),
-            "ASSESS_RELEVANCE": phase4(m06_config, "ASSESS_RELEVANCE", relevance),
+            "BUILD_EVENTS": analysis(m05_config, run_event_builder, "BUILD_EVENTS", review,
+                                     after=lambda job, out: autopilot.after_event_build(conn, queue, out.final_run_id, job.payload)),
+            "ASSESS_RELEVANCE": phase4(m06_config, "ASSESS_RELEVANCE", relevance, after=chain_after_relevance),
             "ASSESS_EVENT": phase4(m07_config, "ASSESS_EVENT", assessment, enqueue_challenge),
             "CHALLENGE_ASSESSMENT": phase4(m08_config, "CHALLENGE_ASSESSMENT", challenge)}
 

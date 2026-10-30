@@ -60,3 +60,29 @@ describe("event forms", () => {
     expect(relevanceOverride(RelevanceDecisionSchema.parse({ ...base, action: "OVERRIDE", priority_score: "1.5" }))).toEqual({ priority_score: 1.5 });
   });
 });
+
+import { AutopilotSchema, BatchEventSchema, batchSummary, parsePicks } from "@/lib/inbox";
+
+describe("CR7-05 inbox", () => {
+  const V = "22222222-2222-4222-8222-222222222222";
+  const pick = `${U}|${V}|${H}`;
+  it("a batch decision needs an audited reason and exact event versions, at most 50", () => {
+    expect(BatchEventSchema.safeParse({ decision: "CONFIRM", reason: "reviewed", items: [pick] }).success).toBe(true);
+    expect(BatchEventSchema.safeParse({ decision: "CONFIRM", reason: "ok", items: [pick] }).success).toBe(false);
+    expect(BatchEventSchema.safeParse({ decision: "CONFIRM", reason: "reviewed", items: [] }).success).toBe(false);
+    expect(BatchEventSchema.safeParse({ decision: "CONFIRM", reason: "reviewed", items: ["not-a-pick"] }).success).toBe(false);
+    expect(BatchEventSchema.safeParse({ decision: "APPROVE", reason: "reviewed", items: [pick] }).success).toBe(false);
+    expect(BatchEventSchema.safeParse({ decision: "REJECT", reason: "reviewed", items: Array(51).fill(pick) }).success).toBe(false);
+  });
+  it("splits a selection into the exact event, version and hash", () => {
+    expect(parsePicks([pick])).toEqual([{ event_id: U, version_id: V, version_hash: H }]);
+  });
+  it("autopilot is on or off with a reason", () => {
+    expect(AutopilotSchema.safeParse({ report_id: U, enabled: "on", reason: "run it" }).success).toBe(true);
+    expect(AutopilotSchema.safeParse({ report_id: U, enabled: "maybe", reason: "run it" }).success).toBe(false);
+  });
+  it("reports partial failures instead of hiding them", () => {
+    expect(batchSummary(2, [])).toBe("2 event(s) done");
+    expect(batchSummary(1, [{ id: U, message: "stale hash" }])).toContain("1 not done: stale hash");
+  });
+});

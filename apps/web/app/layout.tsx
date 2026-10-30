@@ -31,6 +31,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             <div className="brand">LFHÉ</div>
             <div className="brand-sub">AI-assisted, human-governed air-domain OSINT · Phase 7 pilot</div>
             <NavLink href="/">Dashboard</NavLink>
+            {can(session, "CLAIM_READ") && <NavLink href="/inbox" count={q.eventsCandidate + q.assessmentsInReview}>Inbox</NavLink>}
             <div className="nav-group">Analysis</div>
             {can(session, "SOURCE_READ") && <NavLink href="/sources">Sources</NavLink>}
             {can(session, "CLAIM_READ") && <NavLink href="/claims" count={q.claimsToReview}>Claims</NavLink>}

@@ -2,6 +2,11 @@
 
 All material project changes are recorded here.
 
+## [Unreleased] — Phase 7 CR7-05 (PO decision: automatic analysis, human control only where it matters)
+
+Migration `20261011004500_cr7_05_report_autopilot.sql` (46 migrations), `autopilot.py` worker chain, `/inbox`; see
+`docs/cr7-05.md`. CG7 OPEN.
+
 ## [Unreleased] — Phase 7 CR7-04 (proven defect from the P7-04 walkthrough)
 
 Migration `20261011004400_cr7_04_assessment_rejection_visibility.sql` (45 migrations), one bounded M07 attribution

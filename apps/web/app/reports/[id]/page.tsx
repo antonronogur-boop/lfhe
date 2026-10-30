@@ -3,6 +3,7 @@ import {
   type CanonicalReport, EDITORIAL_TRANSFORMS, SECTION_TITLES, SELECTABLE_SECTIONS, SELECTION_DECISIONS, confidenceLabel, diffVersions,
 } from "@/lib/reports";
 import { createClient } from "@/lib/supabase/server";
+import { AutopilotCard, type AutopilotRow } from "@/components/autopilot";
 import { Badge, Flash, PageHeader, Tabs, When } from "@/components/ui";
 
 import {
@@ -47,6 +48,7 @@ export default async function ReportWorkspace({
 
   const { data: report } = await supabase.from("reports").select("*").eq("id", id).single();
   if (!report) return <p>Unknown report.</p>;
+  const { data: apData } = await supabase.from("report_autopilot").select("report_id,enabled,reason,changed_at");
   const [{ data: candData }, { data: versionData }] = await Promise.all([
     supabase.from("report_candidate_state").select("*").eq("report_id", id).order("created_at"),
     supabase.from("report_version_states").select("*").eq("report_id", id).order("version_no", { ascending: false }),
@@ -111,6 +113,8 @@ export default async function ReportWorkspace({
       <Tabs current={view} items={[["pool", "Candidate pool"], ["draft", "Draft"], ["versions", "Versions"], ["preview", "Preview"],
         ["qa", "QA"], ["release", "Approvals & release"]].map(([k, l]) => ({ key: k, label: l, href: link(k) }))} />
       <Flash ok={ok} error={error} />
+      {view === "pool" && <AutopilotCard reports={[{ id, code: report.code, report_mode: report.report_mode, information_cutoff: report.information_cutoff }]}
+        state={(apData ?? []) as AutopilotRow[]} allowed={can(session, "EVENT_ACTION")} fixedReport={id} />}
 
       {view === "pool" && (
         <section>
