@@ -4,6 +4,10 @@ All material project changes are recorded here.
 
 ## [Unreleased] — Phase 7 CR7-03 (PO 2026-10-30, SPEC_INDEX 31)
 
+Status: PO approved · implemented on branch `cr7-03-pilot-operational-path` · automated tests and technical browser E2E
+PASS · not yet applied to DEV · human P7-04 outstanding · 0 / 6 real pilot cycles (first measured cycle: REPLAY).
+Repository total: 44 migrations.
+
 ### Added
 - Migration `20261011004300_cr7_03_workflow_job_requests.sql`: HUMAN_ONLY `request_workflow_job` /
   `request_pending_claim_extractions` (M02 / M04 / M05 / M06 / M07 / M08 requests; idempotent, audited

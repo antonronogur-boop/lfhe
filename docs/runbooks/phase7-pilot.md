@@ -16,11 +16,15 @@ python scripts/apply_migrations.py $env:LFHE_DEV_DB_URL
 python scripts/supabase_dev_smoke.py | Out-File -Encoding utf8 dev-smoke-phase7.json
 ```
 
-Expected: **42 migrations** (new: `20261011004100_p7_pilot_instrumentation.sql`), smoke **68 / 68 PASS**
+*Historical, pre-CR7-03 (2026-10-23):* **42 migrations** (new: `20261011004100_p7_pilot_instrumentation.sql`), smoke **68 / 68 PASS**
 (62 earlier + 6 Phase 7 checks: pilot tables with RLS; no direct writes / no worker reads; 16 HUMAN_ONLY
 pilot functions not exposed to worker / service_role / anon; viewer and ADMIN cannot create a cycle;
 PILOT_LEAD holds no analytical / QA / approval / security / release authority; the 41 applied migrations
 match `database/migrations.lock.json`). The smoke creates no pilot record.
+
+**Current:** after merging CR7-03 the repository holds **44 migrations** (4200 CR7-01, 4300 CR7-03); applying them and the
+smoke (+3 CR7-03 checks) is described in §3a. Roles, the cost assumption and the provider price are already recorded
+(PO) — §1 and §2 are done.
 
 ## 1. Pilot roles (once)
 
