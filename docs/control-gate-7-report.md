@@ -113,6 +113,10 @@ zárolással). Audit hash-lánc: PASS, 161 bejegyzés; pg_cron aktív. `docs/dev
 
 Árak csak rögzített `pilot_provider_prices` mellett; nélküle a költség „ismeretlen”.
 
+- **CR7-03 (2026-10-30, `cr7-03-pilot-operational-path`):** teljes Python készlet **592 passed, 1 skipped** (a skipped a
+  valós-provider próba), benne CR7-03 integráció 7 / 7 és böngészős E2E 2 / 2; web TypeScript PASS, vitest **54 / 54**
+  (6 fájl), production build PASS; prompt lock OK; secret scan és gitleaks (git) clean.
+
 ## BROWSER UX VALIDATION RESULT
 
 **NOT YET EVIDENCED** (P7-04, PO) — az emberi böngészős végigjárást automatizálás nem helyettesíti (§17, P7-04).
