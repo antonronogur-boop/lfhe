@@ -59,7 +59,8 @@ export const UxFindingSchema = z.object({
   title: text(5, 200), description: text(10),
   route: z.string().regex(/^\/[A-Za-z0-9/_[\]-]*$/).optional().or(z.literal("").transform(() => undefined)),
 });
-export const DisposeSchema = z.object({ cycle_id: uuid, finding_id: uuid, disposition: z.enum(DISPOSITIONS), note: text(5) });
+export const DisposeSchema = z.object({ cycle_id: uuid.optional().or(z.literal("").transform(() => undefined)), finding_id: uuid,
+  disposition: z.enum(DISPOSITIONS), note: text(5) });
 export const ComparatorSchema = z.object({
   cycle_id: uuid,
   method: z.enum(COMPARATOR_METHODS),
@@ -143,4 +144,54 @@ export function missingLabel(code: string): string {
 export function currentDisposition(history: { finding_id: string; disposition: string; seq: number }[], findingId: string): string {
   const h = history.filter((d) => d.finding_id === findingId).sort((a, b) => b.seq - a.seq);
   return h[0]?.disposition ?? "OPEN";
+}
+
+/* ---- CR7-03 pilot workspace summary (pure; presentation only) ---------------------------------------------------- */
+/** Workflow-stage groups used to show who spent the time; a stage group is not a role check. */
+export const STAGE_GROUPS: Record<string, readonly string[]> = {
+  analyst: ["SOURCE_REVIEW", "CLAIM_REVIEW", "EVENT_REVIEW", "ASSESSMENT_REVIEW", "REPORT_SELECTION", "REPORT_EDIT", "QA_RESOLUTION", "CORRECTION", "OTHER"],
+  reviewer: ["WARNING_HANDLING", "CONTENT_APPROVAL"],
+  security: ["SECURITY_REVIEW"],
+  release: ["RELEASE", "PROVENANCE_INSPECTION"],
+};
+
+export interface TimingAll { stage: string; user_id: string; active_seconds: number | string | null; open_segments: number | string | null }
+
+export function timeByGroup(rows: TimingAll[]): Record<string, number> {
+  const out: Record<string, number> = { analyst: 0, reviewer: 0, security: 0, release: 0 };
+  for (const r of rows) {
+    const g = Object.entries(STAGE_GROUPS).find(([, stages]) => stages.includes(r.stage))?.[0] ?? "analyst";
+    out[g] += Number(r.active_seconds ?? 0);
+  }
+  return out;
+}
+
+export interface RunSummaryRow { module_code: string; provider: string; model: string; status: string; input_tokens: number | null;
+  output_tokens: number | null; model_cost: string | null; cost_currency: string | null; is_repair_run: boolean }
+
+/** AI execution summary; cost stays "unknown" if any run lacks a matching explicit price (never zero). */
+export function runSummary(rows: RunSummaryRow[]) {
+  const models = [...new Set(rows.map((r) => `${r.provider} / ${r.model}`))];
+  const tokensIn = rows.reduce((a, r) => a + (r.input_tokens ?? 0), 0);
+  const tokensOut = rows.reduce((a, r) => a + (r.output_tokens ?? 0), 0);
+  const priced = rows.filter((r) => r.model_cost !== null);
+  const currencies = [...new Set(priced.map((r) => r.cost_currency))];
+  const cost = priced.length === rows.length && rows.length > 0 && currencies.length === 1
+    ? { value: priced.reduce((a, r) => a + Number(r.model_cost), 0), currency: currencies[0] as string } : null;
+  const byModule: Record<string, number> = {};
+  for (const r of rows) byModule[r.module_code] = (byModule[r.module_code] ?? 0) + 1;
+  return { runs: rows.length, failed: rows.filter((r) => r.status !== "SUCCEEDED").length, repairs: rows.filter((r) => r.is_repair_run).length,
+    models, tokensIn, tokensOut, cost, unpriced: rows.length - priced.length, byModule };
+}
+
+/** Analyst-time cost at an explicit loaded hourly cost. It is NOT a saving and NOT a capacity value: a capacity value
+ *  needs a comparator baseline (hours released); without one the result is observational only. */
+export function timeCost(seconds: number, hourly: number | null) {
+  return hourly === null ? null : Math.round((seconds / 3600) * hourly * 100) / 100;
+}
+
+export function capacityStatement(method: string | null | undefined): string {
+  if (!method) return "No comparator recorded — observational only / productivity claim not available.";
+  if (method === "NONE") return "Comparator NONE — observational only / productivity claim not available.";
+  return `Comparator ${method.replaceAll("_", " ").toLowerCase()} — capacity value can be computed from the timed baseline (not a cash saving).`;
 }

@@ -3,6 +3,7 @@ import {
   type CanonicalReport, EDITORIAL_TRANSFORMS, SECTION_TITLES, SELECTABLE_SECTIONS, SELECTION_DECISIONS, confidenceLabel, diffVersions,
 } from "@/lib/reports";
 import { createClient } from "@/lib/supabase/server";
+import { Badge, Flash, PageHeader, Tabs, When } from "@/components/ui";
 
 import {
   decideCandidate, decideRemovals, editStatement, freezeSelection, moveStatement, refreshCandidates, removeStatement,
@@ -26,8 +27,6 @@ interface AStatement {
 }
 interface Proposal { id: string; proposal_no: number; target_item_local_id: string | null; target_statement_local_id: string | null; reason: string }
 
-const box = { border: "1px solid #ddd", borderRadius: 4, padding: 10, marginBottom: 12 } as const;
-const muted = { color: "#666" } as const;
 const confStyle: Record<string, object> = {
   "conf-high": { borderLeft: "4px solid #1f4e79" }, "conf-moderate": { borderLeft: "4px solid #5b6f84" },
   "conf-low": { borderLeft: "4px dashed #8a6d3b" }, "conf-none": { borderLeft: "4px dotted #bbb" },
@@ -94,7 +93,6 @@ export default async function ReportWorkspace({
       }
     }
   }
-  const tabs = ["pool", "draft", "versions", "preview", "qa", "release"];
   const link = (v: string, extra = "") => `/reports/${id}?view=${v}${current ? `&version=${current.report_version_id}` : ""}${extra}`;
   const hidden = (vs: VersionState) => (
     <>
@@ -106,19 +104,18 @@ export default async function ReportWorkspace({
 
   return (
     <main>
-      <p><a href="/reports">← Reports</a></p>
-      <h1>{report.title}</h1>
-      <p style={muted}>{report.code} · {report.cycle_label} · {report.report_mode} · information cutoff {report.information_cutoff}</p>
-      <nav style={{ marginBottom: 12 }}>
-        {tabs.map((t) => <a key={t} href={link(t)} style={{ marginRight: 12, fontWeight: view === t ? 700 : 400 }}>{t}</a>)}
-      </nav>
-      {error && <p role="alert" style={{ color: "#a00" }}>Error: {error}</p>}
-      {ok && <p style={{ color: "#070" }}>Done ({ok}). Recorded in the audit log.</p>}
+      <PageHeader title={report.title} crumbs={[{ href: "/", label: "Dashboard" }, { href: "/reports", label: "Reports" }, { label: report.code }]}
+        badges={<><Badge value={report.report_mode} />{current && <Badge tone="outline">v{current.version_no}</Badge>}</>}
+        lede={<>{report.code} · cycle {report.cycle_label} · information cutoff <When at={report.information_cutoff} /> · built only from approved
+          Phase 4 material you select; M09 suggests wording, every inclusion and removal is your decision.</>} />
+      <Tabs current={view} items={[["pool", "Candidate pool"], ["draft", "Draft"], ["versions", "Versions"], ["preview", "Preview"],
+        ["qa", "QA"], ["release", "Approvals & release"]].map(([k, l]) => ({ key: k, label: l, href: link(k) }))} />
+      <Flash ok={ok} error={error} />
 
       {view === "pool" && (
         <section>
           <h2>Candidate pool</h2>
-          <p style={muted}>Only approved, as-of current Phase 4 material for this report&apos;s mode and cutoff appears here. Nothing is
+          <p className="muted">Only approved, as-of current Phase 4 material for this report&apos;s mode and cutoff appears here. Nothing is
             ever removed from the pool; inclusion is your decision.</p>
           {editor && (
             <form action={refreshCandidates} style={{ marginBottom: 8 }}>
@@ -130,9 +127,9 @@ export default async function ReportWorkspace({
             const st = avState.get(c.object_id);
             const conf = confidenceLabel(st?.final_analytic_confidence);
             return (
-              <div key={c.candidate_id} style={{ ...box, ...confStyle[conf.cls] }}>
-                <div><strong>{c.candidate_type}</strong> {c.object_id} <span style={muted}>hash {c.object_hash.slice(0, 12)}…</span></div>
-                <div style={muted}>
+              <div key={c.candidate_id} className="card" style={confStyle[conf.cls]}>
+                <div><strong>{c.candidate_type}</strong> {c.object_id} <span className="muted">hash {c.object_hash.slice(0, 12)}…</span></div>
+                <div className="muted">
                   recommended {c.recommended_section}{c.recommended_rank !== null && <> · M06 priority {c.recommended_rank}</>}
                   {st && <> · {conf.label} · assessment state {st.state} · event version {st.event_version_id}</>}
                 </div>
@@ -158,7 +155,7 @@ export default async function ReportWorkspace({
           })}
           {cands.length === 0 && <p>No eligible approved material yet.</p>}
           {editor && cands.some((c) => c.latest_decision === "INCLUDE") && (
-            <form action={freezeSelection} style={{ ...box, background: "#f6f8fa" }}>
+            <form action={freezeSelection} className="card" style={{ background: "#f6f8fa" }}>
               <input type="hidden" name="report_id" value={id} />
               <strong>Freeze the included selection and request the M09 draft</strong>{" "}
               <input name="reason" placeholder="reason" required minLength={5} /> <button type="submit">Request M09 draft</button>
@@ -170,12 +167,12 @@ export default async function ReportWorkspace({
       {view === "draft" && (!current || !canonical) && <p>No draft yet. Select candidates and request the M09 draft.</p>}
       {view === "draft" && current && canonical && (
         <section>
-          <h2>Draft version {current.version_no} <span style={muted}>({current.origin}, {current.report_version_hash.slice(0, 16)}…)</span></h2>
-          <p style={muted}>State DRAFT_VERSION · length {current.length_status}
+          <h2>Draft version {current.version_no} <span className="muted">({current.origin}, {current.report_version_hash.slice(0, 16)}…)</span></h2>
+          <p className="muted">State DRAFT_VERSION · length {current.length_status}
             {current.length_review_pending && <strong style={{ color: "#a50" }}> · REPORT_LENGTH_REVIEW_REQUIRED — your decision is pending</strong>}
             {!current.is_latest && <strong style={{ color: "#a00" }}> · not the latest version (read-only)</strong>}</p>
           {current.length_review_pending && editor && current.is_latest && (
-            <form action={decideRemovals} style={{ ...box, borderColor: "#a50" }}>
+            <form action={decideRemovals} className="card" style={{ borderColor: "#a50" }}>
               {hidden(current)}
               <input type="hidden" name="proposal_ids" value={proposals.map((p) => p.id).join(",")} />
               <strong>M09 removal proposals (substantive removal is your decision)</strong>
@@ -197,36 +194,36 @@ export default async function ReportWorkspace({
               <div key={sec.section} style={{ marginBottom: 10 }}>
                 <h3 style={{ marginBottom: 4 }}>{SECTION_TITLES[sec.section]}
                   {cov && (cov.target_min !== null || cov.target_max !== null) && (
-                    <small style={muted}> ({cov.count} of target {cov.target_min ?? "–"}–{cov.target_max ?? "–"}
+                    <small className="muted"> ({cov.count} of target {cov.target_min ?? "–"}–{cov.target_max ?? "–"}
                       {cov.below_target && " · below target: no filler is generated"}{cov.above_target && " · above target"})</small>)}
                 </h3>
-                {sec.items.length === 0 && <p style={muted}><em>No approved material was selected for this section.</em></p>}
+                {sec.items.length === 0 && <p className="muted"><em>No approved material was selected for this section.</em></p>}
                 {sec.items.map((it) => {
                   const conf = confidenceLabel(it.final_analytic_confidence);
                   return (
-                    <article key={it.item_local_id} style={{ ...box, ...confStyle[conf.cls] }}>
-                      <div style={muted}>{it.item_local_id} · {conf.label} · pinned{" "}
+                    <article key={it.item_local_id} className="card" style={confStyle[conf.cls]}>
+                      <div className="muted">{it.item_local_id} · {conf.label} · pinned{" "}
                         {Object.entries(it.pins).filter(([, v]) => v).map(([k, v]) => `${k} ${v!.id.slice(0, 8)}…`).join(", ")}</div>
                       {it.statements.map((st, n) => (
                         <div key={st.report_statement_local_id} style={{ margin: "6px 0" }}>
                           <div style={st.statement_role === "CAVEAT" ? { color: "#555" } : undefined}>
                             {st.statement_role === "CAVEAT" && <strong>Caveat: </strong>}{st.text}
-                            {st.likelihood_term && <span style={muted}> [likelihood: {st.likelihood_term}]</span>}
+                            {st.likelihood_term && <span className="muted"> [likelihood: {st.likelihood_term}]</span>}
                             {st.contested && <strong style={{ color: "#9a3412" }}> [contested]</strong>}
                           </div>
                           <details>
-                            <summary style={muted}>{st.report_statement_local_id} · {st.statement_role} · {st.editorial_transform} · provenance</summary>
+                            <summary className="muted">{st.report_statement_local_id} · {st.statement_role} · {st.editorial_transform} · provenance</summary>
                             <ul>
                               {st.sources.map((sid) => {
                                 const s = sources.get(sid);
                                 return (
                                   <li key={sid}>
                                     {s ? <>{s.statement_local_id} {s.statement_type} ({s.epistemic_category}): “{s.statement_text}”
-                                      {s.attribution_required && <span style={muted}> · attribution required: “{s.attribution_text}”</span>}
-                                      {s.likelihood_term && <span style={muted}> · likelihood {s.likelihood_term}</span>}
-                                      <span style={muted}> · assessment version {s.assessment_version_id}</span></> : sid}
+                                      {s.attribution_required && <span className="muted"> · attribution required: “{s.attribution_text}”</span>}
+                                      {s.likelihood_term && <span className="muted"> · likelihood {s.likelihood_term}</span>}
+                                      <span className="muted"> · assessment version {s.assessment_version_id}</span></> : sid}
                                     <ul>{(claimsBySource.get(sid) ?? []).map((c) => (
-                                      <li key={c.claim_id} style={muted}>{c.role} claim {c.claim_id}: {c.text}</li>))}</ul>
+                                      <li key={c.claim_id} className="muted">{c.role} claim {c.claim_id}: {c.text}</li>))}</ul>
                                   </li>
                                 );
                               })}
@@ -266,7 +263,7 @@ export default async function ReportWorkspace({
               </div>
             );
           })}
-          {canonical.human_removals.length > 0 && <p style={muted}>Removed by human decision: {canonical.human_removals.join(", ")}</p>}
+          {canonical.human_removals.length > 0 && <p className="muted">Removed by human decision: {canonical.human_removals.join(", ")}</p>}
         </section>
       )}
 
@@ -303,7 +300,7 @@ export default async function ReportWorkspace({
           {!render && <p>No preview rendered yet for this version (the worker renders every new version).</p>}
           {render && (
             <>
-              <p style={muted}>PREVIEW of version {current?.version_no} · {render.template_version} · {render.renderer_version} · sha256 {render.content_sha256.slice(0, 16)}…
+              <p className="muted">PREVIEW of version {current?.version_no} · {render.template_version} · {render.renderer_version} · sha256 {render.content_sha256.slice(0, 16)}…
                 — not QA-approved, not security-reviewed, not released.</p>
               <iframe title="report preview" sandbox="" srcDoc={render.content} style={{ width: "100%", height: 1100, border: "1px solid #ccc" }} />
             </>
@@ -324,10 +321,10 @@ async function VersionCompare({ a, b }: { a: string; b: string }) {
   const diff = diffVersions(A.canonical_json, B.canonical_json).filter((d) => d.kind !== "unchanged");
   return (
     <div style={{ marginTop: 10 }}>
-      <p style={muted}>v{A.version_no} ({A.report_version_hash.slice(0, 12)}…) → v{B.version_no} ({B.report_version_hash.slice(0, 12)}…)</p>
+      <p className="muted">v{A.version_no} ({A.report_version_hash.slice(0, 12)}…) → v{B.version_no} ({B.report_version_hash.slice(0, 12)}…)</p>
       {diff.length === 0 && <p>No statement-level difference.</p>}
       {diff.map((d) => (
-        <div key={d.key} style={{ ...box, borderLeft: `4px solid ${d.kind === "added" ? "#2a7" : d.kind === "removed" ? "#c33" : "#c90"}` }}>
+        <div key={d.key} className="card" style={{ borderLeft: `4px solid ${d.kind === "added" ? "#2a7" : d.kind === "removed" ? "#c33" : "#c90"}` }}>
           <strong>{d.kind}</strong> <code>{d.key}</code>{d.sourcesChanged && d.kind === "changed" && " · sources changed"}
           {d.before !== undefined && <div style={{ color: "#a00" }}>− {d.before}</div>}
           {d.after !== undefined && <div style={{ color: "#070" }}>+ {d.after}</div>}
