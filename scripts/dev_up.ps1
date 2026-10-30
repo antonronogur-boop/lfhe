@@ -23,7 +23,11 @@ if ($LASTEXITCODE -ne 0) { Remove-Item Env:LFHE_DEV_DB_URL; throw "Migration fai
 Remove-Item Env:LFHE_DEV_DB_URL
 $adm = $null
 
-Write-Host "2/3  Worker settings" -ForegroundColor Cyan
+# the WEB window must NEVER inherit worker secrets (the web app refuses to start with LFHE_DATABASE_URL present)
+Write-Host "2/3  Starting the WEB window" -ForegroundColor Cyan
+Start-Process powershell -ArgumentList "-NoExit","-ExecutionPolicy","Bypass","-Command","Remove-Item Env:LFHE_DATABASE_URL,Env:LFHE_ANTHROPIC_API_KEY -ErrorAction SilentlyContinue; Set-Location '$repo\apps\web'; `$host.UI.RawUI.WindowTitle='LFHE WEB'; npm.cmd run dev -- -H 127.0.0.1"
+
+Write-Host "3/3  Worker settings" -ForegroundColor Cyan
 $wk = Get-Secret "lfhe_worker_login password (hidden)"
 $env:LFHE_ENV = "DEV"
 $env:LFHE_DATABASE_URL = "postgresql://lfhe_worker_login.${ref}:$([uri]::EscapeDataString($wk))@${poolerHost}:5432/postgres"
@@ -33,9 +37,8 @@ $env:LFHE_ANTHROPIC_API_KEY = Get-Secret "Anthropic API key (hidden)"
 $env:LFHE_CHROMIUM_PATH = "C:\Program Files\Google\Chrome\Application\chrome.exe"
 if (-not (Test-Path $env:LFHE_CHROMIUM_PATH)) { throw "Chrome was not found at $($env:LFHE_CHROMIUM_PATH)." }
 
-Write-Host "3/3  Starting the WORKER and the WEB window" -ForegroundColor Cyan
+Write-Host "     Starting the WORKER window" -ForegroundColor Cyan
 Start-Process powershell -ArgumentList "-NoExit","-ExecutionPolicy","Bypass","-Command","Set-Location '$repo'; . .\.venv\Scripts\Activate.ps1; `$host.UI.RawUI.WindowTitle='LFHE WORKER'; python -m lfhe_orchestrator.worker"
-Start-Process powershell -ArgumentList "-NoExit","-ExecutionPolicy","Bypass","-Command","Set-Location '$repo\apps\web'; `$host.UI.RawUI.WindowTitle='LFHE WEB'; npm.cmd run dev -- -H 127.0.0.1"
 $env:LFHE_ANTHROPIC_API_KEY = $null; $env:LFHE_DATABASE_URL = $null
 Write-Host ""
 Write-Host "DONE. Two new windows opened (LFHE WORKER, LFHE WEB). In ~20 seconds open http://127.0.0.1:3000/inbox" -ForegroundColor Green
