@@ -195,3 +195,18 @@ Pilot tables are readable with `PILOT_READ` (benchmark cases / labels: `PILOT_EV
 only); nobody writes them directly; `lfhe_worker` can neither read them nor call any pilot function.
 The Phase 6 authority assignment (QA_WARNING_ACKNOWLEDGE / REPORT_CONTENT_APPROVE → REVIEWER,
 SECURITY_REVIEW → SECURITY_REVIEWER, RELEASE_DECIDE → RELEASE_AUTHORITY) is unchanged.
+
+## CR7-03 — human request path for pipeline jobs (migration `20261011004300_cr7_03_workflow_job_requests.sql`)
+
+No new role or permission. A request uses the permission of the corresponding human step:
+
+| Function / job type | Caller | Permission |
+| --- | --- | --- |
+| `request_workflow_job('EXTRACT_CLAIMS' \| 'ANALYSE_LINEAGE', …)`, `request_pending_claim_extractions` | human (HUMAN_ONLY) | `CLAIM_REVIEW` (ANALYST) |
+| `request_workflow_job('BUILD_EVENTS', …)` | human (HUMAN_ONLY) | `EVENT_ACTION` (ANALYST) |
+| `request_workflow_job('ASSESS_RELEVANCE' \| 'ASSESS_EVENT' \| 'CHALLENGE_ASSESSMENT', …)` | human (HUMAN_ONLY) | `ASSESSMENT_REVIEW` (ANALYST, REVIEWER) |
+
+`ASSESS_EVENT` additionally requires an M06 recommendation for the exact event version or an audited
+`promote_event_version` decision. ADMIN, VIEWER, SECURITY_REVIEWER, RELEASE_AUTHORITY, PILOT_LEAD (alone), `anon`,
+`service_role` and `lfhe_worker` cannot request (tested). `workflow_job_requests` and `workflow_job_request_status` are
+readable with `CLAIM_READ`; nobody writes the table directly (append-only, audited `WORKFLOW_JOB_REQUESTED`).

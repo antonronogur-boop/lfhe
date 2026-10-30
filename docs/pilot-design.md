@@ -112,3 +112,13 @@ cases are the baseline unchanged (BM02-Q01, -Q24) and one synonym paraphrase via
 | SD7-10 | Workload instrument: raw NASA-TLX (unweighted) | standard, quick, no pairwise weighting session |
 | SD7-11 | Annual capacity value only for a CONTROLLED, claimable weekly figure | §9, §11, §12: an observational result is never annualised into a value claim |
 | SD7-12 | The cycle cutoff is copied from and must equal the report's cutoff; no separate pilot cutoff rule | §7 / test 3: closed REPLAY / LIVE cutoff semantics are reused, not redefined |
+
+## CR7-03 — operational path (PO 2026-10-30, SPEC_INDEX 31)
+
+Migration `20261011004300_cr7_03_workflow_job_requests.sql` adds the human request path for the existing pipeline jobs
+(`request_workflow_job`, `request_pending_claim_extractions`; append-only `workflow_job_requests`; status view
+`workflow_job_request_status`). It is operational, not measurement: it writes no pilot table and changes no analytical
+object. The web workspace gains `/events`, `/assessments`, `/jobs`, decision queues and a dashboard; the pilot workspace
+shows time by stage group, AI executions (tokens, cost only with an explicit price), QA D / S findings, provenance and an
+explicit "observational only / productivity claim not available" statement without a comparator. Details:
+`docs/cr7-03.md`.

@@ -68,6 +68,12 @@ rögzítésre.
 
 ## NEGATIVE FINDINGS (eddig)
 
+* USABILITY_DEFECT — **BLOCKING** (2026-10-25, EVENT_ASSESSMENT): „No UI / request path from claims to approved
+  assessment”. A Phase 3–4 emberi döntéseknek nem volt felülete, és az M04–M07 jobokat semmi nem állította sorba, így a
+  pilot-ciklus nem érhetett terminális állapotba. Kezelés: CR7-03 (PO 2026-10-30) — implementálva, böngészős E2E-vel
+  igazolva a helyi tesztveremben; a DEV-en történő ellenőrzés után a megállapítás RESOLVED diszpozíciót kaphat (az eredeti
+  rekord append-only, auditált marad).
+
 * MODEL_PERFORMANCE_LIMITATION (P7-BM-02): tiszta anyagon is ad nem blokkoló WARNING-ot (a 3 tiszta esetből 3 PASS_WITH_WARNINGS),
   és egy hibát többszörösen jelez → elemzői QA-feloldási teher; a finding-kód választása nem mindig egyezik a címkével.
 
