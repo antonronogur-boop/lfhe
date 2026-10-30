@@ -73,7 +73,10 @@
   változatlan Phase 1–6 regresszió és a Phase 7 tesztek.
 - Web: vitest **54 / 54** (6 fájl), TypeScript PASS, production build PASS.
 - Prompt lock: PASS. Secret scan: clean. Gitleaks (git-előzmény): clean.
-- CI: zöld — **run 41025798079** (secret-scan, python-tests, web, e2e), PR #1.
+- CI (PR #1; secret-scan, python-tests, web, e2e — mind zöld):
+  - CR7-03 implementációs CI (`5c37a02`): run 41025798079;
+  - **pre-merge cleanup verification CI** a `fe4b29f` dokumentációs cleanup commit után: **run 41039249220** — ez a
+    merge előtti ellenőrzési bizonyíték. (Az ezt követő, csak dokumentációs commitok CI-futásai nem kerülnek ide.)
 
 *Történeti, pre-CR7-03 eredmény (2026-10-23, nem aktuális):* 576 passed / 1 skipped, web 44 / 44, CI run 40009048791
 (`cba45d1`).
