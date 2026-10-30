@@ -380,6 +380,25 @@ def main() -> int:
     check("CR7-01: provider_fixed_sampling allowed for anthropic, never combined with temperature",
           ok_fixed == [] and bad_mix == ["$.provider_fixed_sampling (CONFLICTS_WITH_SAMPLING_PARAMETER)"], f"{ok_fixed} / {bad_mix}")
 
+    # CR7-03: human request path for pipeline jobs (migration 4300)
+    req_fns = db.execute(
+        "SELECT count(*) AS n, count(*) FILTER (WHERE has_function_privilege('lfhe_worker', p.oid, 'EXECUTE') "
+        "OR has_function_privilege('service_role', p.oid, 'EXECUTE') OR has_function_privilege('anon', p.oid, 'EXECUTE')) AS bad "
+        "FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace WHERE n.nspname = 'lfhe' "
+        "AND p.proname IN ('request_workflow_job', 'request_pending_claim_extractions') "
+        "AND obj_description(p.oid, 'pg_proc') = 'HUMAN_ONLY'").fetchone()
+    check("CR7-03: 2 HUMAN_ONLY job-request functions, none executable by worker / service_role / anon",
+          req_fns["n"] == 2 and req_fns["bad"] == 0, f"{req_fns['n']} functions, {req_fns['bad']} exposed")
+    req = {"p_job_type": "BUILD_EVENTS", "p": {"claim_ids": [zero], "report_mode": "LIVE",
+                                                "information_cutoff": "2026-01-01T00:00:00Z"}, "p_reason": "DEV smoke probe"}
+    r, r2 = rest.rpc("request_workflow_job", req, viewer), rest.rpc("request_workflow_job", req, admin)
+    check("CR7-03: viewer and ADMIN cannot request pipeline jobs (HUMAN_ONLY + EVENT_ACTION)",
+          r.status_code >= 400 and "EVENT_ACTION" in r.text and r2.status_code >= 400 and "EVENT_ACTION" in r2.text,
+          f"HTTP {r.status_code}/{r2.status_code}")
+    append_only = db.execute("SELECT count(*) AS n FROM pg_trigger WHERE tgrelid = 'lfhe.workflow_job_requests'::regclass "
+                             "AND NOT tgisinternal").fetchone()["n"]
+    check("CR7-03: job requests are append-only", append_only == 2, f"{append_only} trigger(s)")
+
     # 5. source administration end-to-end
     r = rest.rpc("create_source", payload, admin)
     ok = check("source admin: admin creates source", r.status_code == 200, f"HTTP {r.status_code} {r.text}")
