@@ -62,3 +62,6 @@ Repository total: 44 migrations.
 - CG1-05 Model runs record envelope, input-set and context-set hashes (DB-verified set hashes).
 - CG1-06 Python 3.13 hash-checked lock, pinned gitleaks in CI, DEV Supabase smoke script/runbook.
 - P1-11 F1–F10 acceptance suite, backup/restore round-trip test, documentation.
+
+## CR7-06 — LocalObjectStore Windows fix (release PDF)
+- `put_if_absent` removed its temporary file after setting it read-only; Windows refuses to delete read-only files (WinError 5), so `RENDER_RELEASE_PDF` failed on DEV. The temporary name is now removed while writable and the final object is made read-only afterwards. Regression test added. No migration, no schema or behaviour change on Linux.

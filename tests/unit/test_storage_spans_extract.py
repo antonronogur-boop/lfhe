@@ -96,3 +96,21 @@ def test_concurrent_writers_never_observe_a_partial_object(tmp_path):
         t.join()
     assert errors == [] and len(set(keys)) == 1
     assert store.get(keys[0]) == data and list(store.iter_keys()) == keys[:1]
+
+
+def test_object_store_never_unlinks_a_read_only_file_windows_rule(tmp_path, monkeypatch):
+    """Windows cannot delete a read-only file (WinError 5). The store must remove its
+    temporary name while still writable and only then mark the final object read-only."""
+    real_unlink = os.unlink
+
+    def windows_like_unlink(p, *a, **kw):
+        if not (os.stat(p).st_mode & 0o200):
+            raise PermissionError(5, "Access is denied", str(p))
+        return real_unlink(p, *a, **kw)
+
+    monkeypatch.setattr(os, "unlink", windows_like_unlink)
+    store = LocalObjectStore(tmp_path)
+    key = store.put_if_absent(b"release pdf bytes", prefix="release-pdf")
+    assert store.get(key) == b"release pdf bytes"
+    assert not (os.stat(tmp_path / key).st_mode & 0o222)  # final object is read-only
+    assert [p for p in (tmp_path / key).parent.iterdir() if p.name.startswith(".tmp-")] == []

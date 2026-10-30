@@ -65,18 +65,24 @@ class LocalObjectStore:
             self.get(key)  # verifies the existing object
             return key
         fd, tmp = tempfile.mkstemp(prefix=".tmp-", dir=path.parent)
+        linked = False
         try:
             with os.fdopen(fd, "wb") as fh:
                 fh.write(data)
                 fh.flush()
                 os.fsync(fh.fileno())
-            os.chmod(tmp, 0o444)
             try:
                 os.link(tmp, path)
+                linked = True
             except FileExistsError:
                 self.get(key)  # a concurrent writer won; verify its complete object
         finally:
+            # The temporary name is removed while it is still writable: on Windows a
+            # read-only file cannot be unlinked (WinError 5), which broke release-PDF
+            # rendering on DEV. Read-only is applied to the final object afterwards.
             os.unlink(tmp)
+        if linked:
+            os.chmod(path, 0o444)
         return key
 
     def iter_keys(self, prefix: str = "raw"):
