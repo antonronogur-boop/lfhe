@@ -57,7 +57,7 @@ const TONE: Record<string, string> = {
   RELEASED: "ok", RELEASE_REJECTED: "danger", SECURITY_REJECTED: "danger", CONTENT_REJECTED: "danger",
   // pilot
   OPEN: "info", COMPLETED: "ok", STOPPED: "neutral", BLOCKING: "danger", ENHANCEMENT: "neutral",
-  ENQUEUED: "info", ALREADY_ACTIVE: "neutral", ALREADY_COMPLETED: "neutral", REQUEUED_AFTER_FAILURE: "warn",
+  ENQUEUED: "info", ALREADY_ACTIVE: "neutral", ALREADY_COMPLETED: "neutral", REQUEUED_AFTER_FAILURE: "warn", REQUEUED_AFTER_REJECTION: "warn",
   HIGH: "accent", MODERATE: "info", LOW: "warn", LIVE: "info", REPLAY: "violet",
   SUPPORTS: "ok", CONTRADICTS: "danger", UPDATES: "info", CONTEXTUALISES: "neutral",
 };

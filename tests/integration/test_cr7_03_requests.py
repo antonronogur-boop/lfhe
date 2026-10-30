@@ -207,3 +207,32 @@ def test_requests_without_active_prompt_fail_clearly(pg, analyst, make_user):
         assert x.execute("SELECT lfhe.current_prompt_version('M99_UNKNOWN') v").fetchone()["v"] is None
         with pytest.raises(psycopg.errors.ObjectNotInPrerequisiteState, match="PROMPT_NOT_ACTIVE"):
             x.execute("SELECT lfhe.cr7_03_prompt('M99_UNKNOWN')")
+
+
+def test_cr7_04_rejected_m07_can_be_re_requested_and_shows_why(pg, prompts, analyst):
+    c = pclaim(pg, "A blog said 3 radars are at Fort Aster.", "3 radars are at Fort Aster")
+    e = human_event(pg, analyst, [c], title="Radars at Fort Aster (blog)")
+    h = head(pg, e)
+    vid, vh = str(h["head_version_id"]), h["head_content_hash"]
+    with pg.as_user(analyst) as hu:
+        hu.execute("SELECT lfhe.promote_event_version(%s, %s, 'REQUEST_ASSESSMENT', 'analyst requests assessment')", (vid, vh))
+    ctx = {"event_version_id": vid, "event_version_hash": vh, "report_mode": "LIVE", "information_cutoff": NOW().isoformat()}
+    park_pending(pg)
+    from test_p4_assessments import st
+    lie = [st("AS1", "KNOWN_FACT", "3 radars are at Fort Aster.", claims=[c], attr=False)]
+    ok = [st("AS1", "KNOWN_FACT", "A blog said 3 radars are at Fort Aster.", claims=[c], attr_text="A blog said")]
+    a = request(pg, analyst, "ASSESS_EVENT", ctx)
+    assert a["outcome"] == "ENQUEUED"
+    assert work(pg, lambda m, env: m07_out(env, lie)) == 1
+    assert job(pg, a["job_id"])["status"] == "HUMAN_REVIEW"
+    with pg.as_user(analyst) as hu:                          # the UI can now show WHY
+        d = hu.execute("SELECT outcome, rejection_reasons FROM lfhe.job_rejection_detail WHERE job_id=%s",
+                       (a["job_id"],)).fetchall()
+    assert any(r["outcome"] == "OUTPUT_REJECTED" and "ATTRIBUTION_CONTRADICTS_WORKFLOW_STATE:AS1" in r["rejection_reasons"]
+               for r in d)
+    r2 = request(pg, analyst, "ASSESS_EVENT", ctx, reason="analyst re-requests after the rejected output")
+    assert r2["outcome"] == "REQUEUED_AFTER_REJECTION" and r2["job_id"] != a["job_id"]
+    assert request(pg, analyst, "ASSESS_EVENT", ctx)["outcome"] == "ALREADY_ACTIVE"
+    assert work(pg, lambda m, env: m07_out(env, ok)) == 1
+    assert job(pg, r2["job_id"])["status"] == "SUCCESS"
+    assert request(pg, analyst, "ASSESS_EVENT", ctx)["outcome"] == "ALREADY_COMPLETED"   # recorded → no more re-runs

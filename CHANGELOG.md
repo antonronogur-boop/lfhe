@@ -2,6 +2,11 @@
 
 All material project changes are recorded here.
 
+## [Unreleased] — Phase 7 CR7-04 (proven defect from the P7-04 walkthrough)
+
+Migration `20261011004400_cr7_04_assessment_rejection_visibility.sql` (45 migrations), one bounded M07 attribution
+repair run in `assessment_pipeline.py`, rejection reasons in the web UI; see `docs/cr7-04.md`. CG7 OPEN.
+
 ## [Unreleased] — Phase 7 CR7-03 (PO 2026-10-30, SPEC_INDEX 31)
 
 Status: PO approved · implemented on branch `cr7-03-pilot-operational-path` · automated tests and technical browser E2E

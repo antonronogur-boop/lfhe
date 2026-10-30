@@ -1,6 +1,7 @@
 import { Badge, Chips, Empty, Locked, PageHeader, Short, When } from "@/components/ui";
 import { can, requireSession } from "@/lib/auth";
-import { JOB_LABELS, displayStatus } from "@/lib/jobs";
+import { rejectionsFor } from "@/components/jobs";
+import { JOB_LABELS, displayStatus, explainRejection } from "@/lib/jobs";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -22,6 +23,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
   const { data: reqs } = await supabase.from("workflow_job_requests").select("job_id,requested_by,reason,created_at")
     .in("job_id", jobs.length ? jobs.map((j) => j.id) : ["00000000-0000-0000-0000-000000000000"]);
   const humanReq = new Map(((reqs ?? []) as { job_id: string; reason: string; created_at: string }[]).map((r) => [r.job_id, r]));
+  const why = await rejectionsFor(jobs.filter((j) => j.job_type === "ASSESS_EVENT" && j.status === "HUMAN_REVIEW").map((j) => j.id));
   const chips = [{ key: "", label: "All", href: "/jobs" }, ...["PENDING", "RUNNING", "HUMAN_REVIEW", "SUCCESS", "FAILED"].map((s) => ({
     key: s, label: displayStatus(s).replaceAll("_", " ").toLowerCase(), href: `/jobs?status=${s}` }))];
   return (
@@ -44,6 +46,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
                   : <div className="muted">worker / pipeline chain</div>}</td>
                 <td style={{ fontSize: 12.5 }}><When at={j.completed_at} /></td>
                 <td style={{ fontSize: 12.5, maxWidth: 360 }} className="wrap-anywhere">{j.status === "PENDING" && j.attempt_count > 0 && <div>retry after <When at={j.next_attempt_at} /></div>}
+                  {why.has(j.id) && <div style={{ color: "var(--text-2)" }}>Output rejected: {(why.get(j.id) ?? []).map(explainRejection).join("; ") || "see audit"}</div>}
                   {j.last_error && <span style={{ color: j.status === "FAILED" ? "var(--danger)" : "var(--text-2)" }}>{j.last_error.slice(0, 300)}</span>}</td>
               </tr>);
           })}</tbody>

@@ -2,15 +2,27 @@ import type { ReactNode } from "react";
 
 import { requestJob } from "@/app/jobs/actions";
 import { Submit } from "@/components/client";
-import { Badge, Locked, When } from "@/components/ui";
-import { JOB_LABELS, type RequestableJob } from "@/lib/jobs";
+import { Alert, Badge, Locked, When } from "@/components/ui";
+import { JOB_LABELS, explainRejection, type RequestableJob } from "@/lib/jobs";
 import { createClient } from "@/lib/supabase/server";
 import type { AnalysisContext } from "@/lib/workspace";
 
 export interface RequestRow {
   request_id: string; job_type: string; object_type: string; object_id: string; outcome: string; report_mode: string | null;
   information_cutoff: string | null; requested_at: string; job_id: string; display_status: string; attempt_count: number;
-  max_attempts: number; last_error: string | null; completed_at: string | null;
+  max_attempts: number; last_error: string | null; completed_at: string | null; rejection_reasons?: string[];
+}
+
+/** Why an M07 output was rejected (CR7-04 read model): job id → reasons of the latest rejected run. */
+export async function rejectionsFor(jobIds: string[]): Promise<Map<string, string[]>> {
+  const out = new Map<string, string[]>();
+  if (jobIds.length === 0) return out;
+  const supabase = await createClient();
+  const { data } = await supabase.from("job_rejection_detail").select("job_id,outcome,rejection_reasons,completed_at")
+    .in("job_id", jobIds).order("completed_at", { ascending: false });
+  for (const r of (data ?? []) as { job_id: string; outcome: string; rejection_reasons: string[] | null }[])
+    if (!out.has(r.job_id) && r.outcome !== "ASSESSMENT_RECORDED") out.set(r.job_id, r.rejection_reasons ?? []);
+  return out;
 }
 
 /** Latest human requests for the given objects with the live job status (CR7-03 status view). */
@@ -20,7 +32,9 @@ export async function requestsFor(objectIds: string[], jobTypes?: string[]): Pro
   let q = supabase.from("workflow_job_request_status").select("*").in("object_id", objectIds).order("seq", { ascending: false }).limit(40);
   if (jobTypes) q = q.in("job_type", jobTypes);
   const { data } = await q;
-  return (data ?? []) as RequestRow[];
+  const rows = (data ?? []) as RequestRow[];
+  const why = await rejectionsFor(rows.filter((r) => r.job_type === "ASSESS_EVENT" && r.display_status === "NEEDS_HUMAN_REVIEW").map((r) => r.job_id));
+  return rows.map((r) => (why.has(r.job_id) ? { ...r, rejection_reasons: why.get(r.job_id) } : r));
 }
 
 export function JobStatusLine({ rows }: { rows: RequestRow[] }) {
@@ -36,6 +50,12 @@ export function JobStatusLine({ rows }: { rows: RequestRow[] }) {
           {r.report_mode && <span className="muted">{r.report_mode} · cutoff <When at={r.information_cutoff} /></span>}
           <span className="muted">requested <When at={r.requested_at} /> · attempt {r.attempt_count}/{r.max_attempts}</span>
           {r.display_status === "FAILED" && r.last_error && <span style={{ color: "var(--danger)" }}>{r.last_error}</span>}
+          {r.rejection_reasons && (
+            <div style={{ flexBasis: "100%" }}><Alert kind="warn" title="The model output was rejected by a mandatory rule, so nothing was recorded.">
+              {r.rejection_reasons.length > 0 && <ul style={{ margin: "4px 0 0 18px" }}>{r.rejection_reasons.map((x) => <li key={x}>{explainRejection(x)}</li>)}</ul>}
+              <div>The system already retried once automatically. Press <i>Request assessment (M07)</i> again: it is recorded and audited (up to 3 times).</div>
+            </Alert></div>
+          )}
         </div>
       ))}
     </div>

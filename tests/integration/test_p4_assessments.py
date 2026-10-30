@@ -433,3 +433,45 @@ def test_operational_recommendations_and_unobservable_indicators_are_rejected(pg
     with pg.admin() as x:
         assert x.execute("SELECT count(*) n FROM lfhe.assessment_indicator_proposals WHERE assessment_version_id=%s",
                          (version_of(pg, r.final_run_id)["id"],)).fetchone()["n"] == 1
+
+
+# --- CR7-04: one bounded, traceable repair run when ONLY the attribution rule is violated --------
+def _attribution_setup(pg, analyst):
+    plain = pclaim(pg, "A blog said 3 tanker aircraft are at Fort Aster.", "3 tanker aircraft are at Fort Aster")
+    e = human_event(pg, analyst, [plain], title="Tankers at Fort Aster (blog)")
+    h = head(pg, e)
+    return plain, str(h["head_version_id"]), h["head_content_hash"]
+
+
+def test_cr7_04_attribution_repair_recovers_a_model_slip(pg, m07, analyst):
+    plain, vid, vh = _attribution_setup(pg, analyst)
+    bad = [st("AS1", "KNOWN_FACT", "3 tanker aircraft are at Fort Aster.", claims=[plain], attr=False)]
+    good = [st("AS1", "KNOWN_FACT", "A blog said 3 tanker aircraft are at Fort Aster.", claims=[plain], attr_text="A blog said")]
+    seen = []
+
+    def responder(m, env):
+        seen.append(env["task"].get("repair"))
+        return out(env, good if env["task"].get("repair") else bad)
+
+    r = assess(pg, vid, vh, responder)
+    assert r.outcome == "ASSESSMENT_RECORDED" and len(r.model_run_ids) == 2
+    fb = seen[1]
+    assert fb["kind"] == "ATTRIBUTION_RULE" and fb["findings"][0]["attribution_required_by_workflow"] is True
+    assert version_of(pg, r.final_run_id) is not None
+
+
+def test_cr7_04_repair_is_bounded_and_still_fail_closed(pg, m07, analyst):
+    plain, vid, vh = _attribution_setup(pg, analyst)
+    bad = [st("AS1", "KNOWN_FACT", "3 tanker aircraft are at Fort Aster.", claims=[plain], attr=False)]
+    calls = []
+    r = assess(pg, vid, vh, lambda m, env: (calls.append(1), out(env, bad))[1])
+    assert r.outcome == "OUTPUT_REJECTED" and len(calls) == 2           # one repair, never more
+    assert "ATTRIBUTION_CONTRADICTS_WORKFLOW_STATE:AS1" in r.rejection_reasons
+    assert version_of(pg, r.final_run_id) is None                       # nothing was accepted
+
+
+def test_cr7_04_no_repair_for_other_rejection_reasons(pg, m07, analyst):
+    plain, vid, vh = _attribution_setup(pg, analyst)
+    calls = []
+    r = assess(pg, vid, vh, lambda m, env: (calls.append(1), out(env, claims=[plain], rationale="short"))[1])
+    assert r.outcome == "OUTPUT_REJECTED" and len(calls) == 1

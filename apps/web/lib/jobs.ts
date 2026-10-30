@@ -92,5 +92,22 @@ export function outcomeText(outcome: string): string {
     ALREADY_ACTIVE: "already queued or running — no second job was created",
     ALREADY_COMPLETED: "already completed for this exact input — no re-run",
     REQUEUED_AFTER_FAILURE: "re-queued after a permanent failure (new job)",
+    REQUEUED_AFTER_REJECTION: "re-queued after the previous model output was rejected (new run, audited)",
   } as Record<string, string>)[outcome] ?? outcome;
+}
+
+/** Plain-language explanation of a closed ingestion rejection code such as "ATTRIBUTION_MISSING:AS1" (CR7-04). */
+export function explainRejection(reason: string): string {
+  const [code, ref] = reason.split(":");
+  const where = ref ? ` (statement ${ref})` : "";
+  const text = ({
+    ATTRIBUTION_MISSING: "the source of a claim that is not corroborated was not named inside the statement",
+    ATTRIBUTION_CONTRADICTS_WORKFLOW_STATE: "the model marked the statement as needing / not needing a source attribution against the workflow rule",
+    CONFIDENCE_RATIONALE_REQUIRED: "the confidence recommendation had no sufficient rationale",
+    FINAL_CONFIDENCE_IS_HUMAN_ONLY: "the model tried to set the final confidence, which only a human may do",
+    CONTRADICTION_OMITTED: "a contradicting claim was not kept visible",
+    PROVENANCE_CLASS_MISMATCH: "a statement cited evidence that does not match its provenance class",
+    SCHEMA_VALIDATION_FAILED: "the output did not match the required format",
+  } as Record<string, string>)[code];
+  return `${text ?? code}${where}`;
 }
