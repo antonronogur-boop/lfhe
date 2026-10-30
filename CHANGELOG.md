@@ -65,3 +65,4 @@ Repository total: 44 migrations.
 
 ## CR7-06 — LocalObjectStore Windows fix (release PDF)
 - `put_if_absent` removed its temporary file after setting it read-only; Windows refuses to delete read-only files (WinError 5), so `RENDER_RELEASE_PDF` failed on DEV. The temporary name is now removed while writable and the final object is made read-only afterwards. Regression test added. No migration, no schema or behaviour change on Linux.
+- `scripts/verify_release.py <report-code> <storage-root>`: read-only post-release check (DB PDF hash, PDF file on disk, manifest hash, `pilot_cycles = 0`, audit chain). Integration test added.
