@@ -97,7 +97,15 @@ def wait_for(stack, query, predicate=lambda rows: bool(rows), timeout=90, *args)
         if predicate(rows):
             return rows
         time.sleep(0.5)
-    raise AssertionError(f"timed out waiting for: {query} -> {rows}")
+    diag = ""
+    base = getattr(stack, "base", None)
+    if base is not None:
+        for name in ("worker.log", "web.log", "postgrest.log"):
+            f = Path(base) / name
+            if f.exists():
+                diag += f"\n--- {name} (tail) ---\n" + "\n".join(f.read_text(errors="replace").splitlines()[-25:])
+        diag += "\nprocesses alive: " + str([p.poll() is None for p in getattr(stack, "procs", [])])
+    raise AssertionError(f"timed out waiting for: {query} -> {rows}{diag}")
 
 
 def login(browser, stack, who: str) -> Page:

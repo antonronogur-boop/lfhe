@@ -109,10 +109,15 @@ class Stack:
         cf.create_database(self.pg, self.pg.dbname, environment="TEST")
 
     def seed(self) -> None:
-        from claims_support import make_text_snapshot, model_configuration
+        from psycopg.types.json import Jsonb
+
+        from claims_support import make_text_snapshot
         from pipeline_support import activate_real_prompts
         activate_real_prompts(self.pg, MODULES)
-        self.model_config = model_configuration(self.pg)
+        # registered here, not via the session-cached test helper (this is a separate database)
+        with self.pg.registrar() as c:
+            self.model_config = str(c.execute("SELECT lfhe.register_model_configuration('fake', 'fake-model-1', %s::jsonb) AS id",
+                                              (Jsonb({"temperature": 0}),)).fetchone()["id"])
         for name, roles in ROLES.items():
             uid = cf.new_user(self.pg, f"lfhe-{name}@e2e.invalid")
             for r in roles:
@@ -154,7 +159,7 @@ class Stack:
         env = {k: v for k, v in os.environ.items() if k not in ("SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_SERVICE_KEY",
                                                                   "LFHE_DATABASE_URL")}
         env.update(NEXT_PUBLIC_SUPABASE_URL=f"http://127.0.0.1:{self.gateway.port}",
-                   NEXT_PUBLIC_SUPABASE_ANON_KEY=self.gateway.anon_key(), NEXT_TELEMETRY_DISABLED="1", CI="1")
+                   NEXT_PUBLIC_SUPABASE_ANON_KEY=self.gateway.anon_key(), NEXT_TELEMETRY_DISABLED="1", CI="1", TZ="UTC")
         return env
 
     def build_web(self) -> None:

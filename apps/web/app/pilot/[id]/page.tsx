@@ -80,7 +80,7 @@ export default async function PilotCycle({
     <main>
       <PageHeader title={c.code} crumbs={[{ href: "/", label: "Dashboard" }, { href: "/pilot", label: "Pilot" }, { label: c.code }]}
         badges={<><Badge value={c.pilot_mode} /><Badge value={c.status} />{c.terminal_state && <Badge value={c.terminal_state} />}
-          {missingCodes.length === 0 ? <Badge tone="ok">ready to complete</Badge> : <Badge tone="warn">{missingCodes.length} measurement gap(s)</Badge>}</>}
+          {open && (missingCodes.length === 0 ? <Badge tone="ok">ready to complete</Badge> : <Badge tone="warn">{missingCodes.length} measurement gap(s)</Badge>)}</>}
         lede={<>Measurement only — pilot records never change analytical, QA, approval, security or release state. Cutoff <When at={c.information_cutoff} />.</>} />
       <Flash ok={ok} error={error} />
       <div className="grid cols-4" style={{ marginBottom: 16 }}>
@@ -159,7 +159,7 @@ export default async function PilotCycle({
             {(comparator.data as { comparable_scope: boolean }).comparable_scope ? "yes" : "no"} — {(comparator.data as { reference: string }).reference}</p>
         ) : <p>Not recorded. Without a comparator, no productivity claim is possible.</p>}
         {open && manager && !comparator.data && (
-          <form action={recordComparator} style={{ display: "grid", gap: 4, maxWidth: 620 }}>
+          <form action={recordComparator} className="form" style={{ maxWidth: 620 }}>
             <input type="hidden" name="cycle_id" value={id} />
             <label>Method <select name="method">{COMPARATOR_METHODS.map((m) => <option key={m}>{m}</option>)}</select></label>
             <label>Baseline analyst time (whole minutes) <input name="baseline_minutes" inputMode="numeric" /></label>
@@ -226,7 +226,7 @@ export default async function PilotCycle({
           {findings.length === 0 && <li>None recorded.</li>}
         </ul>
         {participant && (
-          <form action={recordUxFinding} style={{ display: "grid", gap: 4, maxWidth: 620 }}>
+          <form action={recordUxFinding} className="form" style={{ maxWidth: 620 }}>
             <input type="hidden" name="cycle_id" value={id} />
             <label>Area <select name="area">{UX_AREAS.map((x) => <option key={x}>{x}</option>)}</select></label>
             <label>Severity <select name="severity">{UX_SEVERITIES.map((x) => <option key={x}>{x}</option>)}</select></label>
@@ -243,7 +243,7 @@ export default async function PilotCycle({
       <section className="card">
         <h2>Workload (raw NASA-TLX, 0–100)</h2>
         {myWorkload ? <p>Your rating is recorded.</p> : open && participant ? (
-          <form action={recordWorkload} style={{ display: "grid", gap: 4, maxWidth: 420 }}>
+          <form action={recordWorkload} className="form" style={{ maxWidth: 420 }}>
             <input type="hidden" name="cycle_id" value={id} />
             {["mental", "physical", "temporal", "performance", "effort", "frustration"].map((d) => (
               <label key={d}>{d} <input name={d} type="number" min={0} max={100} required /></label>
@@ -257,7 +257,7 @@ export default async function PilotCycle({
       {open && manager && (
         <section className="card">
           <h2>Close the cycle</h2>
-          <form action={closeCycle} style={{ display: "grid", gap: 4, maxWidth: 620 }}>
+          <form action={closeCycle} className="form" style={{ maxWidth: 620 }}>
             <input type="hidden" name="cycle_id" value={id} />
             <label>Outcome <select name="outcome"><option>COMPLETED</option><option>STOPPED</option></select></label>
             <label>Note / stop reason <input name="note" required minLength={10} /></label>

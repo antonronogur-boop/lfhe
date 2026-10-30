@@ -158,13 +158,14 @@ input:not([type]), select, textarea {
 textarea { min-height: 64px; resize: vertical; width: 100%; }
 select { padding-right: 28px; }
 input:disabled, select:disabled, textarea:disabled { background: var(--surface-3); color: var(--text-3); }
-input:invalid:not(:placeholder-shown) { border-color: #e7a19a; }
+input:user-invalid, select:user-invalid, textarea:user-invalid { border-color: #e7a19a; }
+.field input, .field select, .field textarea { width: 100%; }
 fieldset { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; margin: 0; }
 legend { font-size: 12px; color: var(--text-3); padding: 0 4px; }
 .form { display: grid; gap: 12px; }
 .form-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
 .form-row { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
-.form-row .field { flex: 1 1 200px; }
+.form-row .field { flex: 1 1 200px; min-width: 0; }
 .checkline { display: flex; gap: 8px; align-items: flex-start; font-weight: 500; color: var(--text); }
 .checkline input { margin-top: 3px; }
 button, .btn { font: inherit; font-weight: 600; font-size: 13px; border-radius: var(--radius-sm); padding: 7px 14px; cursor: pointer;
